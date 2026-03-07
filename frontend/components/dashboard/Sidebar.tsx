@@ -80,10 +80,10 @@ export default function DashboardSidebar() {
                         <Link
                             key={item.href}
                             href={item.href}
-                            className={cn("sidebar-item", isActive && "active")}
+                            className={cn("sidebar-item overflow-hidden", isActive && "active")}
                         >
                             <item.icon size={20} />
-                            <span className="text-[15px] font-medium">{item.label}</span>
+                            <span className="text-[13px] font-medium truncate">{item.label}</span>
                         </Link>
                     )
                 })}

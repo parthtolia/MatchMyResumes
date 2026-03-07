@@ -218,17 +218,27 @@ export default function TrackerPage() {
 
     useEffect(() => { fetchApps() }, [isLoaded, isSignedIn])
 
+    // Convert dd/mm/yyyy → yyyy-mm-dd for API
+    const parseDateInput = (val: string): string | undefined => {
+        if (!val) return undefined
+        const match = val.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+        if (match) return `${match[3]}-${match[2]}-${match[1]}`
+        return val // fallback if already in other format
+    }
+
     const addApplication = async () => {
         if (!form.company_name || !form.job_title) return
         setSaving(true)
         try {
-            await api.post("/api/applications/", {
+            const res = await api.post("/api/applications/", {
                 ...form,
-                date_applied: form.date_applied || undefined,
+                date_applied: parseDateInput(form.date_applied),
             })
+            // Optimistically add to list immediately
+            setApplications(prev => [...prev, res.data])
             setShowForm(false)
             setForm({ company_name: "", job_title: "", job_url: "", status: "applied", notes: "", date_applied: "" })
-            fetchApps()
+            fetchApps() // background refresh to sync
         } catch { } finally { setSaving(false) }
     }
 
@@ -312,7 +322,7 @@ export default function TrackerPage() {
                                 value={form.job_title} onChange={e => setForm({ ...form, job_title: e.target.value })} />
                             <input type="url" placeholder="Job URL (optional)" className="input-styled"
                                 value={form.job_url} onChange={e => setForm({ ...form, job_url: e.target.value })} />
-                            <input type="date" className="input-styled" title="Date Applied"
+                            <input type="text" className="input-styled" placeholder="Date Applied (dd/mm/yyyy)"
                                 value={form.date_applied} onChange={e => setForm({ ...form, date_applied: e.target.value })} />
                             <select className="input-styled" value={form.status} onChange={e => setForm({ ...form, status: e.target.value as Status })}>
                                 {COLUMNS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}

@@ -99,20 +99,20 @@ export default function DashboardPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="stat-card flex flex-col justify-between p-8 shadow-md border border-white/15 border-opacity-100"
-                        style={{ minHeight: "160px" }}
+                        className="stat-card flex flex-col justify-between p-5 shadow-md border border-white/15 border-opacity-100"
+                        style={{ minHeight: "110px" }}
                     >
-                        <card.icon size={32} className={`${card.color} mb-6`} />
+                        <card.icon size={24} className={`${card.color} mb-3`} />
                         <div className="flex flex-col gap-1">
-                            <div className={`text-5xl font-extrabold tracking-tight transition-all ${refreshing ? "text-white/50" : "text-white"}`}>{card.value}</div>
-                            <div className="text-lg text-gray-400 font-semibold">{card.label}</div>
+                            <div className={`text-4xl font-extrabold tracking-tight transition-all ${refreshing ? "text-white/50" : "text-white"}`}>{card.value}</div>
+                            <div className="text-sm text-gray-400 font-semibold">{card.label}</div>
                         </div>
                     </motion.div>
                 ))}
             </div>
 
             {/* Quick Actions */}
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-4">
                 <h2 className="text-2xl font-bold text-white">Quick Actions</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
                     {quickActions.map((action, i) => (
@@ -125,16 +125,16 @@ export default function DashboardPage() {
                         >
                             <Link
                                 href={action.href}
-                                className="flex-1 flex flex-col justify-between p-8 rounded-2xl border border-white/15 bg-[#111118] hover:border-violet-500/50 hover:bg-[#111122] transition-all group shadow-md"
-                                style={{ minHeight: "200px" }}
+                                className="flex-1 flex flex-col justify-between p-5 rounded-2xl border border-white/15 bg-[#111118] hover:border-violet-500/50 hover:bg-[#111122] transition-all group shadow-md"
+                                style={{ minHeight: "150px" }}
                             >
-                                <div className="flex flex-col gap-6">
-                                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${action.color} flex items-center justify-center group-hover:-translate-y-1 transition-transform`}>
-                                        <action.icon size={26} className="text-white" />
+                                <div className="flex flex-col gap-3">
+                                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center group-hover:-translate-y-1 transition-transform`}>
+                                        <action.icon size={20} className="text-white" />
                                     </div>
-                                    <h3 className="font-bold text-white text-xl">{action.label}</h3>
+                                    <h3 className="font-bold text-white text-base">{action.label}</h3>
                                 </div>
-                                <p className="text-sm text-gray-400 leading-relaxed font-medium mt-auto pt-6">{action.desc}</p>
+                                <p className="text-sm text-gray-400 leading-relaxed font-medium mt-auto pt-3">{action.desc}</p>
                             </Link>
                         </motion.div>
                     ))}

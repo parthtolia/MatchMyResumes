@@ -9,7 +9,7 @@ import { Logo } from "@/components/ui/Logo"
 
 const features = [
   { icon: Target, title: "ATS Score Engine", desc: "Get a detailed 0–100 ATS compatibility score with breakdown across 5 dimensions." },
-  { icon: Zap, title: "AI Resume Optimizer", desc: "GPT-4o rewrites your resume to naturally integrate missing keywords without fabrication." },
+  { icon: Zap, title: "AI Resume Optimizer", desc: "AI rewrites your resume to naturally integrate missing keywords without fabrication." },
   { icon: FileText, title: "Cover Letter Generator", desc: "Generate tailored, tone-perfect cover letters in seconds from your resume + JD." },
   { icon: BarChart3, title: "Application Tracker", desc: "Track every application in a Kanban board with status, notes, and analytics." },
 ]
@@ -201,7 +201,7 @@ export default function LandingPage() {
             <h2 className="text-4xl font-bold mb-4">
               Everything you need to <span className="gradient-text">land the job</span>
             </h2>
-            <p className="text-gray-400 text-lg">Powered by GPT-4o and cutting-edge ATS analysis algorithms</p>
+            <p className="text-gray-400 text-lg">Powered by state-of-the-art AI and cutting-edge ATS analysis algorithms</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, i) => (

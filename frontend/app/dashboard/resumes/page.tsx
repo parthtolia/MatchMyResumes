@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { FileText, Upload, Trash2, Tag, Loader2, Copy } from "lucide-react"
+import { FileText, Upload, Trash2, Tag, Loader2, Copy, CheckCircle2 } from "lucide-react"
 import { useDropzone } from "react-dropzone"
 import api from "@/lib/api"
 import { formatDate } from "@/lib/utils"
@@ -27,6 +27,8 @@ export default function ResumesPage() {
     const [uploading, setUploading] = useState(false)
     const [selected, setSelected] = useState<any>(null)
     const [error, setError] = useState("")
+    const [deletingId, setDeletingId] = useState<string | null>(null)
+    const [deleteSuccess, setDeleteSuccess] = useState(false)
 
     const onDrop = async (files: File[]) => {
         const file = files[0]
@@ -46,9 +48,16 @@ export default function ResumesPage() {
     const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { "application/pdf": [".pdf"], "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"] } })
 
     const deleteResume = async (id: string) => {
-        await api.delete(`/api/resumes/${id}`)
-        refreshData()
-        if (selected?.id === id) setSelected(null)
+        setDeletingId(id)
+        try {
+            await api.delete(`/api/resumes/${id}`)
+            if (selected?.id === id) setSelected(null)
+            setDeleteSuccess(true)
+            setTimeout(() => setDeleteSuccess(false), 2500)
+            refreshData()
+        } finally {
+            setDeletingId(null)
+        }
     }
 
     const viewDetail = async (id: string) => {
@@ -87,6 +96,11 @@ export default function ResumesPage() {
             </div>
 
             {error && <p className="text-red-400 text-sm">{error}</p>}
+            {deleteSuccess && (
+                <div className="flex items-center gap-2 text-emerald-400 text-sm">
+                    <CheckCircle2 size={16} /> Resume deleted successfully
+                </div>
+            )}
 
             {/* Resume Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -108,8 +122,8 @@ export default function ResumesPage() {
                                         <FileText size={16} className={resume.is_optimized ? "text-emerald-400" : "text-violet-400"} />
                                         <span className="text-sm text-white truncate">{resume.filename}</span>
                                     </div>
-                                    <button onClick={e => { e.stopPropagation(); deleteResume(resume.id) }} className="text-gray-600 hover:text-red-400 transition-colors ml-2 shrink-0">
-                                        <Trash2 size={14} />
+                                    <button onClick={e => { e.stopPropagation(); deleteResume(resume.id) }} disabled={deletingId === resume.id} className="text-gray-600 hover:text-red-400 transition-colors ml-2 shrink-0 cursor-pointer disabled:cursor-not-allowed">
+                                        {deletingId === resume.id ? <Loader2 size={14} className="animate-spin text-red-400" /> : <Trash2 size={14} />}
                                     </button>
                                 </div>
                                 <div className="flex flex-wrap items-center gap-2 mt-2">
