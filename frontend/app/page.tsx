@@ -55,9 +55,10 @@ export default function LandingPage() {
           <Link href="#features" className="hover:text-white transition-colors">Features</Link>
           <Link href="#pricing" className="hover:text-white transition-colors">Pricing</Link>
           <Link href="#how-it-works" className="hover:text-white transition-colors">How it works</Link>
+          <Link href="#faq" className="hover:text-white transition-colors">FAQ</Link>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/sign-in" className="text-sm text-gray-400 hover:text-white transition-colors px-4 py-2">
+          <Link href="/sign-in" className="text-sm text-gray-400 hover:text-white transition-colors px-4 py-2 hidden sm:block">
             Sign In
           </Link>
           <Link href="/sign-up" className="btn-glow text-sm text-white px-5 py-2 rounded-xl font-medium">
@@ -151,6 +152,7 @@ export default function LandingPage() {
                       { label: "Semantic Match", val: 79, color: "bg-violet-500" },
                       { label: "Formatting", val: 95, color: "bg-blue-500" },
                       { label: "Quantification", val: 72, color: "bg-yellow-500" },
+                      { label: "Section Score", val: 82, color: "bg-pink-500" },
                     ].map(item => (
                       <div key={item.label} className="flex items-center gap-4">
                         <span className="text-xs font-medium text-gray-400 w-28 shrink-0">{item.label}</span>
@@ -284,6 +286,41 @@ export default function LandingPage() {
                   <p className="text-sm text-gray-500">{t.role}</p>
                 </div>
               </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="py-24 border-t border-white/5">
+        <div className="max-w-3xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4">Frequently Asked <span className="gradient-text">Questions</span></h2>
+            <p className="text-gray-400">Everything you need to know about MatchMyResumes.</p>
+          </div>
+          <div className="space-y-4">
+            {[
+              { q: "What is an ATS and why does it matter?", a: "Applicant Tracking Systems (ATS) are software tools used by 99% of Fortune 500 companies to automatically filter resumes before a human ever sees them. A low ATS score means your resume gets rejected automatically, regardless of your qualifications." },
+              { q: "How does the ATS Score work?", a: "We analyze your resume across 5 dimensions: Keyword Match, Semantic Match, Formatting, Quantification, and Section Completeness. Each is scored 0–100 and weighted to produce an overall compatibility score against your target job description." },
+              { q: "Does the AI Optimizer fabricate experience?", a: "Never. Our AI only restructures and enhances existing content — it never invents skills, roles, or achievements you don't have. It integrates relevant keywords naturally while preserving 100% of your authentic experience." },
+              { q: "What file formats are supported?", a: "We support PDF and DOCX resume uploads. For best results, use a standard single-column PDF without complex tables or graphics." },
+              { q: "Is my data secure?", a: "Yes. Your resumes and job descriptions are stored securely in an encrypted database and are only accessible to you. We never share your data with third parties or use it to train AI models." },
+              { q: "Can I cancel my subscription anytime?", a: "Absolutely. There are no contracts or lock-ins. Cancel anytime from your account settings and you'll retain access until the end of your billing period." },
+            ].map((item, i) => (
+              <motion.details
+                key={i}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                viewport={{ once: true }}
+                className="glass p-6 rounded-2xl group cursor-pointer"
+              >
+                <summary className="flex items-center justify-between font-semibold text-white list-none cursor-pointer">
+                  {item.q}
+                  <span className="text-violet-400 ml-4 shrink-0 text-xl group-open:rotate-45 transition-transform inline-block">+</span>
+                </summary>
+                <p className="text-gray-400 text-sm mt-3 leading-relaxed">{item.a}</p>
+              </motion.details>
             ))}
           </div>
         </div>

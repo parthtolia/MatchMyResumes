@@ -29,6 +29,9 @@ export default function ResumesPage() {
     const [error, setError] = useState("")
     const [deletingId, setDeletingId] = useState<string | null>(null)
     const [deleteSuccess, setDeleteSuccess] = useState(false)
+    // Track locally deleted IDs for immediate UI removal without waiting for re-fetch
+    const [locallyDeleted, setLocallyDeleted] = useState<Set<string>>(new Set())
+    const displayResumes = resumes.filter(r => !locallyDeleted.has(r.id))
 
     const onDrop = async (files: File[]) => {
         const file = files[0]
@@ -48,13 +51,20 @@ export default function ResumesPage() {
     const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { "application/pdf": [".pdf"], "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"] } })
 
     const deleteResume = async (id: string) => {
+        // Optimistically remove from display immediately
+        setLocallyDeleted(prev => new Set([...prev, id]))
+        if (selected?.id === id) setSelected(null)
+        setDeleteSuccess(true)
+        setTimeout(() => setDeleteSuccess(false), 2500)
         setDeletingId(id)
         try {
             await api.delete(`/api/resumes/${id}`)
-            if (selected?.id === id) setSelected(null)
-            setDeleteSuccess(true)
-            setTimeout(() => setDeleteSuccess(false), 2500)
-            refreshData()
+            refreshData() // background sync to update global state
+        } catch {
+            // Revert optimistic removal on failure
+            setLocallyDeleted(prev => { const s = new Set(prev); s.delete(id); return s })
+            setDeleteSuccess(false)
+            setError("Failed to delete resume. Please try again.")
         } finally {
             setDeletingId(null)
         }
@@ -70,7 +80,7 @@ export default function ResumesPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-white">My Resumes</h1>
-                    <p className="text-gray-400 text-sm mt-1">{resumes.length} resume versions stored</p>
+                    <p className="text-gray-400 text-sm mt-1">{displayResumes.length} resume versions stored</p>
                 </div>
                 {loading && resumes.length > 0 && (
                     <span className="flex items-center gap-1.5 text-xs text-gray-500">
@@ -107,13 +117,13 @@ export default function ResumesPage() {
                 <div className="lg:col-span-1 space-y-2">
                     {loading ? (
                         <div className="flex justify-center py-8"><Loader2 className="animate-spin text-violet-400" /></div>
-                    ) : resumes.length === 0 ? (
+                    ) : displayResumes.length === 0 ? (
                         <div className="glass p-8 text-center">
                             <FileText size={40} className="text-gray-600 mx-auto mb-3" />
                             <p className="text-gray-500 text-sm">No resumes uploaded yet</p>
                         </div>
                     ) : (
-                        resumes.map(resume => (
+                        displayResumes.map(resume => (
                             <motion.div key={resume.id} layout
                                 onClick={() => viewDetail(resume.id)}
                                 className={`p-4 rounded-xl border cursor-pointer transition-all ${selected?.id === resume.id ? "border-violet-500/50 bg-violet-500/10" : "border-white/5 bg-[#111118] hover:border-white/10"}`}>

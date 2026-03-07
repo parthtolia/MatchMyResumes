@@ -6,7 +6,7 @@ import { UserButton, useUser as useClerkUser } from "@clerk/nextjs"
 import api from "@/lib/api"
 import {
     LayoutDashboard, FileText, Zap, Mail,
-    Briefcase, Settings, BarChart3, CreditCard, ScanSearch,
+    Briefcase, Settings, BarChart3, CreditCard, ScanSearch, X,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Logo } from "@/components/ui/Logo"
@@ -36,7 +36,7 @@ const navItems = [
     { href: "/dashboard/settings", icon: Settings, label: "Settings" },
 ]
 
-export default function DashboardSidebar() {
+export default function DashboardSidebar({ onClose }: { onClose?: () => void } = {}) {
     const pathname = usePathname()
     const { user, isLoaded } = useUserSafe()
     const [plan, setPlan] = useState<string>("free")
@@ -63,12 +63,17 @@ export default function DashboardSidebar() {
     return (
         <aside className="w-60 h-screen flex flex-col border-r border-white/15 bg-[#0d0d14] shrink-0">
             {/* Logo */}
-            <div className="p-6 pt-6 pb-5 border-b border-white/15">
+            <div className="p-6 pt-6 pb-5 border-b border-white/15 flex items-center justify-between">
                 <Link href="/">
                     <div className="scale-[0.80] origin-left whitespace-nowrap">
                         <Logo />
                     </div>
                 </Link>
+                {onClose && (
+                    <button onClick={onClose} className="md:hidden text-gray-400 hover:text-white transition-colors" aria-label="Close menu">
+                        <X size={18} />
+                    </button>
+                )}
             </div>
 
             {/* Nav */}
@@ -80,6 +85,7 @@ export default function DashboardSidebar() {
                         <Link
                             key={item.href}
                             href={item.href}
+                            onClick={onClose}
                             className={cn("sidebar-item overflow-hidden", isActive && "active")}
                         >
                             <item.icon size={20} />

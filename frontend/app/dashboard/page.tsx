@@ -73,25 +73,19 @@ export default function DashboardPage() {
     ]
 
     return (
-        <div className="w-full max-w-[1400px] flex flex-col gap-8 pb-10">
+        <div className="w-full max-w-[1400px] flex flex-col gap-4 pb-4">
             {/* Header */}
-            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-1 border-b border-white/15 pb-4">
-                <h1 className="text-3xl lg:text-4xl font-semibold text-white tracking-tight">
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between border-b border-white/15 pb-3">
+                <h1 className="text-2xl font-semibold text-white tracking-tight">
                     Welcome, {user?.firstName ? user.firstName.charAt(0).toUpperCase() + user.firstName.slice(1).toLowerCase() : "Developer"}!
                 </h1>
-                <p className="text-gray-400">Here's your job search overview</p>
-            </motion.div>
-
-            {/* Stats */}
-            <div className="flex items-center justify-between mb-1">
-                <span />
                 {refreshing && (
                     <span className="flex items-center gap-1.5 text-xs text-gray-500">
                         <span className="w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
-                        Syncing latest data…
+                        Syncing…
                     </span>
                 )}
-            </div>
+            </motion.div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                 {statCards.map((card, i) => (
                     <motion.div
@@ -112,9 +106,9 @@ export default function DashboardPage() {
             </div>
 
             {/* Quick Actions */}
-            <div className="flex flex-col gap-4">
-                <h2 className="text-2xl font-bold text-white">Quick Actions</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+            <div className="flex flex-col gap-2">
+                <h2 className="text-base font-semibold text-gray-300">Quick Actions</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                     {quickActions.map((action, i) => (
                         <motion.div
                             key={action.href}
@@ -125,16 +119,16 @@ export default function DashboardPage() {
                         >
                             <Link
                                 href={action.href}
-                                className="flex-1 flex flex-col justify-between p-5 rounded-2xl border border-white/15 bg-[#111118] hover:border-violet-500/50 hover:bg-[#111122] transition-all group shadow-md"
-                                style={{ minHeight: "150px" }}
+                                className="flex-1 flex flex-col justify-between p-4 rounded-xl border border-white/15 bg-[#111118] hover:border-violet-500/50 hover:bg-[#111122] transition-all group shadow-md"
+                                style={{ minHeight: "120px" }}
                             >
-                                <div className="flex flex-col gap-3">
-                                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center group-hover:-translate-y-1 transition-transform`}>
-                                        <action.icon size={20} className="text-white" />
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center group-hover:-translate-y-0.5 transition-transform shrink-0`}>
+                                        <action.icon size={18} className="text-white" />
                                     </div>
-                                    <h3 className="font-bold text-white text-base">{action.label}</h3>
+                                    <h3 className="font-bold text-white text-sm">{action.label}</h3>
                                 </div>
-                                <p className="text-sm text-gray-400 leading-relaxed font-medium mt-auto pt-3">{action.desc}</p>
+                                <p className="text-xs text-gray-400 leading-relaxed mt-2">{action.desc}</p>
                             </Link>
                         </motion.div>
                     ))}
@@ -142,51 +136,28 @@ export default function DashboardPage() {
             </div>
 
             {/* Tips Section */}
-            <div className="glass p-8 lg:p-10 shadow-lg rounded-2xl border border-white/15 flex flex-col gap-6 mt-4">
-                <div className="flex items-center gap-4">
-                    <Target size={28} className="text-violet-400" />
-                    <div>
-                        <h2 className="text-xl lg:text-2xl font-bold text-white">How ATS Systems Work</h2>
-                        <p className="text-sm text-gray-400 mt-1">Applicant Tracking Systems filter resumes before a human reads them. Here is how to beat them:</p>
-                    </div>
+            <div className="glass p-4 shadow-lg rounded-xl border border-white/15 flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                    <Target size={20} className="text-violet-400 shrink-0" />
+                    <h2 className="text-sm font-bold text-white">How ATS Systems Work</h2>
+                    <p className="text-xs text-gray-500 hidden lg:block">Filter resumes before a human reads them — here's how to beat them:</p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="bg-white/5 border border-white/10 p-5 rounded-xl space-y-3 hover:bg-white/10 transition-colors">
-                        <div className="flex items-center gap-2 text-emerald-400 font-semibold">
-                            <CheckCircle size={18} /> Keyword Matching
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+                    {[
+                        { color: "text-emerald-400", title: "Keyword Match", tip: "Include exact hard skills from the JD contextually in your resume." },
+                        { color: "text-blue-400", title: "Formatting", tip: "Use standard headers. Avoid tables, columns, or graphics." },
+                        { color: "text-purple-400", title: "Quantification", tip: "Show results with metrics. e.g. \"Increased sales by 15%\"." },
+                        { color: "text-orange-400", title: "Section Score", tip: "Include Skills, Summary, and LinkedIn URL sections." },
+                        { color: "text-rose-400", title: "Content Density", tip: "Target 400–800 words for optimal ATS scoring." },
+                        { color: "text-teal-400", title: "Tailor Each App", tip: "Use the AI Optimizer to reshape bullets for each job description." },
+                    ].map(t => (
+                        <div key={t.title} className="bg-white/5 border border-white/10 p-3 rounded-lg hover:bg-white/10 transition-colors">
+                            <div className={`flex items-center gap-1.5 ${t.color} font-semibold text-xs mb-1`}>
+                                <CheckCircle size={12} /> {t.title}
+                            </div>
+                            <p className="text-[11px] text-gray-400 leading-relaxed">{t.tip}</p>
                         </div>
-                        <p className="text-sm text-gray-300 leading-relaxed">ATS bots scan for exact hard skill matches. Extract the top keywords from the JD and ensure they exist contextually in your resume.</p>
-                    </div>
-                    <div className="bg-white/5 border border-white/10 p-5 rounded-xl space-y-3 hover:bg-white/10 transition-colors">
-                        <div className="flex items-center gap-2 text-blue-400 font-semibold">
-                            <CheckCircle size={18} /> Standard Formatting
-                        </div>
-                        <p className="text-sm text-gray-300 leading-relaxed">Keep it simple. Use standard headers like "Experience" and "Education". Avoid complex tables, columns, or unusual graphics.</p>
-                    </div>
-                    <div className="bg-white/5 border border-white/10 p-5 rounded-xl space-y-3 hover:bg-white/10 transition-colors">
-                        <div className="flex items-center gap-2 text-purple-400 font-semibold">
-                            <CheckCircle size={18} /> Quantifiable Impact
-                        </div>
-                        <p className="text-sm text-gray-300 leading-relaxed">Don't just list responsibilities. Show results with metrics, percentages, and dollars. e.g., "Increased sales by 15%".</p>
-                    </div>
-                    <div className="bg-white/5 border border-white/10 p-5 rounded-xl space-y-3 hover:bg-white/10 transition-colors">
-                        <div className="flex items-center gap-2 text-orange-400 font-semibold">
-                            <CheckCircle size={18} /> Section Completeness
-                        </div>
-                        <p className="text-sm text-gray-300 leading-relaxed">Ensure you have a dedicated Skills section, a professional Summary, and complete contact info including your LinkedIn URL.</p>
-                    </div>
-                    <div className="bg-white/5 border border-white/10 p-5 rounded-xl space-y-3 hover:bg-white/10 transition-colors">
-                        <div className="flex items-center gap-2 text-rose-400 font-semibold">
-                            <CheckCircle size={18} /> Content Density
-                        </div>
-                        <p className="text-sm text-gray-300 leading-relaxed">An ATS prefers resumes between 400-800 words detailing the depth of your experience. Extreme brevity can penalize your score.</p>
-                    </div>
-                    <div className="bg-white/5 border border-white/10 p-5 rounded-xl space-y-3 hover:bg-white/10 transition-colors">
-                        <div className="flex items-center gap-2 text-teal-400 font-semibold">
-                            <CheckCircle size={18} /> Tailor Every Application
-                        </div>
-                        <p className="text-sm text-gray-300 leading-relaxed">A generic resume won't completely cut it. Use our AI Optimizer to quickly reshape your bullet points for every single job description.</p>
-                    </div>
+                    ))}
                 </div>
             </div>
         </div>

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
-import DashboardSidebar from "@/components/dashboard/Sidebar"
+import MobileDashboard from "@/components/dashboard/MobileDashboard"
 
 const hasRealClerk =
     (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "").startsWith("pk_") &&
@@ -17,15 +17,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
     // Dev mode (placeholder Clerk keys): skip auth, allow through
 
     return (
-        <div className="flex h-screen bg-[#0a0a0f] overflow-hidden">
-            <DashboardSidebar />
-            <main className="flex-1 overflow-y-auto w-full">
-                <div className="px-8 md:px-12 lg:px-16 pt-6 pb-12 w-full max-w-[1600px]">
-                    <GlobalDataProvider>
-                        {children}
-                    </GlobalDataProvider>
-                </div>
-            </main>
-        </div>
+        <MobileDashboard>
+            <GlobalDataProvider>
+                {children}
+            </GlobalDataProvider>
+        </MobileDashboard>
     )
 }
