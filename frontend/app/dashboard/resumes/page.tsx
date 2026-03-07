@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import { FileText, Upload, Trash2, Tag, Loader2, Copy, CheckCircle2 } from "lucide-react"
 import { useDropzone } from "react-dropzone"
@@ -29,9 +29,14 @@ export default function ResumesPage() {
     const [error, setError] = useState("")
     const [deletingId, setDeletingId] = useState<string | null>(null)
     const [deleteSuccess, setDeleteSuccess] = useState(false)
-    // Track locally deleted IDs for immediate UI removal without waiting for re-fetch
-    const [locallyDeleted, setLocallyDeleted] = useState<Set<string>>(new Set())
-    const displayResumes = resumes.filter(r => !locallyDeleted.has(r.id))
+    // useRef so deleted IDs survive all re-renders (state from GlobalDataProvider won't reset it)
+    const deletedRef = useRef<Set<string>>(new Set())
+    const [localResumes, setLocalResumes] = useState<typeof resumes>([])
+
+    // Keep local list in sync with global, but always exclude deleted IDs
+    useEffect(() => {
+        setLocalResumes(resumes.filter(r => !deletedRef.current.has(r.id)))
+    }, [resumes])
 
     const onDrop = async (files: File[]) => {
         const file = files[0]
@@ -51,18 +56,20 @@ export default function ResumesPage() {
     const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { "application/pdf": [".pdf"], "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"] } })
 
     const deleteResume = async (id: string) => {
-        // Optimistically remove from display immediately
-        setLocallyDeleted(prev => new Set([...prev, id]))
+        // Mark as deleted in ref (persists forever) + immediately remove from local list
+        deletedRef.current.add(id)
+        setLocalResumes(prev => prev.filter(r => r.id !== id))
         if (selected?.id === id) setSelected(null)
         setDeleteSuccess(true)
         setTimeout(() => setDeleteSuccess(false), 2500)
         setDeletingId(id)
         try {
             await api.delete(`/api/resumes/${id}`)
-            refreshData() // background sync to update global state
+            refreshData() // background sync
         } catch {
-            // Revert optimistic removal on failure
-            setLocallyDeleted(prev => { const s = new Set(prev); s.delete(id); return s })
+            // Revert: remove from ref and restore via refresh
+            deletedRef.current.delete(id)
+            refreshData()
             setDeleteSuccess(false)
             setError("Failed to delete resume. Please try again.")
         } finally {
@@ -80,7 +87,7 @@ export default function ResumesPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-white">My Resumes</h1>
-                    <p className="text-gray-400 text-sm mt-1">{displayResumes.length} resume versions stored</p>
+                    <p className="text-gray-400 text-sm mt-1">{localResumes.length} resume versions stored</p>
                 </div>
                 {loading && resumes.length > 0 && (
                     <span className="flex items-center gap-1.5 text-xs text-gray-500">
@@ -117,13 +124,13 @@ export default function ResumesPage() {
                 <div className="lg:col-span-1 space-y-2">
                     {loading ? (
                         <div className="flex justify-center py-8"><Loader2 className="animate-spin text-violet-400" /></div>
-                    ) : displayResumes.length === 0 ? (
+                    ) : localResumes.length === 0 ? (
                         <div className="glass p-8 text-center">
                             <FileText size={40} className="text-gray-600 mx-auto mb-3" />
                             <p className="text-gray-500 text-sm">No resumes uploaded yet</p>
                         </div>
                     ) : (
-                        displayResumes.map(resume => (
+                        localResumes.map(resume => (
                             <motion.div key={resume.id} layout
                                 onClick={() => viewDetail(resume.id)}
                                 className={`p-4 rounded-xl border cursor-pointer transition-all ${selected?.id === resume.id ? "border-violet-500/50 bg-violet-500/10" : "border-white/5 bg-[#111118] hover:border-white/10"}`}>

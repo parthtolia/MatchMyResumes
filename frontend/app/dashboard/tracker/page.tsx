@@ -218,13 +218,21 @@ export default function TrackerPage() {
 
     useEffect(() => { fetchApps() }, [isLoaded, isSignedIn])
 
+    // Convert dd/mm/yyyy → yyyy-mm-dd for the API
+    const parseDate = (val: string): string | undefined => {
+        if (!val) return undefined
+        const m = val.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/)
+        if (m) return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`
+        return val
+    }
+
     const addApplication = async () => {
         if (!form.company_name || !form.job_title) return
         setSaving(true)
         try {
             const res = await api.post("/api/applications/", {
                 ...form,
-                date_applied: form.date_applied || undefined,
+                date_applied: parseDate(form.date_applied),
             })
             // Optimistically add to list immediately
             setApplications(prev => [...prev, res.data])
@@ -314,7 +322,7 @@ export default function TrackerPage() {
                                 value={form.job_title} onChange={e => setForm({ ...form, job_title: e.target.value })} />
                             <input type="url" placeholder="Job URL (optional)" className="input-styled"
                                 value={form.job_url} onChange={e => setForm({ ...form, job_url: e.target.value })} />
-                            <input type="date" className="input-styled" title="Date Applied"
+                            <input type="text" className="input-styled" placeholder="Date Applied (dd/mm/yyyy)"
                                 value={form.date_applied} onChange={e => setForm({ ...form, date_applied: e.target.value })} />
                             <select className="input-styled" value={form.status} onChange={e => setForm({ ...form, status: e.target.value as Status })}>
                                 {COLUMNS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}

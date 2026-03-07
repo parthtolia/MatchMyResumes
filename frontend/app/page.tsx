@@ -49,8 +49,10 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white overflow-x-hidden">
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-4 border-b border-white/5 bg-black/20 backdrop-blur-xl">
-        <Logo />
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4 border-b border-white/5 bg-black/20 backdrop-blur-xl">
+        <div className="scale-75 sm:scale-100 origin-left">
+          <Logo />
+        </div>
         <div className="hidden md:flex items-center gap-8 text-sm text-gray-400">
           <Link href="#features" className="hover:text-white transition-colors">Features</Link>
           <Link href="#pricing" className="hover:text-white transition-colors">Pricing</Link>
@@ -61,7 +63,7 @@ export default function LandingPage() {
           <Link href="/sign-in" className="text-sm text-gray-400 hover:text-white transition-colors px-4 py-2 hidden sm:block">
             Sign In
           </Link>
-          <Link href="/sign-up" className="btn-glow text-sm text-white px-5 py-2 rounded-xl font-medium">
+          <Link href="/sign-up" className="btn-glow text-xs sm:text-sm text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl font-medium whitespace-nowrap">
             Get Started
           </Link>
         </div>

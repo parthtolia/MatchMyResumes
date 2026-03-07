@@ -108,7 +108,7 @@ export default function DashboardPage() {
             {/* Quick Actions */}
             <div className="flex flex-col gap-2">
                 <h2 className="text-base font-semibold text-gray-300">Quick Actions</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
                     {quickActions.map((action, i) => (
                         <motion.div
                             key={action.href}
@@ -120,15 +120,15 @@ export default function DashboardPage() {
                             <Link
                                 href={action.href}
                                 className="flex-1 flex flex-col justify-between p-4 rounded-xl border border-white/15 bg-[#111118] hover:border-violet-500/50 hover:bg-[#111122] transition-all group shadow-md"
-                                style={{ minHeight: "120px" }}
+                                style={{ minHeight: "130px" }}
                             >
-                                <div className="flex items-center gap-3">
+                                <div className="flex flex-col gap-2">
                                     <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center group-hover:-translate-y-0.5 transition-transform shrink-0`}>
                                         <action.icon size={18} className="text-white" />
                                     </div>
                                     <h3 className="font-bold text-white text-sm">{action.label}</h3>
                                 </div>
-                                <p className="text-xs text-gray-400 leading-relaxed mt-2">{action.desc}</p>
+                                <p className="text-xs text-gray-400 leading-relaxed mt-1">{action.desc}</p>
                             </Link>
                         </motion.div>
                     ))}
