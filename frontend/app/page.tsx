@@ -6,6 +6,18 @@ import {
   CheckCircle, ArrowRight, Star, TrendingUp
 } from "lucide-react"
 import { Logo } from "@/components/ui/Logo"
+import { useUser as useClerkUser, UserButton } from "@clerk/nextjs"
+
+const HAS_REAL_CLERK =
+  typeof process !== "undefined" &&
+  (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "").startsWith("pk_") &&
+  !(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "").includes("_...")
+
+function useAuthSafe() {
+  if (!HAS_REAL_CLERK) return { isSignedIn: false as const, isLoaded: true }
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  return useClerkUser()
+}
 
 const features = [
   { icon: Target, title: "ATS Score Engine", desc: "Get a detailed 0–100 ATS compatibility score with breakdown across 5 dimensions." },
@@ -46,6 +58,8 @@ const plans = [
 ]
 
 export default function LandingPage() {
+  const { isSignedIn, isLoaded } = useAuthSafe()
+
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white overflow-x-hidden">
       {/* Navbar */}
@@ -60,12 +74,25 @@ export default function LandingPage() {
           <Link href="#faq" className="hover:text-white transition-colors">FAQ</Link>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/sign-in" className="text-sm text-gray-400 hover:text-white transition-colors px-4 py-2 hidden sm:block">
-            Sign In
-          </Link>
-          <Link href="/sign-up" className="btn-glow text-xs sm:text-sm text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl font-medium whitespace-nowrap">
-            Get Started
-          </Link>
+          {isLoaded && isSignedIn ? (
+            <>
+              <Link href="/dashboard" className="text-xs sm:text-sm text-gray-300 hover:text-white transition-colors px-3 sm:px-4 py-1.5 sm:py-2 border border-white/20 hover:border-white/40 rounded-xl font-medium whitespace-nowrap">
+                Dashboard
+              </Link>
+              {HAS_REAL_CLERK && (
+                <UserButton afterSignOutUrl="/" appearance={{ elements: { avatarBox: "w-8 h-8" } }} />
+              )}
+            </>
+          ) : (
+            <>
+              <Link href="/sign-in" className="text-sm text-gray-400 hover:text-white transition-colors px-4 py-2 hidden sm:block">
+                Sign In
+              </Link>
+              <Link href="/sign-up" className="btn-glow text-xs sm:text-sm text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl font-medium whitespace-nowrap">
+                Get Started
+              </Link>
+            </>
+          )}
         </div>
       </nav>
 

@@ -139,7 +139,7 @@ export default function ResumesPage() {
                                         <FileText size={16} className={resume.is_optimized ? "text-emerald-400" : "text-violet-400"} />
                                         <span className="text-sm text-white truncate">{resume.filename}</span>
                                     </div>
-                                    <button onClick={e => { e.stopPropagation(); deleteResume(resume.id) }} disabled={deletingId === resume.id} className="text-gray-600 hover:text-red-400 transition-colors ml-2 shrink-0 cursor-pointer disabled:cursor-not-allowed">
+                                    <button onClick={e => { e.stopPropagation(); deleteResume(resume.id) }} disabled={deletingId !== null} className="text-gray-600 hover:text-red-400 transition-colors ml-2 shrink-0 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40">
                                         {deletingId === resume.id ? <Loader2 size={14} className="animate-spin text-red-400" /> : <Trash2 size={14} />}
                                     </button>
                                 </div>

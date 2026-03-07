@@ -73,7 +73,7 @@ export default function DashboardPage() {
     ]
 
     return (
-        <div className="w-full max-w-[1400px] flex flex-col gap-4 pb-4">
+        <div className="w-full max-w-[1400px] flex flex-col gap-5 pb-4">
             {/* Header */}
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between border-b border-white/15 pb-3">
                 <h1 className="text-2xl font-semibold text-white tracking-tight">
@@ -108,7 +108,7 @@ export default function DashboardPage() {
             {/* Quick Actions */}
             <div className="flex flex-col gap-2">
                 <h2 className="text-base font-semibold text-gray-300">Quick Actions</h2>
-                <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
                     {quickActions.map((action, i) => (
                         <motion.div
                             key={action.href}

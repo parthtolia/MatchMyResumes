@@ -6,7 +6,7 @@ import { UserButton, useUser as useClerkUser } from "@clerk/nextjs"
 import api from "@/lib/api"
 import {
     LayoutDashboard, FileText, Zap, Mail,
-    Briefcase, Settings, BarChart3, CreditCard, ScanSearch, X,
+    Briefcase, Settings, BarChart3, CreditCard, ScanSearch,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Logo } from "@/components/ui/Logo"
@@ -63,17 +63,12 @@ export default function DashboardSidebar({ onClose }: { onClose?: () => void } =
     return (
         <aside className="w-60 h-screen flex flex-col border-r border-white/15 bg-[#0d0d14] shrink-0">
             {/* Logo */}
-            <div className="p-6 pt-6 pb-5 border-b border-white/15 flex items-center justify-between">
-                <Link href="/">
+            <div className="p-6 pt-6 pb-5 border-b border-white/15">
+                <Link href="/dashboard">
                     <div className="scale-[0.80] origin-left whitespace-nowrap">
                         <Logo />
                     </div>
                 </Link>
-                {onClose && (
-                    <button onClick={onClose} className="md:hidden text-gray-400 hover:text-white transition-colors" aria-label="Close menu">
-                        <X size={18} />
-                    </button>
-                )}
             </div>
 
             {/* Nav */}

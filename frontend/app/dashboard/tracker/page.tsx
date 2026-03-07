@@ -322,8 +322,19 @@ export default function TrackerPage() {
                                 value={form.job_title} onChange={e => setForm({ ...form, job_title: e.target.value })} />
                             <input type="url" placeholder="Job URL (optional)" className="input-styled"
                                 value={form.job_url} onChange={e => setForm({ ...form, job_url: e.target.value })} />
-                            <input type="text" className="input-styled" placeholder="Date Applied (dd/mm/yyyy)"
-                                value={form.date_applied} onChange={e => setForm({ ...form, date_applied: e.target.value })} />
+                            <div className="relative">
+                                <input type="text" className="input-styled pr-9" placeholder="DD/MM/YYYY"
+                                    value={form.date_applied} onChange={e => setForm({ ...form, date_applied: e.target.value })} />
+                                <label className="absolute inset-y-0 right-2 flex items-center cursor-pointer text-gray-400 hover:text-violet-400 transition-colors" title="Pick date">
+                                    <Calendar size={15} />
+                                    <input type="date" className="sr-only" onChange={e => {
+                                        if (e.target.value) {
+                                            const [y, m, d] = e.target.value.split("-")
+                                            setForm({ ...form, date_applied: `${d}/${m}/${y}` })
+                                        }
+                                    }} />
+                                </label>
+                            </div>
                             <select className="input-styled" value={form.status} onChange={e => setForm({ ...form, status: e.target.value as Status })}>
                                 {COLUMNS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
                             </select>
