@@ -33,6 +33,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return HAS_REAL_CLERK ? (
     <ClerkProvider
+      afterSignInUrl="/dashboard"
+      afterSignUpUrl="/dashboard"
       appearance={{
         baseTheme: dark,
         variables: {
