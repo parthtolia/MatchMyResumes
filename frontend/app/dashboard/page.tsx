@@ -136,13 +136,13 @@ export default function DashboardPage() {
             </div>
 
             {/* Tips Section */}
-            <div className="glass p-4 shadow-lg rounded-xl border border-white/15 flex flex-col gap-3 -mt-4 flex-1">
+            <div className="glass p-5 shadow-lg rounded-xl border border-white/15 flex flex-col gap-4 -mt-4 flex-1">
                 <div className="flex items-center gap-3">
                     <Target size={20} className="text-violet-400 shrink-0" />
                     <h2 className="text-sm font-bold text-white">How ATS Systems Work</h2>
                     <p className="text-xs text-gray-500 hidden lg:block">Filter resumes before a human reads them — here's how to beat them:</p>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 flex-1">
                     {[
                         { color: "text-emerald-400", title: "Keyword Match", tip: "Include exact hard skills from the JD contextually in your resume." },
                         { color: "text-blue-400", title: "Formatting", tip: "Use standard headers. Avoid tables, columns, or graphics." },
@@ -151,8 +151,8 @@ export default function DashboardPage() {
                         { color: "text-rose-400", title: "Content Density", tip: "Target 400–800 words for optimal ATS scoring." },
                         { color: "text-teal-400", title: "Tailor Each App", tip: "Use the AI Optimizer to reshape bullets for each job description." },
                     ].map(t => (
-                        <div key={t.title} className="bg-white/5 border border-white/10 p-3 rounded-lg hover:bg-white/10 transition-colors">
-                            <div className={`flex items-center gap-1.5 ${t.color} font-semibold text-xs mb-1`}>
+                        <div key={t.title} className="bg-white/5 border border-white/10 p-4 rounded-lg hover:bg-white/10 transition-colors flex flex-col gap-2">
+                            <div className={`flex items-center gap-1.5 ${t.color} font-semibold text-xs`}>
                                 <CheckCircle size={12} /> {t.title}
                             </div>
                             <p className="text-[11px] text-gray-400 leading-relaxed">{t.tip}</p>

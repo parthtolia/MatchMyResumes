@@ -166,10 +166,10 @@ function CoverLetterContent() {
                 <p className="text-gray-400 text-sm mt-1">Generate a tailored, ATS-optimized cover letter in seconds</p>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-[1fr_1.5fr] gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-[1fr_1.5fr] gap-6 xl:min-h-[680px]">
                 {/* Config Panel */}
-                <div className="space-y-4">
-                    <div className="glass p-6 space-y-4">
+                <div className="flex flex-col">
+                    <div className="glass p-6 space-y-4 flex-1">
                         <h2 className="font-semibold text-white mb-2">Configuration</h2>
 
                         <div>
@@ -280,7 +280,7 @@ function CoverLetterContent() {
                 </div>
 
                 {/* Output Panel */}
-                <div className="h-full min-h-[500px]">
+                <div className="h-full min-h-[600px]">
                     {loading ? (
                         <div className="glass p-12 h-full flex flex-col items-center justify-center text-center">
                             <Loader2 size={48} className="text-violet-400 animate-spin mb-4" />

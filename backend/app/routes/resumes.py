@@ -1,6 +1,7 @@
 """
 Resume & ATS Scoring Routes
 """
+import asyncio
 import uuid
 from typing import List
 
@@ -85,9 +86,9 @@ async def upload_resume(
     except Exception as e:
         raise HTTPException(status_code=422, detail=f"Failed to parse resume: {str(e)}")
     
-    # Generate embedding
+    # Generate embedding (capped at 8s so Koyeb's HTTP timeout is never hit)
     try:
-        embedding = await generate_embedding(parsed["raw_text"])
+        embedding = await asyncio.wait_for(generate_embedding(parsed["raw_text"]), timeout=8.0)
     except Exception:
         embedding = None
     
