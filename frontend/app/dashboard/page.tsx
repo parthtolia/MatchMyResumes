@@ -73,7 +73,7 @@ export default function DashboardPage() {
     ]
 
     return (
-        <div className="w-full max-w-[1400px] flex flex-col gap-5 pb-4">
+        <div className="w-full max-w-[1400px] flex flex-col gap-10 pb-4">
             {/* Header */}
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between border-b border-white/15 pb-3">
                 <h1 className="text-2xl font-semibold text-white tracking-tight">
@@ -86,15 +86,15 @@ export default function DashboardPage() {
                     </span>
                 )}
             </motion.div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
                 {statCards.map((card, i) => (
                     <motion.div
                         key={card.label}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="stat-card flex flex-col justify-between p-5 shadow-md border border-white/15 border-opacity-100"
-                        style={{ minHeight: "110px" }}
+                        className="stat-card flex flex-col justify-between p-6 shadow-md border border-white/15 border-opacity-100"
+                        style={{ minHeight: "130px" }}
                     >
                         <card.icon size={24} className={`${card.color} mb-3`} />
                         <div className="flex flex-col gap-1">
@@ -106,9 +106,9 @@ export default function DashboardPage() {
             </div>
 
             {/* Quick Actions */}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
                 <h2 className="text-base font-semibold text-gray-300">Quick Actions</h2>
-                <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 xl:grid-cols-4 gap-5">
                     {quickActions.map((action, i) => (
                         <motion.div
                             key={action.href}
@@ -119,8 +119,8 @@ export default function DashboardPage() {
                         >
                             <Link
                                 href={action.href}
-                                className="flex-1 flex flex-col justify-between p-4 rounded-xl border border-white/15 bg-[#111118] hover:border-violet-500/50 hover:bg-[#111122] transition-all group shadow-md"
-                                style={{ minHeight: "130px" }}
+                                className="flex-1 flex flex-col justify-between p-5 rounded-xl border border-white/15 bg-[#111118] hover:border-violet-500/50 hover:bg-[#111122] transition-all group shadow-md"
+                                style={{ minHeight: "150px" }}
                             >
                                 <div className="flex flex-col gap-2">
                                     <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center group-hover:-translate-y-0.5 transition-transform shrink-0`}>

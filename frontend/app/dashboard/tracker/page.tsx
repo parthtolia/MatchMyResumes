@@ -205,6 +205,8 @@ export default function TrackerPage() {
     const [showForm, setShowForm] = useState(false)
     const [form, setForm] = useState({ company_name: "", job_title: "", job_url: "", status: "applied" as Status, notes: "", date_applied: "" })
     const [saving, setSaving] = useState(false)
+    const [formError, setFormError] = useState("")
+    const datePickerRef = useRef<HTMLInputElement>(null)
     const [dragOverCol, setDragOverCol] = useState<Status | null>(null)
 
     const fetchApps = async () => {
@@ -228,18 +230,27 @@ export default function TrackerPage() {
 
     const addApplication = async () => {
         if (!form.company_name || !form.job_title) return
+        const isDuplicate = applications.some(
+            a => a.company_name.toLowerCase() === form.company_name.toLowerCase() &&
+                 a.job_title.toLowerCase() === form.job_title.toLowerCase()
+        )
+        if (isDuplicate) {
+            setFormError("An application for this company and job title already exists.")
+            return
+        }
+        setFormError("")
         setSaving(true)
         try {
             const res = await api.post("/api/applications/", {
                 ...form,
                 date_applied: parseDate(form.date_applied),
             })
-            // Optimistically add to list immediately
             setApplications(prev => [...prev, res.data])
             setShowForm(false)
             setForm({ company_name: "", job_title: "", job_url: "", status: "applied", notes: "", date_applied: "" })
-            fetchApps() // background refresh to sync
-        } catch { } finally { setSaving(false) }
+        } catch (e: any) {
+            setFormError(e?.response?.data?.detail || "Failed to add application. Please try again.")
+        } finally { setSaving(false) }
     }
 
     const moveStatus = async (id: string, newStatus: Status) => {
@@ -253,6 +264,7 @@ export default function TrackerPage() {
     }
 
     const deleteApp = async (id: string) => {
+        if (!window.confirm("Delete this application? This cannot be undone.")) return
         setApplications(prev => prev.filter(a => a.id !== id))
         try {
             await api.delete(`/api/applications/${id}`)
@@ -325,15 +337,16 @@ export default function TrackerPage() {
                             <div className="relative">
                                 <input type="text" className="input-styled pr-9" placeholder="DD/MM/YYYY"
                                     value={form.date_applied} onChange={e => setForm({ ...form, date_applied: e.target.value })} />
-                                <label className="absolute inset-y-0 right-2 flex items-center cursor-pointer text-gray-400 hover:text-violet-400 transition-colors" title="Pick date">
+                                <button type="button" className="absolute inset-y-0 right-2 flex items-center cursor-pointer text-gray-400 hover:text-violet-400 transition-colors" title="Pick date"
+                                    onClick={() => { (datePickerRef.current as any)?.showPicker?.() ?? datePickerRef.current?.click() }}>
                                     <Calendar size={15} />
-                                    <input type="date" className="sr-only" onChange={e => {
-                                        if (e.target.value) {
-                                            const [y, m, d] = e.target.value.split("-")
-                                            setForm({ ...form, date_applied: `${d}/${m}/${y}` })
-                                        }
-                                    }} />
-                                </label>
+                                </button>
+                                <input ref={datePickerRef} type="date" className="sr-only" onChange={e => {
+                                    if (e.target.value) {
+                                        const [y, m, d] = e.target.value.split("-")
+                                        setForm({ ...form, date_applied: `${d}/${m}/${y}` })
+                                    }
+                                }} />
                             </div>
                             <select className="input-styled" value={form.status} onChange={e => setForm({ ...form, status: e.target.value as Status })}>
                                 {COLUMNS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
@@ -341,12 +354,16 @@ export default function TrackerPage() {
                             <textarea placeholder="Notes..." className="input-styled resize-none sm:col-span-2" rows={2}
                                 value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
                         </div>
+                        {formError && (
+                            <p className="text-sm text-red-400">{formError}</p>
+                        )}
                         <div className="flex gap-2">
-                            <button onClick={addApplication} disabled={saving || !form.company_name || !form.job_title}
+                            <button type="button" onClick={addApplication} disabled={saving || !form.company_name || !form.job_title}
+                                style={{ touchAction: "manipulation" }}
                                 className="btn-glow px-5 py-2 rounded-xl text-white text-sm font-medium flex items-center gap-2 disabled:opacity-50">
                                 {saving ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} Add Application
                             </button>
-                            <button onClick={() => setShowForm(false)} className="px-5 py-2 rounded-xl text-gray-400 text-sm hover:text-white transition-colors">
+                            <button type="button" onClick={() => { setShowForm(false); setFormError("") }} className="px-5 py-2 rounded-xl text-gray-400 text-sm hover:text-white transition-colors">
                                 Cancel
                             </button>
                         </div>
