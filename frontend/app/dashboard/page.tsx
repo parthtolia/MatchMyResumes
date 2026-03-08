@@ -106,7 +106,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Quick Actions */}
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-5">
                 <h2 className="text-base font-semibold text-gray-300">Quick Actions</h2>
                 <div className="grid grid-cols-2 xl:grid-cols-4 gap-5">
                     {quickActions.map((action, i) => (
@@ -136,7 +136,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Tips Section */}
-            <div className="glass p-4 shadow-lg rounded-xl border border-white/15 flex flex-col gap-3">
+            <div className="glass p-4 shadow-lg rounded-xl border border-white/15 flex flex-col gap-3 -mt-4">
                 <div className="flex items-center gap-3">
                     <Target size={20} className="text-violet-400 shrink-0" />
                     <h2 className="text-sm font-bold text-white">How ATS Systems Work</h2>

@@ -3,6 +3,7 @@ Job Description, Cover Letter, Applications, Subscriptions, and Admin Routes
 """
 import asyncio
 import uuid
+from datetime import datetime, timezone
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -116,11 +117,24 @@ async def create_cover_letter(
 ):
     user_id = get_user_id_from_payload(current_user)
     
-    # Check plan
+    # Check plan and monthly cover letter limit
     user_result = await db.execute(select(User).where(User.id == user_id))
     user = user_result.scalar_one_or_none()
-    if not user or user.plan == PlanType.free:
+    if not user:
         raise HTTPException(status_code=402, detail="Cover letter generation requires Pro or Premium plan")
+    from app.routes.resumes import PLAN_LIMITS, _month_start
+    cl_limits = {PlanType.free: 1, PlanType.pro: 10, PlanType.premium: -1}
+    cl_limit = cl_limits.get(user.plan, 1)
+    if cl_limit == 0:
+        raise HTTPException(status_code=402, detail="Cover letter generation requires Pro or Premium plan")
+    if cl_limit != -1:
+        month_count = await db.scalar(
+            select(func.count(CoverLetter.id))
+            .where(CoverLetter.user_id == user_id, CoverLetter.created_at >= _month_start())
+        )
+        if (month_count or 0) >= cl_limit:
+            upgrade_msg = "Upgrade to Pro for 10/month." if user.plan == PlanType.free else "Upgrade to Premium for unlimited."
+            raise HTTPException(status_code=402, detail=f"Monthly cover letter limit reached ({cl_limit}/month). {upgrade_msg}")
     
     # Fetch resume & JD
     resume_result = await db.execute(select(Resume).where(Resume.id == payload.resume_id))
@@ -188,6 +202,18 @@ async def create_application(
     current_user: dict = Depends(get_current_user),
 ):
     user_id = get_user_id_from_payload(current_user)
+
+    # Enforce job tracker limit per plan
+    user_result = await db.execute(select(User).where(User.id == user_id))
+    user = user_result.scalar_one_or_none()
+    tracker_limits = {PlanType.free: 20, PlanType.pro: 200, PlanType.premium: -1}
+    tracker_limit = tracker_limits.get(user.plan if user else PlanType.free, 20)
+    if tracker_limit != -1:
+        total = await db.scalar(select(func.count(Application.id)).where(Application.user_id == user_id))
+        if (total or 0) >= tracker_limit:
+            upgrade_msg = "Upgrade to Pro for 200 jobs." if (not user or user.plan == PlanType.free) else "Upgrade to Premium for unlimited."
+            raise HTTPException(status_code=402, detail=f"Job tracker limit reached ({tracker_limit} applications). {upgrade_msg}")
+
     application = Application(id=str(uuid.uuid4()), user_id=user_id, **payload.model_dump())
     db.add(application)
     await db.commit()

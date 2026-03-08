@@ -4,6 +4,7 @@ Resume & ATS Scoring Routes
 import uuid
 from typing import List
 
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
@@ -33,8 +34,16 @@ ALLOWED_TYPES = {"application/pdf": "pdf", "application/vnd.openxmlformats-offic
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
 
-def _get_usage_limit(plan: PlanType) -> int:
-    return {PlanType.free: 2, PlanType.pro: 999, PlanType.premium: 9999}.get(plan, 2)
+def _month_start() -> datetime:
+    now = datetime.now(timezone.utc)
+    return now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+# -1 means unlimited
+PLAN_LIMITS = {
+    PlanType.free:    {"cv_score": 5,  "jd_match": 5,  "ai_optimize": 0,  "cover_letter": 1,  "tracker": 20},
+    PlanType.pro:     {"cv_score": -1, "jd_match": -1, "ai_optimize": 10, "cover_letter": 10, "tracker": 200},
+    PlanType.premium: {"cv_score": -1, "jd_match": -1, "ai_optimize": -1, "cover_letter": -1, "tracker": -1},
+}
 
 
 @router.post("/upload", response_model=ResumeUploadResponse, status_code=201)
@@ -99,11 +108,6 @@ async def upload_resume(
         )
         db.add(user)
 
-    # Check usage limit for free plan
-    count = user.usage_count or 0
-    if user.plan == PlanType.free and count >= _get_usage_limit(PlanType.free):
-        raise HTTPException(status_code=402, detail="Monthly upload limit reached. Upgrade to Pro for unlimited scans.")
-
     # Save resume
     resume = Resume(
         id=str(uuid.uuid4()),
@@ -117,7 +121,6 @@ async def upload_resume(
         is_optimized=False,
     )
     db.add(resume)
-    user.usage_count = (user.usage_count or 0) + 1
     await db.commit()
     await db.refresh(resume)
     
@@ -183,7 +186,21 @@ async def score_resume(
 ):
     """Compute ATS score for a resume against a job description."""
     user_id = get_user_id_from_payload(current_user)
-    
+
+    # Enforce monthly JD-match limit
+    user_result = await db.execute(select(User).where(User.id == user_id))
+    user = user_result.scalar_one_or_none()
+    if user:
+        limit = PLAN_LIMITS.get(user.plan, PLAN_LIMITS[PlanType.free])["jd_match"]
+        if limit != -1:
+            month_count = await db.scalar(
+                select(func.count(ResumeScore.id))
+                .join(Resume, ResumeScore.resume_id == Resume.id)
+                .where(Resume.user_id == user_id, ResumeScore.created_at >= _month_start())
+            )
+            if (month_count or 0) >= limit:
+                raise HTTPException(status_code=402, detail=f"Monthly JD Match limit reached ({limit}/month). Upgrade to Pro for unlimited scans.")
+
     # Fetch resume
     resume_result = await db.execute(
         select(Resume).where(Resume.id == request.resume_id, Resume.user_id == user_id)
@@ -271,6 +288,21 @@ async def cv_score_resume(
 ):
     """Compute a standalone CV quality score without a JD."""
     user_id = get_user_id_from_payload(current_user)
+
+    # Enforce monthly ATS cv-score limit (tracked via usage_count + usage_reset_date)
+    user_result = await db.execute(select(User).where(User.id == user_id))
+    user = user_result.scalar_one_or_none()
+    if user:
+        ms = _month_start()
+        if not user.usage_reset_date or user.usage_reset_date.replace(tzinfo=timezone.utc) < ms:
+            user.usage_count = 0
+            user.usage_reset_date = ms
+        limit = PLAN_LIMITS.get(user.plan, PLAN_LIMITS[PlanType.free])["cv_score"]
+        if limit != -1 and (user.usage_count or 0) >= limit:
+            raise HTTPException(status_code=402, detail=f"Monthly ATS Score limit reached ({limit}/month). Upgrade to Pro for unlimited scans.")
+        user.usage_count = (user.usage_count or 0) + 1
+        await db.commit()
+
     result = await db.execute(
         select(Resume).where(Resume.id == request.resume_id, Resume.user_id == user_id)
     )
@@ -302,6 +334,14 @@ async def optimize_resume_endpoint(
     user = user_result.scalar_one_or_none()
     if not user or user.plan == PlanType.free:
         raise HTTPException(status_code=402, detail="AI optimization requires Pro or Premium plan")
+    limit = PLAN_LIMITS.get(user.plan, PLAN_LIMITS[PlanType.free])["ai_optimize"]
+    if limit != -1:
+        month_count = await db.scalar(
+            select(func.count(Resume.id))
+            .where(Resume.user_id == user_id, Resume.is_optimized == True, Resume.created_at >= _month_start())
+        )
+        if (month_count or 0) >= limit:
+            raise HTTPException(status_code=402, detail=f"Monthly AI optimization limit reached ({limit}/month). Upgrade to Premium for unlimited.")
     
     # Fetch resume & JD
     resume_result = await db.execute(

@@ -27,6 +27,7 @@ export default function ResumesPage() {
     const [uploading, setUploading] = useState(false)
     const [selected, setSelected] = useState<any>(null)
     const [error, setError] = useState("")
+    const [uploadSuccess, setUploadSuccess] = useState(false)
     const [deletingId, setDeletingId] = useState<string | null>(null)
     const [deleteSuccess, setDeleteSuccess] = useState(false)
     // useRef so deleted IDs survive all re-renders (state from GlobalDataProvider won't reset it)
@@ -43,34 +44,37 @@ export default function ResumesPage() {
         if (!file) return
         setUploading(true)
         setError("")
+        setUploadSuccess(false)
         try {
             const formData = new FormData()
             formData.append("file", file)
-            await api.post("/api/resumes/upload", formData, { headers: { "Content-Type": "multipart/form-data" } })
+            const res = await api.post("/api/resumes/upload", formData, { headers: { "Content-Type": "multipart/form-data" } })
+            setLocalResumes(prev => [res.data, ...prev])
+            setUploadSuccess(true)
+            setTimeout(() => setUploadSuccess(false), 3000)
             refreshData()
         } catch (e: any) {
-            setError(e.message)
+            setError(e.response?.data?.detail || e.message)
         } finally { setUploading(false) }
     }
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { "application/pdf": [".pdf"], "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"] } })
 
     const deleteResume = async (id: string) => {
-        // Mark as deleted in ref (persists forever) + immediately remove from local list
+        if (!window.confirm("Delete this resume? This cannot be undone.")) return
+        setError("")
+        setDeletingId(id)
         deletedRef.current.add(id)
         setLocalResumes(prev => prev.filter(r => r.id !== id))
         if (selected?.id === id) setSelected(null)
-        setDeleteSuccess(true)
-        setTimeout(() => setDeleteSuccess(false), 2500)
-        setDeletingId(id)
         try {
             await api.delete(`/api/resumes/${id}`)
-            refreshData() // background sync
+            setDeleteSuccess(true)
+            setTimeout(() => setDeleteSuccess(false), 2500)
+            refreshData()
         } catch {
-            // Revert: remove from ref and restore via refresh
             deletedRef.current.delete(id)
             refreshData()
-            setDeleteSuccess(false)
             setError("Failed to delete resume. Please try again.")
         } finally {
             setDeletingId(null)
@@ -113,6 +117,11 @@ export default function ResumesPage() {
             </div>
 
             {error && <p className="text-red-400 text-sm">{error}</p>}
+            {uploadSuccess && (
+                <div className="flex items-center gap-2 text-emerald-400 text-sm">
+                    <CheckCircle2 size={16} /> Resume uploaded successfully
+                </div>
+            )}
             {deleteSuccess && (
                 <div className="flex items-center gap-2 text-emerald-400 text-sm">
                     <CheckCircle2 size={16} /> Resume deleted successfully
@@ -139,7 +148,7 @@ export default function ResumesPage() {
                                         <FileText size={16} className={resume.is_optimized ? "text-emerald-400" : "text-violet-400"} />
                                         <span className="text-sm text-white truncate">{resume.filename}</span>
                                     </div>
-                                    <button onClick={e => { e.stopPropagation(); deleteResume(resume.id) }} disabled={deletingId !== null} className="text-gray-600 hover:text-red-400 transition-colors ml-2 shrink-0 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40">
+                                    <button onClick={e => { e.stopPropagation(); deleteResume(resume.id) }} disabled={deletingId === resume.id} className="text-gray-600 hover:text-red-400 transition-colors ml-2 shrink-0 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40">
                                         {deletingId === resume.id ? <Loader2 size={14} className="animate-spin text-red-400" /> : <Trash2 size={14} />}
                                     </button>
                                 </div>
