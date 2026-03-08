@@ -73,7 +73,7 @@ export default function DashboardPage() {
     ]
 
     return (
-        <div className="w-full max-w-[1400px] flex flex-col gap-10 pb-4">
+        <div className="w-full max-w-[1400px] flex flex-col gap-10 pb-4 min-h-[80vh]">
             {/* Header */}
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between border-b border-white/15 pb-3">
                 <h1 className="text-2xl font-semibold text-white tracking-tight">
@@ -136,7 +136,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Tips Section */}
-            <div className="glass p-4 shadow-lg rounded-xl border border-white/15 flex flex-col gap-3 -mt-4">
+            <div className="glass p-4 shadow-lg rounded-xl border border-white/15 flex flex-col gap-3 -mt-4 flex-1">
                 <div className="flex items-center gap-3">
                     <Target size={20} className="text-violet-400 shrink-0" />
                     <h2 className="text-sm font-bold text-white">How ATS Systems Work</h2>

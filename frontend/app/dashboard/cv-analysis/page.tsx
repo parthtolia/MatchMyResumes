@@ -68,7 +68,12 @@ export default function CVAnalysisPage() {
             const score = await api.post("/api/resumes/cv-score", { resume_id: id })
             setResult(score.data)
         } catch (e: any) {
-            setError(e.message || "Failed to analyze resume")
+            const msg = e.response?.data?.detail || e.message || "Failed to analyze resume"
+            setError(msg)
+            if (e.response?.status === 404) {
+                setSelectedResumeId("")
+                refreshData() // cache had a stale resume ID — force refresh
+            }
         } finally {
             setLoading(false)
         }
