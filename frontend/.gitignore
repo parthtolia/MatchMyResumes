@@ -12,6 +12,12 @@
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
+/blob-report/
+tests/.auth/
+tests/fixtures/large-file-15mb.pdf
+lighthouse-report.*
 
 # next.js
 /.next/

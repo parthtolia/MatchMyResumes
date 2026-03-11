@@ -1,6 +1,6 @@
 "use client"
-import { motion } from "framer-motion"
 import Link from "next/link"
+import { LazyMotion, domAnimation, m } from "framer-motion"
 import {
   Zap, Target, FileText, BarChart3,
   CheckCircle, ArrowRight, Star, TrendingUp
@@ -61,6 +61,7 @@ export default function LandingPage() {
   const { isSignedIn, isLoaded } = useAuthSafe()
 
   return (
+    <LazyMotion features={domAnimation}>
     <div className="min-h-screen bg-[#0a0a0f] text-white overflow-x-hidden">
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4 border-b border-white/5 bg-black/20 backdrop-blur-xl">
@@ -104,7 +105,7 @@ export default function LandingPage() {
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/15 rounded-full blur-[120px]" />
 
         <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -131,10 +132,10 @@ export default function LandingPage() {
                 See How It Works
               </Link>
             </div>
-          </motion.div>
+          </m.div>
 
           {/* Hero mockup */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
@@ -202,7 +203,7 @@ export default function LandingPage() {
                 to { width: var(--target-width); }
               }
             `}} />
-          </motion.div>
+          </m.div>
         </div>
       </section>
 
@@ -210,7 +211,7 @@ export default function LandingPage() {
       <section className="py-24 border-t border-white/5">
         <div className="max-w-5xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, i) => (
-            <motion.div
+            <m.div
               key={stat.label}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -220,7 +221,7 @@ export default function LandingPage() {
             >
               <div className="text-4xl font-extrabold gradient-text mb-2">{stat.value}</div>
               <div className="text-gray-400 text-sm">{stat.label}</div>
-            </motion.div>
+            </m.div>
           ))}
         </div>
       </section>
@@ -236,7 +237,7 @@ export default function LandingPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, i) => (
-              <motion.div
+              <m.div
                 key={feature.title}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -249,7 +250,7 @@ export default function LandingPage() {
                 </div>
                 <h3 className="font-semibold text-white mb-2">{feature.title}</h3>
                 <p className="text-gray-400 text-sm leading-relaxed">{feature.desc}</p>
-              </motion.div>
+              </m.div>
             ))}
           </div>
         </div>
@@ -267,7 +268,7 @@ export default function LandingPage() {
               { num: "02", title: "Paste Job Description", desc: "Paste the JD from any job board. We extract keywords, requirements, and responsibilities." },
               { num: "03", title: "Get AI Analysis", desc: "Receive your ATS score, keyword gaps, optimized resume, and tailored cover letter instantly." },
             ].map((step, i) => (
-              <motion.div
+              <m.div
                 key={step.num}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -278,7 +279,7 @@ export default function LandingPage() {
                 <div className="text-6xl font-black text-white/5 mb-4">{step.num}</div>
                 <h3 className="text-xl font-semibold text-white mb-3">{step.title}</h3>
                 <p className="text-gray-400 leading-relaxed">{step.desc}</p>
-              </motion.div>
+              </m.div>
             ))}
           </div>
         </div>
@@ -296,7 +297,7 @@ export default function LandingPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {testimonials.map((t, i) => (
-              <motion.div
+              <m.div
                 key={t.author}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -311,10 +312,10 @@ export default function LandingPage() {
                   <p className="text-gray-300 italic">"{t.quote}"</p>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-white">{t.author}</h4>
-                  <p className="text-sm text-gray-500">{t.role}</p>
+                  <p className="font-semibold text-white">{t.author}</p>
+                  <p className="text-sm text-gray-400">{t.role}</p>
                 </div>
-              </motion.div>
+              </m.div>
             ))}
           </div>
         </div>
@@ -336,7 +337,7 @@ export default function LandingPage() {
               { q: "Is my data secure?", a: "Yes. Your resumes and job descriptions are stored securely in an encrypted database and are only accessible to you. We never share your data with third parties or use it to train AI models." },
               { q: "Can I cancel my subscription anytime?", a: "Absolutely. There are no contracts or lock-ins. Cancel anytime from your account settings and you'll retain access until the end of your billing period." },
             ].map((item, i) => (
-              <motion.details
+              <m.details
                 key={i}
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -349,7 +350,7 @@ export default function LandingPage() {
                   <span className="text-violet-400 ml-4 shrink-0 text-xl group-open:rotate-45 transition-transform inline-block">+</span>
                 </summary>
                 <p className="text-gray-400 text-sm mt-3 leading-relaxed">{item.a}</p>
-              </motion.details>
+              </m.details>
             ))}
           </div>
         </div>
@@ -364,7 +365,7 @@ export default function LandingPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {plans.map((plan, i) => (
-              <motion.div
+              <m.div
                 key={plan.name}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -404,7 +405,7 @@ export default function LandingPage() {
                 >
                   {plan.cta}
                 </Link>
-              </motion.div>
+              </m.div>
             ))}
           </div>
         </div>
@@ -431,13 +432,14 @@ export default function LandingPage() {
         <div className="flex justify-center mb-6">
           <Logo className="scale-75 origin-center" />
         </div>
-        <p className="text-gray-500 text-sm">© 2026 MatchMyResumes. All rights reserved.</p>
-        <div className="flex justify-center gap-6 mt-4 text-sm text-gray-500">
+        <p className="text-gray-400 text-sm">© 2026 MatchMyResumes. All rights reserved.</p>
+        <div className="flex justify-center gap-6 mt-4 text-sm text-gray-400">
           <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
           <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
           <Link href="mailto:support@matchmyresumes.com" className="hover:text-white transition-colors">Contact</Link>
         </div>
       </footer>
     </div>
+    </LazyMotion>
   )
 }
