@@ -66,6 +66,7 @@ export default function ResumesPage() {
     const [error, setError] = useState("")
     const [uploadSuccess, setUploadSuccess] = useState(false)
     const [deleteSuccess, setDeleteSuccess] = useState(false)
+    const [deleting, setDeleting] = useState(false) // instant feedback after confirm
 
     // Track which IDs are mid-delete (Set so multiple concurrent deletes work)
     const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set())
@@ -122,9 +123,11 @@ export default function ResumesPage() {
 
     const performDelete = async (ids: string[]) => {
         setError("")
-        // Optimistically remove from UI immediately
+        setDeleteSuccess(false)
+        // Optimistically remove from UI + show instant "Deleting…" status
         ids.forEach(id => deletedRef.current.add(id))
         setDeletingIds(prev => new Set([...prev, ...ids]))
+        setDeleting(true)
         setLocalResumes(prev => prev.filter(r => !ids.includes(r.id)))
         if (selected && ids.includes(selected.id)) setSelected(null)
         if (selectMode) {
@@ -137,9 +140,9 @@ export default function ResumesPage() {
 
         const failed = ids.filter((_, i) => results[i].status === "rejected")
         setDeletingIds(new Set())
+        setDeleting(false)
 
         if (failed.length > 0) {
-            // Restore failed ones
             failed.forEach(id => deletedRef.current.delete(id))
             refreshData()
             setError(failed.length === ids.length
@@ -149,7 +152,6 @@ export default function ResumesPage() {
         } else {
             setDeleteSuccess(true)
             setTimeout(() => setDeleteSuccess(false), 2500)
-            // Delay refresh so concurrent in-flight deletions don't cause items to reappear
             setTimeout(() => refreshData(), 2000)
         }
     }
@@ -194,43 +196,12 @@ export default function ResumesPage() {
                     <h1 className="text-2xl font-bold text-white">My Resumes</h1>
                     <p className="text-gray-400 text-sm mt-1">{localResumes.length} resume versions stored</p>
                 </div>
-                <div className="flex items-center gap-2">
-                    {loading && resumes.length > 0 && (
-                        <span className="flex items-center gap-1.5 text-xs text-gray-500">
-                            <span className="w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
-                            Syncing…
-                        </span>
-                    )}
-                    {localResumes.length > 0 && (
-                        <>
-                            {selectMode && (
-                                <button
-                                    onClick={selectAll}
-                                    className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-gray-400 hover:text-white transition-all"
-                                >
-                                    Select All
-                                </button>
-                            )}
-                            <button
-                                onClick={toggleSelectMode}
-                                className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${selectMode
-                                    ? "border-violet-500/50 bg-violet-500/10 text-violet-300"
-                                    : "border-white/10 text-gray-400 hover:text-white"
-                                    }`}
-                            >
-                                {selectMode ? "Cancel" : "Select"}
-                            </button>
-                            {selectMode && selectedIds.size > 0 && (
-                                <button
-                                    onClick={() => requestDelete(Array.from(selectedIds))}
-                                    className="text-xs px-3 py-1.5 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all flex items-center gap-1.5"
-                                >
-                                    <Trash2 size={12} /> Delete ({selectedIds.size})
-                                </button>
-                            )}
-                        </>
-                    )}
-                </div>
+                {loading && resumes.length > 0 && (
+                    <span className="flex items-center gap-1.5 text-xs text-gray-500">
+                        <span className="w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
+                        Syncing…
+                    </span>
+                )}
             </div>
 
             {/* Upload */}
@@ -257,7 +228,12 @@ export default function ResumesPage() {
                     <CheckCircle2 size={16} /> Resume uploaded successfully
                 </div>
             )}
-            {deleteSuccess && (
+            {deleting && (
+                <div className="flex items-center gap-2 text-violet-400 text-sm">
+                    <Loader2 size={14} className="animate-spin" /> Deleting…
+                </div>
+            )}
+            {!deleting && deleteSuccess && (
                 <div className="flex items-center gap-2 text-emerald-400 text-sm">
                     <CheckCircle2 size={16} /> Deleted successfully
                 </div>
@@ -266,6 +242,36 @@ export default function ResumesPage() {
             {/* Resume Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-1 space-y-2">
+                    {/* Select controls — shown above the list */}
+                    {localResumes.length > 0 && (
+                        <div className="flex items-center gap-2 pb-1">
+                            {selectMode && (
+                                <button
+                                    onClick={selectAll}
+                                    className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-gray-400 hover:text-white transition-all"
+                                >
+                                    Select All
+                                </button>
+                            )}
+                            <button
+                                onClick={toggleSelectMode}
+                                className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${selectMode
+                                    ? "border-violet-500/50 bg-violet-500/10 text-violet-300"
+                                    : "border-white/10 text-gray-400 hover:text-white"
+                                    }`}
+                            >
+                                {selectMode ? "Cancel" : "Select"}
+                            </button>
+                            {selectMode && selectedIds.size > 0 && (
+                                <button
+                                    onClick={() => requestDelete(Array.from(selectedIds))}
+                                    className="text-xs px-3 py-1.5 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all flex items-center gap-1.5"
+                                >
+                                    <Trash2 size={12} /> Delete ({selectedIds.size})
+                                </button>
+                            )}
+                        </div>
+                    )}
                     {loading && localResumes.length === 0 ? (
                         <div className="flex justify-center py-8"><Loader2 className="animate-spin text-violet-400" /></div>
                     ) : localResumes.length === 0 ? (
