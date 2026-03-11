@@ -12,6 +12,12 @@ from sqlalchemy.orm import defer
 
 from app.core.database import get_db
 from app.core.security import get_current_user, get_user_id_from_payload
+from app.core.rate_limit import limiter
+from app.core.config import get_settings as _get_settings
+
+_cfg = _get_settings()
+_ai_limit = f"{_cfg.ai_rate_limit_per_minute}/minute"
+_general_limit = f"{_cfg.rate_limit_per_minute}/minute"
 from app.models.job_description import JobDescription
 from app.models.cover_letter import CoverLetter
 from app.models.application import Application
@@ -110,7 +116,9 @@ cl_router = APIRouter(prefix="/api/cover-letters", tags=["cover-letters"])
 
 
 @cl_router.post("/", response_model=CoverLetterResponse, status_code=201)
+@limiter.limit(_ai_limit)
 async def create_cover_letter(
+    request: Request,
     payload: CoverLetterRequest,
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
@@ -136,13 +144,17 @@ async def create_cover_letter(
             upgrade_msg = "Upgrade to Pro for 10/month." if user.plan == PlanType.free else "Upgrade to Premium for unlimited."
             raise HTTPException(status_code=402, detail=f"Monthly cover letter limit reached ({cl_limit}/month). {upgrade_msg}")
     
-    # Fetch resume & JD
-    resume_result = await db.execute(select(Resume).where(Resume.id == payload.resume_id))
+    # Fetch resume & JD (with ownership check)
+    resume_result = await db.execute(
+        select(Resume).where(Resume.id == payload.resume_id, Resume.user_id == user_id)
+    )
     resume = resume_result.scalar_one_or_none()
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
-    
-    jd_result = await db.execute(select(JobDescription).where(JobDescription.id == payload.jd_id))
+
+    jd_result = await db.execute(
+        select(JobDescription).where(JobDescription.id == payload.jd_id, JobDescription.user_id == user_id)
+    )
     jd = jd_result.scalar_one_or_none()
     if not jd:
         raise HTTPException(status_code=404, detail="Job description not found")

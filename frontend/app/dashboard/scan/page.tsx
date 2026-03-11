@@ -133,6 +133,7 @@ function ScanPageContent() {
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
         },
         maxFiles: 1,
+        maxSize: 10 * 1024 * 1024, // 10MB
         disabled: loading,
     })
 

@@ -64,9 +64,9 @@ class ATSScoreResponse(BaseModel):
 class OptimizeResumeRequest(BaseModel):
     resume_id: str
     jd_id: Optional[str] = None
-    jd_text: Optional[str] = None
+    jd_text: Optional[str] = Field(None, max_length=50000)
     save_as_version: bool = True
-    version_tag: Optional[str] = None
+    version_tag: Optional[str] = Field(None, max_length=255)
 
 
 class OptimizeResumeResponse(BaseModel):

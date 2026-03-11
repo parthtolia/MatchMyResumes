@@ -6,13 +6,19 @@ import uuid
 from typing import List
 
 from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status, BackgroundTasks, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from sqlalchemy.orm import defer
 
 from app.core.database import get_db
 from app.core.security import get_current_user, get_user_id_from_payload
+from app.core.config import get_settings
+from app.core.rate_limit import limiter
+
+_settings = get_settings()
+_ai_limit = f"{_settings.ai_rate_limit_per_minute}/minute"
+_general_limit = f"{_settings.rate_limit_per_minute}/minute"
 from app.models.resume import Resume
 from app.models.user import User, PlanType
 from app.models.job_description import JobDescription
@@ -48,7 +54,9 @@ PLAN_LIMITS = {
 
 
 @router.post("/upload", response_model=ResumeUploadResponse, status_code=201)
+@limiter.limit(_general_limit)
 async def upload_resume(
+    request: Request,
     file: UploadFile = File(...),
     version_tag: str = Form(None),
     db: AsyncSession = Depends(get_db),
@@ -180,8 +188,10 @@ async def delete_resume(
 
 
 @router.post("/score", response_model=ATSScoreResponse)
+@limiter.limit(_ai_limit)
 async def score_resume(
-    request: ATSScoreRequest,
+    request: Request,
+    payload: ATSScoreRequest,
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
@@ -204,15 +214,15 @@ async def score_resume(
 
     # Fetch resume
     resume_result = await db.execute(
-        select(Resume).where(Resume.id == request.resume_id, Resume.user_id == user_id)
+        select(Resume).where(Resume.id == payload.resume_id, Resume.user_id == user_id)
     )
     resume = resume_result.scalar_one_or_none()
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
-    
+
     # Fetch JD
     jd_result = await db.execute(
-        select(JobDescription).where(JobDescription.id == request.jd_id, JobDescription.user_id == user_id)
+        select(JobDescription).where(JobDescription.id == payload.jd_id, JobDescription.user_id == user_id)
     )
     jd = jd_result.scalar_one_or_none()
     if not jd:
@@ -282,8 +292,10 @@ class CVScoreRequest(PydanticBaseModel):
     resume_id: str
 
 @router.post("/cv-score")
+@limiter.limit(_ai_limit)
 async def cv_score_resume(
-    request: CVScoreRequest,
+    request: Request,
+    payload: CVScoreRequest,
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
@@ -305,7 +317,7 @@ async def cv_score_resume(
         await db.commit()
 
     result = await db.execute(
-        select(Resume).where(Resume.id == request.resume_id, Resume.user_id == user_id)
+        select(Resume).where(Resume.id == payload.resume_id, Resume.user_id == user_id)
     )
     resume = result.scalar_one_or_none()
     if not resume:
@@ -322,14 +334,16 @@ async def cv_score_resume(
 
 
 @router.post("/optimize", response_model=OptimizeResumeResponse)
+@limiter.limit(_ai_limit)
 async def optimize_resume_endpoint(
-    request: OptimizeResumeRequest,
+    request: Request,
+    payload: OptimizeResumeRequest,
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """AI-optimize a resume for a job description (Pro/Premium only)."""
     user_id = get_user_id_from_payload(current_user)
-    
+
     # Check plan access
     user_result = await db.execute(select(User).where(User.id == user_id))
     user = user_result.scalar_one_or_none()
@@ -343,25 +357,25 @@ async def optimize_resume_endpoint(
         )
         if (month_count or 0) >= limit:
             raise HTTPException(status_code=402, detail=f"Monthly AI optimization limit reached ({limit}/month). Upgrade to Premium for unlimited.")
-    
+
     # Fetch resume & JD
     resume_result = await db.execute(
-        select(Resume).where(Resume.id == request.resume_id, Resume.user_id == user_id)
+        select(Resume).where(Resume.id == payload.resume_id, Resume.user_id == user_id)
     )
     resume = resume_result.scalar_one_or_none()
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
-    
-    if not request.jd_id and not request.jd_text:
+
+    if not payload.jd_id and not payload.jd_text:
         raise HTTPException(status_code=400, detail="Must provide either jd_id or jd_text")
 
     raw_jd_text = ""
     job_title = "job"
     missing_keywords = []
 
-    if request.jd_id:
+    if payload.jd_id:
         jd_result = await db.execute(
-            select(JobDescription).where(JobDescription.id == request.jd_id)
+            select(JobDescription).where(JobDescription.id == payload.jd_id, JobDescription.user_id == user_id)
         )
         jd = jd_result.scalar_one_or_none()
         if not jd:
@@ -379,7 +393,7 @@ async def optimize_resume_endpoint(
         latest_score = score_result.scalar_one_or_none()
         missing_keywords = latest_score.missing_keywords if latest_score else []
     else:
-        raw_jd_text = request.jd_text
+        raw_jd_text = payload.jd_text
         job_title = "custom job"
     # Run AI optimization
     try:
@@ -392,8 +406,8 @@ async def optimize_resume_endpoint(
         raise HTTPException(status_code=500, detail=f"AI optimization failed: {str(e)}")
     
     new_resume_id = None
-    if request.save_as_version:
-        tag = request.version_tag or f"Optimized for {job_title}"
+    if payload.save_as_version:
+        tag = payload.version_tag or f"Optimized for {job_title}"
         
         # Calculate version number for this specific root resume
         count_result = await db.execute(

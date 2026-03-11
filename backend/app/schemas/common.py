@@ -8,9 +8,9 @@ from app.models.application import ApplicationStatus
 # ─── Job Description ──────────────────────────────────────────────────
 
 class JDCreateRequest(BaseModel):
-    raw_text: str = Field(..., min_length=100)
-    title: Optional[str] = None
-    company: Optional[str] = None
+    raw_text: str = Field(..., min_length=100, max_length=50000)
+    title: Optional[str] = Field(None, max_length=255)
+    company: Optional[str] = Field(None, max_length=255)
 
 
 class JDResponse(BaseModel):
@@ -30,9 +30,9 @@ class CoverLetterRequest(BaseModel):
     jd_id: str
     tone: ToneType = ToneType.professional
     length: LengthType = LengthType.medium
-    company_name: Optional[str] = None
-    job_title: Optional[str] = None
-    applicant_name: Optional[str] = None
+    company_name: Optional[str] = Field(None, max_length=255)
+    job_title: Optional[str] = Field(None, max_length=255)
+    applicant_name: Optional[str] = Field(None, max_length=255)
 
 
 class CoverLetterResponse(BaseModel):
@@ -50,22 +50,22 @@ class CoverLetterResponse(BaseModel):
 # ─── Application Tracker ─────────────────────────────────────────────
 
 class ApplicationCreate(BaseModel):
-    company_name: str = Field(..., min_length=1)
-    job_title: str = Field(..., min_length=1)
-    job_url: Optional[str] = None
+    company_name: str = Field(..., min_length=1, max_length=255)
+    job_title: str = Field(..., min_length=1, max_length=255)
+    job_url: Optional[str] = Field(None, max_length=2048)
     resume_id: Optional[str] = None
     jd_id: Optional[str] = None
     status: ApplicationStatus = ApplicationStatus.saved
-    notes: Optional[str] = None
+    notes: Optional[str] = Field(None, max_length=5000)
     date_applied: Optional[datetime] = None
 
 
 class ApplicationUpdate(BaseModel):
-    company_name: Optional[str] = None
-    job_title: Optional[str] = None
-    job_url: Optional[str] = None
+    company_name: Optional[str] = Field(None, max_length=255)
+    job_title: Optional[str] = Field(None, max_length=255)
+    job_url: Optional[str] = Field(None, max_length=2048)
     status: Optional[ApplicationStatus] = None
-    notes: Optional[str] = None
+    notes: Optional[str] = Field(None, max_length=5000)
     date_applied: Optional[datetime] = None
 
 

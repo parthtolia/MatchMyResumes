@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 import MobileDashboard from "@/components/dashboard/MobileDashboard"
+import { ErrorBoundaryWrapper } from "./ErrorBoundaryWrapper"
 
 const hasRealClerk =
     (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "").startsWith("pk_") &&
@@ -19,7 +20,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     return (
         <MobileDashboard>
             <GlobalDataProvider>
-                {children}
+                <ErrorBoundaryWrapper>
+                    {children}
+                </ErrorBoundaryWrapper>
             </GlobalDataProvider>
         </MobileDashboard>
     )

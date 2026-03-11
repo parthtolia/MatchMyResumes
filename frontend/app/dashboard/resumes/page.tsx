@@ -116,6 +116,11 @@ export default function ResumesPage() {
             "application/pdf": [".pdf"],
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
         },
+        maxSize: 10 * 1024 * 1024, // 10MB
+        onDropRejected: (rejections) => {
+            const msg = rejections[0]?.errors[0]?.message || "File rejected"
+            setError(msg.includes("larger") ? "File size exceeds 10MB limit" : msg)
+        },
     })
 
     // ── Delete logic ────────────────────────────────────────────────────────

@@ -4,13 +4,13 @@ MatchMyResumes – FastAPI Application Entry Point
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from contextlib import asynccontextmanager
 
 from app.core.config import get_settings
 from app.core.database import init_db
+from app.core.rate_limit import limiter
 from app.routes.resumes import router as resume_router
 from app.routes.all_routes import (
     jd_router, cl_router, app_router, sub_router, admin_router, dashboard_router
@@ -18,7 +18,6 @@ from app.routes.all_routes import (
 from app.routes.stripe import router as stripe_router
 
 settings = get_settings()
-limiter = Limiter(key_func=get_remote_address)
 
 
 @asynccontextmanager
@@ -78,8 +77,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins_list,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
+    max_age=3600,
 )
 
 # Register routers
@@ -101,8 +101,15 @@ async def health_check():
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     import traceback
-    traceback.print_exc()  # Print full traceback to uvicorn console
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.error(f"Unhandled exception: {type(exc).__name__}: {exc}", exc_info=True)
+    if settings.app_env == "development":
+        return JSONResponse(
+            status_code=500,
+            content={"detail": str(exc), "type": type(exc).__name__},
+        )
     return JSONResponse(
         status_code=500,
-        content={"detail": "Internal server error", "type": type(exc).__name__, "error": str(exc)},
+        content={"detail": "Internal server error"},
     )

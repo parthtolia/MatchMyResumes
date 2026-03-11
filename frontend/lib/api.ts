@@ -20,10 +20,7 @@ api.interceptors.request.use(async (config) => {
         if (typeof window !== "undefined") {
             if (hasRealClerk) {
                 // Production: get real Clerk JWT
-                console.time('Clerk.getToken()')
                 const session = await (window as any).Clerk?.session?.getToken()
-                console.timeEnd('Clerk.getToken()')
-
                 if (session) {
                     config.headers.Authorization = `Bearer ${session}`
                 }
