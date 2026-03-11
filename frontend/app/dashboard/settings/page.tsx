@@ -123,7 +123,7 @@ export default function SettingsPage() {
                                 <p className="text-xs text-gray-500">
                                     {subStatus?.current_period_end ? (
                                         <>
-                                            Renews: {new Date(subStatus.current_period_end).toLocaleDateString()}
+                                            Renews: {new Date(subStatus.current_period_end).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
                                             {subStatus.cancel_at_period_end && " · Cancels at period end"}
                                         </>
                                     ) : (plan === "premium" ? "Premium Plan" : "Pro Plan")}
