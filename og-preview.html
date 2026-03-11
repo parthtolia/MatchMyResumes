@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>OG Image Options — MatchMyResumes</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a2e; font-family: 'Inter', system-ui, sans-serif; padding: 40px 24px; color: white; }
+  h1 { text-align: center; color: #a78bfa; font-size: 20px; margin-bottom: 8px; }
+  .subtitle { text-align: center; color: #6b7280; font-size: 13px; margin-bottom: 48px; }
+  .grid { display: flex; flex-direction: column; gap: 56px; align-items: center; }
+  .card-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .label { font-size: 15px; font-weight: 600; color: #e5e7eb; letter-spacing: 0.02em; }
+  .sub  { font-size: 12px; color: #6b7280; }
+
+  /* Each OG card is 1200×630 scaled down 50% → 600×315 */
+  .og {
+    width: 600px; height: 315px;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 24px 64px rgba(0,0,0,0.6);
+    flex-shrink: 0;
+  }
+
+  /* ── Option A: Dark gradient + logo + tagline ───────────────────────── */
+  .og-a {
+    background: linear-gradient(135deg, #0D0D14 0%, #111128 60%, #0f0f20 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+  }
+  .og-a .glow {
+    position: absolute; width: 320px; height: 320px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .og-a .logo-text {
+    font-size: 32px; font-weight: 800; letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    position: relative;
+  }
+  .og-a .logo-dot { color: #a78bfa; }
+  .og-a .tagline {
+    font-size: 16px; color: #9ca3af; position: relative;
+    letter-spacing: 0.01em;
+  }
+  .og-a .badge {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.25);
+    border-radius: 100px; padding: 6px 16px; position: relative;
+    font-size: 12px; color: #a78bfa; font-weight: 600;
+  }
+  .og-a .badge::before {
+    content: ''; width: 7px; height: 7px; border-radius: 50%; background: #a78bfa;
+  }
+
+  /* ── Option B: Score circle hero ───────────────────────────────────── */
+  .og-b {
+    background: linear-gradient(135deg, #0D0D14 0%, #111128 100%);
+    display: flex; align-items: center; padding: 40px 48px; gap: 48px;
+  }
+  .og-b .left { display: flex; flex-direction: column; gap: 16px; flex: 1; }
+  .og-b .logo-sm { font-size: 15px; font-weight: 800; color: #a78bfa; letter-spacing: -0.02em; }
+  .og-b .headline { font-size: 26px; font-weight: 800; line-height: 1.2; color: white; }
+  .og-b .headline span { color: #a78bfa; }
+  .og-b .desc { font-size: 13px; color: #6b7280; line-height: 1.5; }
+  .og-b .right { display: flex; flex-direction: column; align-items: center; gap: 12px; flex-shrink: 0; }
+  .circle-wrap { position: relative; width: 140px; height: 140px; }
+  .circle-wrap svg { transform: rotate(-90deg); }
+  .circle-wrap .score-text {
+    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .circle-wrap .score-num { font-size: 38px; font-weight: 900; color: white; line-height: 1; }
+  .circle-wrap .score-label { font-size: 10px; color: #6b7280; font-weight: 600; }
+  .og-b .bars { display: flex; flex-direction: column; gap: 6px; width: 140px; }
+  .og-b .bar-row { display: flex; flex-direction: column; gap: 2px; }
+  .og-b .bar-label { font-size: 9px; color: #6b7280; display: flex; justify-content: space-between; }
+  .og-b .bar-track { height: 4px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; }
+  .og-b .bar-fill { height: 100%; border-radius: 4px; }
+
+  /* ── Option C: Split layout ─────────────────────────────────────────── */
+  .og-c {
+    background: #0D0D14;
+    display: flex;
+  }
+  .og-c .left {
+    flex: 1; background: linear-gradient(135deg, #0D0D14 0%, #110f20 100%);
+    display: flex; flex-direction: column; justify-content: center; padding: 40px 44px; gap: 16px;
+    border-right: 1px solid rgba(139,92,246,0.15);
+  }
+  .og-c .logo-sm { font-size: 18px; font-weight: 800; color: #a78bfa; }
+  .og-c .left h2 { font-size: 26px; font-weight: 800; line-height: 1.2; color: white; }
+  .og-c .left h2 em { color: #a78bfa; font-style: normal; }
+  .og-c .left p { font-size: 12px; color: #6b7280; line-height: 1.5; }
+  .og-c .features { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+  .og-c .feat { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #9ca3af; }
+  .og-c .feat-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .og-c .right {
+    width: 240px; background: #111128;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px; gap: 16px;
+  }
+  .mock-card {
+    width: 180px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .mock-card .mc-header { display: flex; align-items: center; gap: 8px; }
+  .mock-card .mc-icon { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg,#7c3aed,#6d28d9); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .mock-card .mc-title { font-size: 11px; font-weight: 600; color: white; }
+  .mock-card .mc-sub { font-size: 9px; color: #6b7280; }
+  .score-badge {
+    align-self: center; background: linear-gradient(135deg,rgba(139,92,246,0.2),rgba(109,40,217,0.2));
+    border: 1px solid rgba(139,92,246,0.3); border-radius: 100px; padding: 4px 14px;
+    font-size: 22px; font-weight: 900; color: white;
+  }
+  .score-badge span { font-size: 11px; color: #a78bfa; font-weight: 600; }
+  .mock-bars { display: flex; flex-direction: column; gap: 5px; width: 100%; }
+  .mock-bar { height: 3px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; }
+  .mock-bar-fill { height: 100%; border-radius: 3px; }
+
+  /* ── Option D: Minimal typographic ─────────────────────────────────── */
+  .og-d {
+    background: #0A0A12;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
+    position: relative; overflow: hidden;
+  }
+  .og-d .noise {
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .og-d .topline {
+    font-size: 13px; font-weight: 700; color: #a78bfa; letter-spacing: 0.15em; text-transform: uppercase;
+    margin-bottom: 20px; position: relative;
+  }
+  .og-d .big-logo {
+    font-size: 54px; font-weight: 900; letter-spacing: -0.04em; position: relative;
+    background: linear-gradient(135deg, #ffffff 0%, #c4b5fd 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1;
+  }
+  .og-d .accent-line {
+    width: 80px; height: 3px; background: linear-gradient(90deg, #7c3aed, #a78bfa);
+    border-radius: 2px; margin: 20px 0 22px; position: relative;
+  }
+  .og-d .tagline {
+    font-size: 18px; color: #9ca3af; font-weight: 500; position: relative;
+    letter-spacing: 0.01em;
+  }
+  .og-d .tagline strong { color: #e5e7eb; font-weight: 700; }
+</style>
+</head>
+<body>
+<h1>OG Image / Thumbnail Options</h1>
+<p class="subtitle">All shown at 50% scale (actual size: 1200×630px) · Screenshot the one you like</p>
+
+<div class="grid">
+
+  <!-- Option A -->
+  <div class="card-wrap">
+    <div class="label">Option A — Dark Gradient + Logo + Tagline</div>
+    <div class="sub">Clean, professional. Works well as a generic brand thumbnail.</div>
+    <div class="og og-a">
+      <div class="glow"></div>
+      <div class="logo-text">MatchMyResumes</div>
+      <div class="tagline">AI-powered resume scoring &amp; optimization</div>
+      <div class="badge">ATS-Ready in seconds</div>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="card-wrap">
+    <div class="label">Option B — Score Circle Hero</div>
+    <div class="sub">Shows the core product. Communicates value immediately.</div>
+    <div class="og og-b">
+      <div class="left">
+        <div class="logo-sm">MatchMyResumes</div>
+        <div class="headline">Get your resume <span>ATS-ready</span> in seconds</div>
+        <div class="desc">Instant scoring, keyword analysis, and AI-powered optimization — tailored to every job.</div>
+      </div>
+      <div class="right">
+        <div class="circle-wrap">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle cx="70" cy="70" r="58" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="10"/>
+            <circle cx="70" cy="70" r="58" fill="none" stroke="url(#cg)" stroke-width="10"
+              stroke-dasharray="364.4" stroke-dashoffset="73" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="cg" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#7c3aed"/>
+                <stop offset="100%" stop-color="#a78bfa"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="score-text">
+            <span class="score-num">87</span>
+            <span class="score-label">ATS SCORE</span>
+          </div>
+        </div>
+        <div class="bars">
+          <div class="bar-row">
+            <div class="bar-label"><span>Keywords</span><span>92</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:92%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label"><span>Formatting</span><span>85</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:85%;background:linear-gradient(90deg,#7c3aed,#a78bfa)"></div></div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label"><span>Quantification</span><span>78</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:78%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label"><span>Content</span><span>90</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:90%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="card-wrap">
+    <div class="label">Option C — Split Layout</div>
+    <div class="sub">Product-forward. Left = brand messaging, right = mock score card.</div>
+    <div class="og og-c">
+      <div class="left">
+        <div class="logo-sm">MatchMyResumes</div>
+        <h2>Beat the ATS.<br/><em>Land the interview.</em></h2>
+        <p>AI-powered resume analysis that shows exactly how your resume scores — and how to fix it.</p>
+        <div class="features">
+          <div class="feat"><div class="feat-dot" style="background:#10b981"></div>Instant ATS Score</div>
+          <div class="feat"><div class="feat-dot" style="background:#a78bfa"></div>JD Match Analysis</div>
+          <div class="feat"><div class="feat-dot" style="background:#3b82f6"></div>AI Resume Optimizer</div>
+          <div class="feat"><div class="feat-dot" style="background:#f59e0b"></div>Cover Letter Generator</div>
+        </div>
+      </div>
+      <div class="right">
+        <div class="mock-card">
+          <div class="mc-header">
+            <div class="mc-icon">📄</div>
+            <div><div class="mc-title">Resume_v3.pdf</div><div class="mc-sub">ATS Analysis</div></div>
+          </div>
+          <div class="score-badge">87 <span>/ 100</span></div>
+          <div class="mock-bars">
+            <div class="mock-bar"><div class="mock-bar-fill" style="width:92%;background:#10b981"></div></div>
+            <div class="mock-bar"><div class="mock-bar-fill" style="width:85%;background:#a78bfa"></div></div>
+            <div class="mock-bar"><div class="mock-bar-fill" style="width:70%;background:#f59e0b"></div></div>
+            <div class="mock-bar"><div class="mock-bar-fill" style="width:88%;background:#3b82f6"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option D -->
+  <div class="card-wrap">
+    <div class="label">Option D — Minimal Typographic</div>
+    <div class="sub">Bold, clean, memorable. Strong at small sizes in link previews.</div>
+    <div class="og og-d">
+      <div class="noise"></div>
+      <div class="topline">AI Resume Intelligence</div>
+      <div class="big-logo">MatchMyResumes</div>
+      <div class="accent-line"></div>
+      <div class="tagline"><strong>Beat the ATS.</strong> Land the Interview.</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

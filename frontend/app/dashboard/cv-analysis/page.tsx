@@ -284,7 +284,7 @@ export default function CVAnalysisPage() {
                                 <p className="text-white font-medium text-sm">Want to match this resume against a job description?</p>
                                 <p className="text-gray-400 text-xs mt-0.5">See your keyword match score, semantic fit, and missing skills for a specific role</p>
                             </div>
-                            <a href="/dashboard/scan" className="btn-glow px-5 py-2.5 rounded-xl text-white text-sm font-semibold shrink-0">
+                            <a href={`/dashboard/scan?resume_id=${result.resume_id}`} className="btn-glow px-5 py-2.5 rounded-xl text-white text-sm font-semibold shrink-0">
                                 ATS vs JD →
                             </a>
                         </div>

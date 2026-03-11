@@ -78,6 +78,7 @@ export default function PricingPage() {
     const { session } = useSessionSafe()
     const [loadingId, setLoadingId] = useState<string | null>(null)
     const [subStatus, setSubStatus] = useState<any>(null)
+    const [checkoutError, setCheckoutError] = useState("")
     const router = useRouter()
 
     const planRank: Record<string, number> = { free: 0, pro: 1, premium: 2 }
@@ -94,6 +95,9 @@ export default function PricingPage() {
                     const token = await session?.getToken()
                     await verifySession(sessionId, token)
                     window.history.replaceState({}, document.title, window.location.pathname)
+                    // Re-fetch plan status immediately after verification
+                    const statusRes = await api.get("/api/subscriptions/status")
+                    setSubStatus(statusRes.data)
                     window.dispatchEvent(new Event("planUpdated"))
                 } catch (e) {
                     console.error("Failed to sync session", e)
@@ -120,7 +124,7 @@ export default function PricingPage() {
             if (data?.checkout_url) window.location.href = data.checkout_url
         } catch (error: any) {
             console.error("Failed to start checkout:", error)
-            alert(error.message || "Failed to start checkout process")
+            setCheckoutError(error.message || "Failed to start checkout. Please try again.")
         } finally {
             setLoadingId(null)
         }
@@ -191,6 +195,13 @@ export default function PricingPage() {
                     )
                 })}
             </div>
+
+            {/* Checkout error */}
+            {checkoutError && (
+                <div className="w-full max-w-4xl p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center mb-2">
+                    {checkoutError}
+                </div>
+            )}
 
             {/* Feature comparison table */}
             <div className="w-full max-w-4xl rounded-2xl border border-white/10 overflow-hidden">

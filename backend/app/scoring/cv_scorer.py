@@ -88,7 +88,7 @@ def compute_cv_quantification_score(text: str) -> Tuple[float, Dict[str, int], L
     if found.get("percentages", 0) == 0:
         tips.append("Your experiences lack percentage-based metrics (e.g., 'Improved efficiency by 30%'). Converting text achievements to percentage KPIs significantly lifts your ATS quantification.")
     if found.get("dollar_amounts", 0) == 0:
-        tips.append("No financial impact detected. Include dollar metrics (e.g. 'Managed $500K budget', 'Generated $50K revenue') to strengthen executive visibility.")
+        tips.append("No financial impact detected. Quantify budget or revenue impact using your local currency (e.g. 'Managed a ₹50L budget', 'Generated €10K revenue', 'Saved $500K in costs') to strengthen executive visibility.")
     if total < 3:
         tips.append(f"Only found {total} numerical metrics. ATS engines prioritize candidates with highly quantified bullet points. Try to include at least 5-10 numbers across your roles.")
 

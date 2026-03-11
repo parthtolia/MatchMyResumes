@@ -1,5 +1,6 @@
 "use client"
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useDropzone } from "react-dropzone"
 import { Upload, FileText, BarChart3, Loader2, Zap } from "lucide-react"
@@ -55,7 +56,7 @@ const breakdownItems = [
 
 type Step = "upload" | "jd" | "result"
 
-export default function ScanPage() {
+function ScanPageContent() {
     const [resumeId, setResumeId] = useState<string | null>(null)
     const [resumeName, setResumeName] = useState("")
     const [step, setStep] = useState<Step>("upload")
@@ -68,6 +69,8 @@ export default function ScanPage() {
     const [selectedResumeId, setSelectedResumeId] = useState("")
     const [jdInputType, setJdInputType] = useState<"saved" | "text">("saved")
     const [selectedJdId, setSelectedJdId] = useState("")
+    const [resumeSource, setResumeSource] = useState<"upload" | "select">("upload")
+    const searchParams = useSearchParams()
 
     // When no saved JDs exist, force text mode so the button isn't perpetually disabled
     useEffect(() => {
@@ -76,12 +79,28 @@ export default function ScanPage() {
         }
     }, [loadingData, jobs.length])
 
+    // Pre-select resume when arriving from ATS score "ATS vs JD" button
+    useEffect(() => {
+        if (loadingData) return
+        const rid = searchParams.get("resume_id")
+        if (rid && resumes.length > 0) {
+            const r = resumes.find(x => x.id === rid)
+            if (r) {
+                setResumeId(r.id)
+                setResumeName(r.filename)
+                setResumeSource("select")
+                setStep("jd")
+            }
+        }
+    }, [loadingData, searchParams])
+
     const handleSelectExistingResume = (id: string) => {
         if (!id) return
         const r = resumes.find(x => x.id === id)
         if (r) {
             setResumeId(r.id)
             setResumeName(r.filename)
+            setResumeSource("select")
             setStep("jd")
         }
     }
@@ -100,6 +119,7 @@ export default function ScanPage() {
             refreshData()
             setResumeId(res.data.id)
             setResumeName(res.data.filename)
+            setResumeSource("upload")
             setStep("jd")
         } catch (e: any) {
             setError(e?.response?.data?.detail || e.message)
@@ -227,7 +247,9 @@ export default function ScanPage() {
                     <motion.div key="jd" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-4">
                         <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
                             <FileText size={18} className="text-emerald-400" />
-                            <span className="text-sm text-emerald-300 font-medium">Resume uploaded: {resumeName}</span>
+                            <span className="text-sm text-emerald-300 font-medium">
+                                {resumeSource === "upload" ? "Resume uploaded" : "Resume selected"}: {resumeName}
+                            </span>
                         </div>
                         <div className="flex items-center justify-between mb-2">
                             <label className="block text-sm font-medium text-gray-300">Target Job Description</label>
@@ -417,11 +439,11 @@ export default function ScanPage() {
                                             {result.breakdown.details?.quantification?.found ? (
                                                 <>
                                                     {result.breakdown.details.quantification.found.percentages === 0 && <li>Add percentage improvements to your bullets (e.g. &quot;increased conversion by 20%&quot;).</li>}
-                                                    {result.breakdown.details.quantification.found.dollar_amounts === 0 && <li>Add monetary scope where applicable (e.g. &quot;managed $1M budget&quot;).</li>}
+                                                    {result.breakdown.details.quantification.found.dollar_amounts === 0 && <li>Add monetary scope where applicable (e.g. &quot;managed a ₹50L budget&quot;, &quot;generated €10K revenue&quot;).</li>}
                                                     {result.breakdown.details.quantification.found.metrics_x === 0 && <li>Use multiplier metrics where applicable (e.g. &quot;improved throughput 3x&quot;).</li>}
                                                 </>
                                             ) : (
-                                                <li>Add quantifiable achievements: percentages (20% improvement), dollar amounts ($1M budget), team sizes, or multiplier gains (3x faster).</li>
+                                                <li>Add quantifiable achievements: percentages (20% improvement), monetary amounts (budget/revenue in your local currency), team sizes, or multiplier gains (3x faster).</li>
                                             )}
                                             <li className="mt-1 text-emerald-400/80 italic flex items-center gap-1"><Info size={12} /> Recruiters prefer measurable impact over generic responsibilities.</li>
                                         </ul>
@@ -466,5 +488,13 @@ export default function ScanPage() {
                 )
             }
         </div >
+    )
+}
+
+export default function ScanPage() {
+    return (
+        <Suspense fallback={null}>
+            <ScanPageContent />
+        </Suspense>
     )
 }

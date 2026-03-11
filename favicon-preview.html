@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Favicon Options — MatchMyResumes</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0D0D14; font-family: system-ui, sans-serif; padding: 48px 32px; color:white; }
+  h1 { text-align:center; color:#a78bfa; font-size:20px; margin-bottom:6px; font-weight:700; }
+  .sub { text-align:center; color:#4b5563; font-size:13px; margin-bottom:52px; }
+
+  .row { display:flex; flex-wrap:wrap; justify-content:center; gap:40px; }
+
+  .item { display:flex; flex-direction:column; align-items:center; gap:18px; }
+  .label { font-size:14px; font-weight:600; color:#e5e7eb; }
+  .desc { font-size:11px; color:#4b5563; text-align:center; max-width:130px; line-height:1.5; }
+
+  /* Show each icon at 3 sizes: 16px (tab), 32px (bookmark), 128px (preview) */
+  .sizes { display:flex; align-items:flex-end; gap:16px; }
+  .size-wrap { display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .size-label { font-size:9px; color:#374151; }
+
+  /* Tab mockup */
+  .tab-mock {
+    display:flex; align-items:center; gap:6px;
+    background:#1f1f2e; border-radius:8px 8px 0 0;
+    padding:7px 14px 7px 10px; border: 1px solid #2d2d3d; border-bottom:none;
+    font-size:12px; color:#9ca3af; margin-top:12px;
+  }
+</style>
+</head>
+<body>
+<h1>Favicon Options — MatchMyResumes</h1>
+<p class="sub">Shown at 128px, 32px, and 16px · Plus a browser tab preview</p>
+
+<div class="row">
+
+  <!-- Option 1: Gradient M -->
+  <div class="item">
+    <div class="sizes">
+      <div class="size-wrap">
+        <svg width="128" height="128" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#7c3aed"/>
+              <stop offset="100%" stop-color="#a78bfa"/>
+            </linearGradient>
+          </defs>
+          <rect width="64" height="64" rx="14" fill="url(#g1)"/>
+          <text x="32" y="46" font-family="system-ui, sans-serif" font-weight="900"
+            font-size="38" fill="white" text-anchor="middle" letter-spacing="-2">M</text>
+        </svg>
+        <span class="size-label">128px</span>
+      </div>
+      <div class="size-wrap">
+        <svg width="32" height="32" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g1b" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#7c3aed"/>
+              <stop offset="100%" stop-color="#a78bfa"/>
+            </linearGradient>
+          </defs>
+          <rect width="64" height="64" rx="14" fill="url(#g1b)"/>
+          <text x="32" y="46" font-family="system-ui" font-weight="900"
+            font-size="38" fill="white" text-anchor="middle" letter-spacing="-2">M</text>
+        </svg>
+        <span class="size-label">32px</span>
+      </div>
+      <div class="size-wrap">
+        <svg width="16" height="16" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g1c" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#7c3aed"/>
+              <stop offset="100%" stop-color="#a78bfa"/>
+            </linearGradient>
+          </defs>
+          <rect width="64" height="64" rx="14" fill="url(#g1c)"/>
+          <text x="32" y="46" font-family="system-ui" font-weight="900"
+            font-size="38" fill="white" text-anchor="middle" letter-spacing="-2">M</text>
+        </svg>
+        <span class="size-label">16px</span>
+      </div>
+    </div>
+    <div class="tab-mock">
+      <svg width="16" height="16" viewBox="0 0 64 64">
+        <defs><linearGradient id="g1d" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient></defs>
+        <rect width="64" height="64" rx="14" fill="url(#g1d)"/>
+        <text x="32" y="46" font-family="system-ui" font-weight="900" font-size="38" fill="white" text-anchor="middle" letter-spacing="-2">M</text>
+      </svg>
+      MatchMyResumes – ATS Resum…
+    </div>
+    <div class="label">Option 1 — Bold M</div>
+    <div class="desc">Clean monogram. Minimal, versatile, easy to read at all sizes.</div>
+  </div>
+
+  <!-- Option 2: Resume + checkmark -->
+  <div class="item">
+    <div class="sizes">
+      <div class="size-wrap">
+        <svg width="128" height="128" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#1e1030"/>
+              <stop offset="100%" stop-color="#2d1b69"/>
+            </linearGradient>
+          </defs>
+          <rect width="64" height="64" rx="14" fill="url(#g2)"/>
+          <!-- Document shape -->
+          <rect x="14" y="10" width="30" height="38" rx="4" fill="none" stroke="#a78bfa" stroke-width="3"/>
+          <rect x="14" y="10" width="30" height="38" rx="4" fill="rgba(139,92,246,0.1)"/>
+          <!-- Lines -->
+          <line x1="20" y1="24" x2="38" y2="24" stroke="rgba(167,139,250,0.4)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="20" y1="30" x2="38" y2="30" stroke="rgba(167,139,250,0.4)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="20" y1="36" x2="30" y2="36" stroke="rgba(167,139,250,0.4)" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Checkmark badge -->
+          <circle cx="42" cy="44" r="11" fill="#0D0D14"/>
+          <circle cx="42" cy="44" r="10" fill="#10b981"/>
+          <polyline points="36,44 40,48 48,39" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="size-label">128px</span>
+      </div>
+      <div class="size-wrap">
+        <svg width="32" height="32" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="g2b" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1e1030"/><stop offset="100%" stop-color="#2d1b69"/></linearGradient></defs>
+          <rect width="64" height="64" rx="14" fill="url(#g2b)"/>
+          <rect x="14" y="10" width="30" height="38" rx="4" fill="none" stroke="#a78bfa" stroke-width="3"/>
+          <rect x="14" y="10" width="30" height="38" rx="4" fill="rgba(139,92,246,0.1)"/>
+          <line x1="20" y1="24" x2="38" y2="24" stroke="rgba(167,139,250,0.4)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="20" y1="30" x2="38" y2="30" stroke="rgba(167,139,250,0.4)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="20" y1="36" x2="30" y2="36" stroke="rgba(167,139,250,0.4)" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="42" cy="44" r="11" fill="#0D0D14"/>
+          <circle cx="42" cy="44" r="10" fill="#10b981"/>
+          <polyline points="36,44 40,48 48,39" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="size-label">32px</span>
+      </div>
+      <div class="size-wrap">
+        <svg width="16" height="16" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="g2c" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1e1030"/><stop offset="100%" stop-color="#2d1b69"/></linearGradient></defs>
+          <rect width="64" height="64" rx="14" fill="url(#g2c)"/>
+          <rect x="14" y="10" width="30" height="38" rx="4" fill="none" stroke="#a78bfa" stroke-width="3"/>
+          <rect x="14" y="10" width="30" height="38" rx="4" fill="rgba(139,92,246,0.1)"/>
+          <line x1="20" y1="24" x2="38" y2="24" stroke="rgba(167,139,250,0.4)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="20" y1="30" x2="38" y2="30" stroke="rgba(167,139,250,0.4)" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="42" cy="44" r="11" fill="#0D0D14"/>
+          <circle cx="42" cy="44" r="10" fill="#10b981"/>
+          <polyline points="36,44 40,48 48,39" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="size-label">16px</span>
+      </div>
+    </div>
+    <div class="tab-mock">
+      <svg width="16" height="16" viewBox="0 0 64 64">
+        <defs><linearGradient id="g2d" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1e1030"/><stop offset="100%" stop-color="#2d1b69"/></linearGradient></defs>
+        <rect width="64" height="64" rx="14" fill="url(#g2d)"/>
+        <rect x="14" y="10" width="30" height="38" rx="4" fill="none" stroke="#a78bfa" stroke-width="3"/>
+        <rect x="14" y="10" width="30" height="38" rx="4" fill="rgba(139,92,246,0.1)"/>
+        <line x1="20" y1="24" x2="38" y2="24" stroke="rgba(167,139,250,0.4)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="20" y1="30" x2="38" y2="30" stroke="rgba(167,139,250,0.4)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="42" cy="44" r="11" fill="#0D0D14"/>
+        <circle cx="42" cy="44" r="10" fill="#10b981"/>
+        <polyline points="36,44 40,48 48,39" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      MatchMyResumes – ATS Resum…
+    </div>
+    <div class="label">Option 2 — Resume + Check</div>
+    <div class="desc">Instantly communicates "resume + approval". Product-clear.</div>
+  </div>
+
+  <!-- Option 3: Score arc -->
+  <div class="item">
+    <div class="sizes">
+      <div class="size-wrap">
+        <svg width="128" height="128" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#7c3aed"/>
+              <stop offset="100%" stop-color="#6d28d9"/>
+            </linearGradient>
+            <linearGradient id="arc3" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#a78bfa"/>
+              <stop offset="100%" stop-color="#10b981"/>
+            </linearGradient>
+          </defs>
+          <rect width="64" height="64" rx="14" fill="#0D0D14"/>
+          <!-- Track arc -->
+          <circle cx="32" cy="34" r="20" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="5"
+            stroke-dasharray="125.7" stroke-dashoffset="31.4"
+            transform="rotate(-210 32 34)" stroke-linecap="round"/>
+          <!-- Score arc -->
+          <circle cx="32" cy="34" r="20" fill="none" stroke="url(#arc3)" stroke-width="5"
+            stroke-dasharray="125.7" stroke-dashoffset="44"
+            transform="rotate(-210 32 34)" stroke-linecap="round"/>
+          <!-- Center number -->
+          <text x="32" y="39" font-family="system-ui" font-weight="900" font-size="16"
+            fill="white" text-anchor="middle">87</text>
+        </svg>
+        <span class="size-label">128px</span>
+      </div>
+      <div class="size-wrap">
+        <svg width="32" height="32" viewBox="0 0 64 64">
+          <defs>
+            <linearGradient id="arc3b" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#10b981"/></linearGradient>
+          </defs>
+          <rect width="64" height="64" rx="14" fill="#0D0D14"/>
+          <circle cx="32" cy="34" r="20" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="5" stroke-dasharray="125.7" stroke-dashoffset="31.4" transform="rotate(-210 32 34)" stroke-linecap="round"/>
+          <circle cx="32" cy="34" r="20" fill="none" stroke="url(#arc3b)" stroke-width="5" stroke-dasharray="125.7" stroke-dashoffset="44" transform="rotate(-210 32 34)" stroke-linecap="round"/>
+          <text x="32" y="39" font-family="system-ui" font-weight="900" font-size="16" fill="white" text-anchor="middle">87</text>
+        </svg>
+        <span class="size-label">32px</span>
+      </div>
+      <div class="size-wrap">
+        <svg width="16" height="16" viewBox="0 0 64 64">
+          <defs>
+            <linearGradient id="arc3c" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#10b981"/></linearGradient>
+          </defs>
+          <rect width="64" height="64" rx="14" fill="#0D0D14"/>
+          <circle cx="32" cy="34" r="20" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="5" stroke-dasharray="125.7" stroke-dashoffset="31.4" transform="rotate(-210 32 34)" stroke-linecap="round"/>
+          <circle cx="32" cy="34" r="20" fill="none" stroke="url(#arc3c)" stroke-width="5" stroke-dasharray="125.7" stroke-dashoffset="44" transform="rotate(-210 32 34)" stroke-linecap="round"/>
+          <text x="32" y="39" font-family="system-ui" font-weight="900" font-size="16" fill="white" text-anchor="middle">87</text>
+        </svg>
+        <span class="size-label">16px</span>
+      </div>
+    </div>
+    <div class="tab-mock">
+      <svg width="16" height="16" viewBox="0 0 64 64">
+        <defs><linearGradient id="arc3d" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#10b981"/></linearGradient></defs>
+        <rect width="64" height="64" rx="14" fill="#0D0D14"/>
+        <circle cx="32" cy="34" r="20" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="5" stroke-dasharray="125.7" stroke-dashoffset="31.4" transform="rotate(-210 32 34)" stroke-linecap="round"/>
+        <circle cx="32" cy="34" r="20" fill="none" stroke="url(#arc3d)" stroke-width="5" stroke-dasharray="125.7" stroke-dashoffset="44" transform="rotate(-210 32 34)" stroke-linecap="round"/>
+        <text x="32" y="39" font-family="system-ui" font-weight="900" font-size="16" fill="white" text-anchor="middle">87</text>
+      </svg>
+      MatchMyResumes – ATS Resum…
+    </div>
+    <div class="label">Option 3 — Score Arc</div>
+    <div class="desc">Mirrors the in-app score circle. Unique, product-forward.</div>
+  </div>
+
+  <!-- Option 4: Target / bullseye -->
+  <div class="item">
+    <div class="sizes">
+      <div class="size-wrap">
+        <svg width="128" height="128" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g4" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#4c1d95"/>
+              <stop offset="100%" stop-color="#7c3aed"/>
+            </linearGradient>
+          </defs>
+          <rect width="64" height="64" rx="14" fill="url(#g4)"/>
+          <circle cx="32" cy="32" r="22" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+          <circle cx="32" cy="32" r="15" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+          <circle cx="32" cy="32" r="8" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+          <circle cx="32" cy="32" r="3.5" fill="white"/>
+          <!-- Arrow -->
+          <line x1="46" y1="18" x2="35" y2="29" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          <polygon points="46,18 38,17 47,26" fill="white"/>
+        </svg>
+        <span class="size-label">128px</span>
+      </div>
+      <div class="size-wrap">
+        <svg width="32" height="32" viewBox="0 0 64 64">
+          <defs><linearGradient id="g4b" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4c1d95"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient></defs>
+          <rect width="64" height="64" rx="14" fill="url(#g4b)"/>
+          <circle cx="32" cy="32" r="22" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+          <circle cx="32" cy="32" r="15" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+          <circle cx="32" cy="32" r="8" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+          <circle cx="32" cy="32" r="3.5" fill="white"/>
+          <line x1="46" y1="18" x2="35" y2="29" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          <polygon points="46,18 38,17 47,26" fill="white"/>
+        </svg>
+        <span class="size-label">32px</span>
+      </div>
+      <div class="size-wrap">
+        <svg width="16" height="16" viewBox="0 0 64 64">
+          <defs><linearGradient id="g4c" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4c1d95"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient></defs>
+          <rect width="64" height="64" rx="14" fill="url(#g4c)"/>
+          <circle cx="32" cy="32" r="22" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+          <circle cx="32" cy="32" r="15" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+          <circle cx="32" cy="32" r="8" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+          <circle cx="32" cy="32" r="3.5" fill="white"/>
+          <line x1="46" y1="18" x2="35" y2="29" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          <polygon points="46,18 38,17 47,26" fill="white"/>
+        </svg>
+        <span class="size-label">16px</span>
+      </div>
+    </div>
+    <div class="tab-mock">
+      <svg width="16" height="16" viewBox="0 0 64 64">
+        <defs><linearGradient id="g4d" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4c1d95"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient></defs>
+        <rect width="64" height="64" rx="14" fill="url(#g4d)"/>
+        <circle cx="32" cy="32" r="22" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+        <circle cx="32" cy="32" r="15" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+        <circle cx="32" cy="32" r="8" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+        <circle cx="32" cy="32" r="3.5" fill="white"/>
+        <line x1="46" y1="18" x2="35" y2="29" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+        <polygon points="46,18 38,17 47,26" fill="white"/>
+      </svg>
+      MatchMyResumes – ATS Resum…
+    </div>
+    <div class="label">Option 4 — Target</div>
+    <div class="desc">"Hit your target role." Memorable metaphor for job searching.</div>
+  </div>
+
+  <!-- Option 5: Bar chart bars -->
+  <div class="item">
+    <div class="sizes">
+      <div class="size-wrap">
+        <svg width="128" height="128" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g5" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0D0D14"/>
+              <stop offset="100%" stop-color="#1a1030"/>
+            </linearGradient>
+            <linearGradient id="bar5a" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#a78bfa"/>
+              <stop offset="100%" stop-color="#7c3aed"/>
+            </linearGradient>
+            <linearGradient id="bar5b" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#818cf8"/>
+              <stop offset="100%" stop-color="#6366f1"/>
+            </linearGradient>
+            <linearGradient id="bar5c" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#34d399"/>
+              <stop offset="100%" stop-color="#10b981"/>
+            </linearGradient>
+          </defs>
+          <rect width="64" height="64" rx="14" fill="url(#g5)"/>
+          <!-- Baseline -->
+          <line x1="10" y1="50" x2="54" y2="50" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+          <!-- Bars -->
+          <rect x="12" y="28" width="9" height="22" rx="3" fill="url(#bar5b)"/>
+          <rect x="25" y="18" width="9" height="32" rx="3" fill="url(#bar5a)"/>
+          <rect x="38" y="23" width="9" height="27" rx="3" fill="url(#bar5c)"/>
+          <!-- Sparkle dot -->
+          <circle cx="29.5" cy="15" r="3" fill="white" opacity="0.9"/>
+        </svg>
+        <span class="size-label">128px</span>
+      </div>
+      <div class="size-wrap">
+        <svg width="32" height="32" viewBox="0 0 64 64">
+          <defs>
+            <linearGradient id="g5b2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0D0D14"/><stop offset="100%" stop-color="#1a1030"/></linearGradient>
+            <linearGradient id="bar5a2" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient>
+            <linearGradient id="bar5b2" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#6366f1"/></linearGradient>
+            <linearGradient id="bar5c2" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#10b981"/></linearGradient>
+          </defs>
+          <rect width="64" height="64" rx="14" fill="url(#g5b2)"/>
+          <line x1="10" y1="50" x2="54" y2="50" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+          <rect x="12" y="28" width="9" height="22" rx="3" fill="url(#bar5b2)"/>
+          <rect x="25" y="18" width="9" height="32" rx="3" fill="url(#bar5a2)"/>
+          <rect x="38" y="23" width="9" height="27" rx="3" fill="url(#bar5c2)"/>
+          <circle cx="29.5" cy="15" r="3" fill="white" opacity="0.9"/>
+        </svg>
+        <span class="size-label">32px</span>
+      </div>
+      <div class="size-wrap">
+        <svg width="16" height="16" viewBox="0 0 64 64">
+          <defs>
+            <linearGradient id="g5c2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0D0D14"/><stop offset="100%" stop-color="#1a1030"/></linearGradient>
+            <linearGradient id="bar5a3" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient>
+            <linearGradient id="bar5b3" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#6366f1"/></linearGradient>
+            <linearGradient id="bar5c3" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#10b981"/></linearGradient>
+          </defs>
+          <rect width="64" height="64" rx="14" fill="url(#g5c2)"/>
+          <line x1="10" y1="50" x2="54" y2="50" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+          <rect x="12" y="28" width="9" height="22" rx="3" fill="url(#bar5b3)"/>
+          <rect x="25" y="18" width="9" height="32" rx="3" fill="url(#bar5a3)"/>
+          <rect x="38" y="23" width="9" height="27" rx="3" fill="url(#bar5c3)"/>
+          <circle cx="29.5" cy="15" r="3" fill="white" opacity="0.9"/>
+        </svg>
+        <span class="size-label">16px</span>
+      </div>
+    </div>
+    <div class="tab-mock">
+      <svg width="16" height="16" viewBox="0 0 64 64">
+        <defs>
+          <linearGradient id="g5d" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0D0D14"/><stop offset="100%" stop-color="#1a1030"/></linearGradient>
+          <linearGradient id="bar5a4" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient>
+          <linearGradient id="bar5b4" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#6366f1"/></linearGradient>
+          <linearGradient id="bar5c4" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#10b981"/></linearGradient>
+        </defs>
+        <rect width="64" height="64" rx="14" fill="url(#g5d)"/>
+        <line x1="10" y1="50" x2="54" y2="50" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+        <rect x="12" y="28" width="9" height="22" rx="3" fill="url(#bar5b4)"/>
+        <rect x="25" y="18" width="9" height="32" rx="3" fill="url(#bar5a4)"/>
+        <rect x="38" y="23" width="9" height="27" rx="3" fill="url(#bar5c4)"/>
+        <circle cx="29.5" cy="15" r="3" fill="white" opacity="0.9"/>
+      </svg>
+      MatchMyResumes – ATS Resum…
+    </div>
+    <div class="label">Option 5 — Score Bars</div>
+    <div class="desc">Analytics-forward. Matches the bar charts inside the app.</div>
+  </div>
+
+</div>
+</body>
+</html>

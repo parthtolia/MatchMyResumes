@@ -107,6 +107,13 @@ export function GlobalDataProvider({ children }: { children: React.ReactNode }) 
         refreshData()
     }, [isLoaded, isSignedIn, userId])
 
+    // Re-fetch when plan is updated (e.g. after Stripe payment)
+    useEffect(() => {
+        const handler = () => refreshData()
+        window.addEventListener("planUpdated", handler)
+        return () => window.removeEventListener("planUpdated", handler)
+    }, [isLoaded, isSignedIn])
+
     return (
         <GlobalDataContext.Provider value={{ resumes, jobs, loadingData, plan, loadingPlan, refreshData }}>
             {children}
