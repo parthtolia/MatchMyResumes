@@ -44,21 +44,28 @@ def _use_groq() -> bool:
     return bool(settings.groq_api_key)
 
 
-RESUME_OPTIMIZER_SYSTEM_PROMPT = """You are an expert ATS resume optimization specialist. Your role is to improve resumes for ATS compatibility without fabricating experience.
+RESUME_OPTIMIZER_SYSTEM_PROMPT = """You are an expert ATS resume optimization specialist. Your #1 goal is to MAXIMIZE the ATS keyword match score between the resume and the job description while keeping all content truthful.
 
-Rules:
-1. Do NOT invent or fabricate any experience, skills, or achievements
+KEYWORD INTEGRATION (HIGHEST PRIORITY):
+- You will receive a list of MISSING KEYWORDS that the resume currently lacks. Your primary task is to weave as many of these exact keywords as possible into the resume.
+- Use the EXACT keyword spelling/phrasing (e.g., if the keyword is "ci/cd", write "CI/CD" — not "continuous integration" alone).
+- Place keywords in the SKILLS section, bullet points, summary, and project descriptions — wherever they fit naturally.
+- If the candidate has related experience but used different terminology, REPLACE with the JD's exact term (e.g., "wrote tests" → "implemented test-driven development (TDD)").
+- Add a comprehensive SKILLS section (or expand the existing one) that lists ALL relevant technical skills from the JD that the candidate plausibly has based on their experience.
+- For each work experience bullet, check if any missing keyword can be truthfully woven in.
+
+OTHER RULES:
+1. Do NOT invent or fabricate any experience, skills, or achievements — but DO rephrase existing content to use JD terminology
 2. Improve clarity and impact of existing content
 3. Add measurable impact where strongly implied (e.g., "managed team" → "managed team of 5")
-4. naturally integrate missing keywords from the job description
-5. Keep ATS-safe formatting: no tables, no columns, standard section headers
-6. Use strong action verbs (achieved, delivered, developed, led, optimized)
-7. Improve bullet point structure for readability
-8. CRITICAL: Return the ENTIRE optimized resume. DO NOT truncate, summarize, or omit any sections (Experience, Education, etc.). Every single role from the original must be present in the output.
-9. ABSOLUTE RULE: You MUST output the EXACT SAME number of work experiences as the original resume. If the original has 5 jobs spanning 10 years, your output MUST have exactly 5 jobs spanning 10 years. Under NO circumstances are you allowed to delete, combine, or shorten the timeline of a candidate's career history.
-10. ABSOLUTE RULE: YOU MUST KEEP THE "EDUCATION", "SKILLS", "PROJECTS" (if present), and "SUMMARY" SECTIONS. Do not delete them.
-11. If a section exists in the original resume, it MUST exist in your output. You must retain every single previous company name, role title, date range, and education degree.
-12. ANTI-PLACEHOLDER RULE: NEVER output text like "(Education details not provided...)". You have the full text. If a section like Education was provided, transcribe it exactly as-is if you determine no ATS enhancements are needed. DO NOT hallucinate that data is missing.
+4. Keep ATS-safe formatting: no tables, no columns, standard section headers
+5. Use strong action verbs (achieved, delivered, developed, led, optimized)
+6. Improve bullet point structure for readability
+7. CRITICAL: Return the ENTIRE optimized resume. DO NOT truncate, summarize, or omit any sections (Experience, Education, etc.). Every single role from the original must be present in the output.
+8. ABSOLUTE RULE: You MUST output the EXACT SAME number of work experiences as the original resume. If the original has 5 jobs spanning 10 years, your output MUST have exactly 5 jobs spanning 10 years. Under NO circumstances are you allowed to delete, combine, or shorten the timeline of a candidate's career history.
+9. ABSOLUTE RULE: YOU MUST KEEP THE "EDUCATION", "SKILLS", "PROJECTS" (if present), and "SUMMARY" SECTIONS. Do not delete them.
+10. If a section exists in the original resume, it MUST exist in your output. You must retain every single previous company name, role title, date range, and education degree.
+11. ANTI-PLACEHOLDER RULE: NEVER output text like "(Education details not provided...)". You have the full text. If a section like Education was provided, transcribe it exactly as-is if you determine no ATS enhancements are needed. DO NOT hallucinate that data is missing.
 
 Return a JSON object with this exact structure:
 {
@@ -222,13 +229,17 @@ async def optimize_resume(
     missing_keywords: List[str],
 ) -> dict:
     """Optimize a resume for a specific job description (Groq → Gemini fallback)."""
-    user_content = f"""MISSING KEYWORDS TO INTEGRATE (only if relevant):
-{', '.join((missing_keywords or [])[:15])}
+    kw_list = (missing_keywords or [])[:20]
+    kw_section = "\n".join(f"  - {kw}" for kw in kw_list) if kw_list else "  (none provided)"
+    user_content = f"""=== MISSING KEYWORDS (MUST integrate as many as possible using EXACT spelling) ===
+{kw_section}
 
-JOB DESCRIPTION:
+Your goal: integrate every keyword above into the resume where truthfully applicable. Each keyword that appears as an exact match in the output directly increases the candidate's ATS score. Aim for 80%+ keyword coverage.
+
+=== JOB DESCRIPTION ===
 {str(jd_text)[:3000]}
 
-CURRENT RESUME:
+=== CURRENT RESUME (optimize this) ===
 {str(resume_text)[:10000]}"""
 
     if _use_groq():

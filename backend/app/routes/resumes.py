@@ -395,6 +395,12 @@ async def optimize_resume_endpoint(
     else:
         raw_jd_text = payload.jd_text
         job_title = "custom job"
+
+    # If no prior score exists, compute missing keywords on the fly
+    if not missing_keywords and raw_jd_text:
+        from app.scoring.ats_scorer import compute_keyword_score
+        _, _, missing_keywords = await compute_keyword_score(resume.raw_text, raw_jd_text)
+
     # Run AI optimization
     try:
         result = await optimize_resume(
@@ -408,24 +414,32 @@ async def optimize_resume_endpoint(
     new_resume_id = None
     if payload.save_as_version:
         tag = payload.version_tag or f"Optimized for {job_title}"
-        
-        # Calculate version number for this specific root resume
+
+        # Find the root resume to count ALL versions and get the original filename
+        root_id = resume.parent_resume_id or resume.id
+        root_resume = resume
+        if resume.parent_resume_id:
+            root_result = await db.execute(select(Resume).where(Resume.id == root_id))
+            root_resume = root_result.scalar_one_or_none() or resume
+
+        # Calculate version number across ALL versions of this root resume
         count_result = await db.execute(
-            select(func.count(Resume.id)).where(Resume.parent_resume_id == resume.id)
+            select(func.count(Resume.id)).where(Resume.parent_resume_id == root_id)
         )
         version_count = count_result.scalar() or 0
         new_version = version_count + 1
-        
+
         # Clean JD title for filename (remove invalid chars)
         clean_jd_title = "".join(c for c in job_title if c.isalnum() or c in " -_").strip().replace(" ", "_").replace("__", "_")
         if not clean_jd_title:
             clean_jd_title = "job"
-            
-        # Extract base and extension
-        parts = resume.filename.rsplit('.', 1)
+
+        # Always use the ROOT resume's original filename to avoid suffix duplication
+        # e.g. "Mayuri_Buran.pdf" stays as base, not "Mayuri_Buran_GenAI_Engineer_v1.pdf"
+        parts = root_resume.filename.rsplit('.', 1)
         base_name = parts[0]
         ext = parts[1] if len(parts) > 1 else "txt"
-        
+
         new_filename = f"{base_name}_{clean_jd_title}_v{new_version}.{ext}"
 
         new_embedding = await generate_embedding(result.get("optimized_text", ""))
@@ -439,7 +453,7 @@ async def optimize_resume_endpoint(
             embedding=new_embedding,
             version_tag=tag,
             is_optimized=True,
-            parent_resume_id=resume.id,
+            parent_resume_id=root_id,
         )
         db.add(new_resume)
         await db.commit()
