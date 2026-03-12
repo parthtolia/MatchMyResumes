@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { FileText, Upload, Trash2, Tag, Loader2, CheckCircle2, AlertTriangle, Check } from "lucide-react"
+import { FileText, Upload, Trash2, Tag, Loader2, CheckCircle2, AlertTriangle, Check, Copy, Download } from "lucide-react"
 import { useDropzone } from "react-dropzone"
 import api from "@/lib/api"
 import { formatDate } from "@/lib/utils"
@@ -80,6 +80,51 @@ export default function ResumesPage() {
 
     // Delete modal
     const [deleteModal, setDeleteModal] = useState<string[] | null>(null)
+
+    // Copy state
+    const [copied, setCopied] = useState(false)
+
+    const copyText = () => {
+        if (!selected?.raw_text) return
+        navigator.clipboard.writeText(selected.raw_text)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+    }
+
+    const downloadPdf = async () => {
+        if (!selected?.raw_text) return
+        try {
+            const { jsPDF } = await import("jspdf")
+            const doc = new jsPDF({ format: "letter" })
+            doc.setFont("helvetica")
+            doc.setFontSize(10)
+            const margin = 20
+            const pageWidth = doc.internal.pageSize.getWidth()
+            const pageHeight = doc.internal.pageSize.getHeight()
+            const maxLineWidth = pageWidth - margin * 2
+            const lines = doc.splitTextToSize(selected.raw_text, maxLineWidth)
+            let y = margin
+            for (const line of lines) {
+                if (y > pageHeight - margin) { doc.addPage(); y = margin }
+                doc.text(line, margin, y)
+                y += 4.5
+            }
+            const name = selected.filename?.replace(/\.[^.]+$/, "") || "resume"
+            doc.save(`${name}.pdf`)
+        } catch { alert("Failed to generate PDF") }
+    }
+
+    const downloadDocx = () => {
+        if (!selected?.raw_text) return
+        const name = selected.filename?.replace(/\.[^.]+$/, "") || "resume"
+        // Build a minimal .doc (HTML-based) that Word can open
+        const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><style>body{font-family:Calibri,sans-serif;font-size:11pt;line-height:1.5;white-space:pre-wrap;}</style></head><body>${selected.raw_text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>")}</body></html>`
+        const blob = new Blob([html], { type: "application/msword" })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url; a.download = `${name}.docx`; a.click()
+        URL.revokeObjectURL(url)
+    }
 
     // Keep local list in sync with global, always filtering out already-deleted IDs
     useEffect(() => {
@@ -344,10 +389,26 @@ export default function ResumesPage() {
                 <div className="lg:col-span-2">
                     {selected && !selectMode ? (
                         <div className="glass p-6 h-full">
-                            <h3 className="font-semibold text-white mb-1">{selected.filename}</h3>
-                            <p className="text-xs text-gray-500 mb-4">{formatDate(selected.created_at)}</p>
+                            <div className="flex items-start justify-between gap-3 mb-1">
+                                <div>
+                                    <h3 className="font-semibold text-white">{selected.filename}</h3>
+                                    <p className="text-xs text-gray-500 mt-1">{formatDate(selected.created_at)}</p>
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                    <button onClick={copyText} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs transition-colors" title="Copy text">
+                                        {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                                        {copied ? "Copied!" : "Copy"}
+                                    </button>
+                                    <button onClick={downloadPdf} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs transition-colors" title="Download as PDF">
+                                        <Download size={14} /> PDF
+                                    </button>
+                                    <button onClick={downloadDocx} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs transition-colors" title="Download as DOCX">
+                                        <Download size={14} /> DOCX
+                                    </button>
+                                </div>
+                            </div>
                             {selected.structured_json && (
-                                <div className="space-y-3 mb-4">
+                                <div className="space-y-3 mb-4 mt-4">
                                     {Object.entries(selected.structured_json).filter(([, v]) => v).map(([k, v]) => (
                                         <div key={k}>
                                             <span className="text-xs font-semibold text-violet-400 uppercase tracking-wider">{k}</span>

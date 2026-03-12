@@ -69,6 +69,7 @@ function ScanPageContent() {
     const [selectedResumeId, setSelectedResumeId] = useState("")
     const [jdInputType, setJdInputType] = useState<"saved" | "text">("saved")
     const [selectedJdId, setSelectedJdId] = useState("")
+    const [usedJdTitle, setUsedJdTitle] = useState("")
     const [resumeSource, setResumeSource] = useState<"upload" | "select">("upload")
     const searchParams = useSearchParams()
 
@@ -149,7 +150,11 @@ function ScanPageContent() {
             if (jdInputType === "text") {
                 const jdRes = await api.post("/api/jobs/", { raw_text: jdText, title: jdTitle })
                 actualJdId = jdRes.data.id
+                setUsedJdTitle(jdTitle)
                 refreshData()
+            } else {
+                const selectedJob = jobs.find(j => j.id === selectedJdId)
+                setUsedJdTitle(selectedJob?.title || `JD ${selectedJdId.slice(0, 8)}`)
             }
             const scoreRes = await api.post("/api/resumes/score", { resume_id: resumeId, jd_id: actualJdId })
             setResult(scoreRes.data)
@@ -258,16 +263,18 @@ function ScanPageContent() {
 
                         <div className="flex flex-col gap-4">
                             {jobs.length > 0 && (
-                                <div className={`p-4 rounded-xl border transition-all ${jdInputType === "saved" ? "bg-white/5 border-white/10" : "border-white/5 opacity-60 hover:opacity-100"}`}>
+                                <div className={`p-4 rounded-xl border transition-all overflow-hidden ${jdInputType === "saved" ? "bg-white/5 border-white/10" : "border-white/5 opacity-60 hover:opacity-100"}`}>
                                     <label className="flex items-center gap-3 cursor-pointer mb-3">
                                         <input type="radio" name="jd_type" checked={jdInputType === "saved"} onChange={() => setJdInputType("saved")} className="accent-violet-500 w-4 h-4 cursor-pointer" />
                                         <span className="text-sm font-medium text-white select-none">Select a Saved Job Description</span>
                                     </label>
                                     {jdInputType === "saved" && (
-                                        <select className="input-styled ml-7 w-[calc(100%-1.75rem)]" value={selectedJdId} onChange={e => setSelectedJdId(e.target.value)}>
-                                            <option value="">Choose a job...</option>
-                                            {jobs.map(j => <option key={j.id} value={j.id}>{j.title || `JD ${j.id.slice(0, 8)}`}</option>)}
-                                        </select>
+                                        <div className="pl-7 pr-0">
+                                            <select className="input-styled w-full" value={selectedJdId} onChange={e => setSelectedJdId(e.target.value)}>
+                                                <option value="">Choose a job...</option>
+                                                {jobs.map(j => <option key={j.id} value={j.id}>{j.title || `JD ${j.id.slice(0, 8)}`}</option>)}
+                                            </select>
+                                        </div>
                                     )}
                                 </div>
                             )}
@@ -325,6 +332,20 @@ function ScanPageContent() {
                 {/* Step 3: Result */}
                 {step === "result" && result && (
                     <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                        {/* Selected resume & JD info */}
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-violet-500/10 border border-violet-500/20 flex-1 min-w-0">
+                                <FileText size={16} className="text-violet-400 shrink-0" />
+                                <span className="text-xs text-gray-400">Resume:</span>
+                                <span className="text-sm text-white font-medium truncate">{resumeName}</span>
+                            </div>
+                            <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex-1 min-w-0">
+                                <BarChart3 size={16} className="text-emerald-400 shrink-0" />
+                                <span className="text-xs text-gray-400">Job:</span>
+                                <span className="text-sm text-white font-medium truncate">{usedJdTitle}</span>
+                            </div>
+                        </div>
+
                         <div className="glass p-8">
                             <div className="flex flex-col md:flex-row items-center gap-8">
                                 <ScoreCircle score={result.total_score} size={180} />

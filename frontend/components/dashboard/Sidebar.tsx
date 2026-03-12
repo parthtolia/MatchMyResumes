@@ -90,10 +90,10 @@ export default function DashboardSidebar({ onClose }: { onClose?: () => void } =
                         </div>
                     )}
                     <div className="flex flex-col min-w-0">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 max-w-full">
                             <span className="text-sm font-semibold text-white truncate">{displayName}</span>
-                            {plan !== "free" && (
-                                <span className={`px-1.5 py-[1px] rounded text-[9px] font-bold uppercase tracking-wider ${plan === 'premium' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-violet-500/20 text-violet-400'}`}>
+                            {plan && plan !== "free" && (
+                                <span className={`shrink-0 px-1.5 py-[1px] rounded text-[9px] font-bold uppercase tracking-wider ${plan === 'premium' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-violet-500/20 text-violet-400'}`}>
                                     {plan}
                                 </span>
                             )}

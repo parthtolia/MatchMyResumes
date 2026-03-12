@@ -2,7 +2,7 @@
 import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
-import { Zap, Loader2, Copy, Check, ArrowRight, Lock } from "lucide-react"
+import { Zap, Loader2, Copy, Check, ArrowRight, Lock, Download } from "lucide-react"
 import api from "@/lib/api"
 import { useGlobalData } from "@/components/dashboard/GlobalDataProvider"
 
@@ -77,6 +77,42 @@ function OptimizeContent() {
         navigator.clipboard.writeText(result?.optimized_text || "")
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
+    }
+
+    const downloadOptimizedPdf = async () => {
+        if (!result?.optimized_text) return
+        try {
+            const { jsPDF } = await import("jspdf")
+            const doc = new jsPDF({ format: "letter" })
+            doc.setFont("helvetica")
+            doc.setFontSize(10)
+            const margin = 20
+            const pageWidth = doc.internal.pageSize.getWidth()
+            const pageHeight = doc.internal.pageSize.getHeight()
+            const maxLineWidth = pageWidth - margin * 2
+            const lines = doc.splitTextToSize(result.optimized_text, maxLineWidth)
+            let y = margin
+            for (const line of lines) {
+                if (y > pageHeight - margin) { doc.addPage(); y = margin }
+                doc.text(line, margin, y)
+                y += 4.5
+            }
+            const selectedResume = resumes.find(r => r.id === resumeId)
+            const name = selectedResume?.filename?.replace(/\.[^.]+$/, "") || "resume"
+            doc.save(`${name}_optimized.pdf`)
+        } catch { alert("Failed to generate PDF") }
+    }
+
+    const downloadOptimizedDocx = () => {
+        if (!result?.optimized_text) return
+        const selectedResume = resumes.find(r => r.id === resumeId)
+        const name = selectedResume?.filename?.replace(/\.[^.]+$/, "") || "resume"
+        const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><style>body{font-family:Calibri,sans-serif;font-size:11pt;line-height:1.5;white-space:pre-wrap;}</style></head><body>${result.optimized_text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>")}</body></html>`
+        const blob = new Blob([html], { type: "application/msword" })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url; a.download = `${name}_optimized.docx`; a.click()
+        URL.revokeObjectURL(url)
     }
 
     // Auto-optimize if navigating from JD Match
@@ -222,12 +258,20 @@ function OptimizeContent() {
                         </div>
 
                         <div className="glass p-6 flex flex-col h-full ring-1 ring-violet-500/20">
-                            <div className="flex items-center justify-between mb-3">
-                                <h3 className="font-semibold text-white text-violet-300">Optimized Resume</h3>
-                                <button onClick={copy} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs">
-                                    {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
-                                    {copied ? "Copied!" : "Copy Text"}
-                                </button>
+                            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                                <h3 className="font-semibold text-violet-300">Optimized Resume</h3>
+                                <div className="flex items-center gap-2">
+                                    <button onClick={copy} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs transition-colors">
+                                        {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                                        {copied ? "Copied!" : "Copy"}
+                                    </button>
+                                    <button onClick={downloadOptimizedPdf} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs transition-colors" title="Download as PDF">
+                                        <Download size={14} /> PDF
+                                    </button>
+                                    <button onClick={downloadOptimizedDocx} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs transition-colors" title="Download as DOCX">
+                                        <Download size={14} /> DOCX
+                                    </button>
+                                </div>
                             </div>
                             <textarea
                                 className="input-styled resize-none font-mono text-xs leading-relaxed flex-1 min-h-[500px]"
