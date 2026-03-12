@@ -277,6 +277,7 @@ export default function LandingSections() {
         <div className="flex justify-center gap-6 mt-4 text-sm text-gray-400">
           <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
           <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+          <Link href="/resume-templates" className="hover:text-white transition-colors">Templates</Link>
           <Link href="mailto:support@matchmyresumes.com" className="hover:text-white transition-colors">Contact</Link>
         </div>
       </footer>
