@@ -98,7 +98,7 @@ export default function ResumeTemplatesPage() {
                 placeholder="Search templates..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="input-styled pl-9 py-2.5 text-sm"
+                className="input-styled pl-10 py-2.5 text-sm"
               />
             </div>
           </div>
