@@ -90,7 +90,7 @@ export default function TemplateCard({ template }: { template: ResumeTemplate })
 
         {/* CTA */}
         <Link
-          href="/sign-up"
+          href="/dashboard/cv-analysis"
           className="mt-3 text-center text-xs text-violet-400 hover:text-violet-300 transition-colors flex items-center justify-center gap-1"
         >
           Check your ATS score after editing

@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation"
 import { UserButton, useUser as useClerkUser } from "@clerk/nextjs"
 import {
     LayoutDashboard, FileText, Zap, Mail,
-    Briefcase, Settings, BarChart3, CreditCard, ScanSearch,
+    Briefcase, Settings, BarChart3, CreditCard, ScanSearch, Download,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Logo } from "@/components/ui/Logo"
@@ -29,6 +29,7 @@ const navItems = [
     { href: "/dashboard/optimize", icon: Zap, label: "AI Optimizer" },
     { href: "/dashboard/cover-letter", icon: Mail, label: "Cover Letter" },
     { href: "/dashboard/resumes", icon: FileText, label: "My Resumes" },
+    { href: "/dashboard/resume-templates", icon: Download, label: "Templates" },
     { href: "/dashboard/tracker", icon: Briefcase, label: "Job Tracker" },
     { href: "/dashboard/pricing", icon: CreditCard, label: "Pricing" },
     { href: "/dashboard/settings", icon: Settings, label: "Settings" },

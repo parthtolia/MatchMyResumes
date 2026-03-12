@@ -15,7 +15,6 @@ export default function LandingHero() {
           <Link href="#pricing" className="hover:text-white transition-colors">Pricing</Link>
           <Link href="#how-it-works" className="hover:text-white transition-colors">How it works</Link>
           <Link href="#faq" className="hover:text-white transition-colors">FAQ</Link>
-          <Link href="/resume-templates" className="hover:text-white transition-colors">Templates</Link>
         </div>
         <div className="flex items-center gap-3">
           <Link href="/sign-in" className="text-sm text-gray-400 hover:text-white transition-colors px-4 py-2 hidden sm:block">
