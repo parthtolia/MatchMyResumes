@@ -18,12 +18,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
     // Dev mode (placeholder Clerk keys): skip auth, allow through
 
     return (
-        <MobileDashboard>
-            <GlobalDataProvider>
+        <GlobalDataProvider>
+            <MobileDashboard>
                 <ErrorBoundaryWrapper>
                     {children}
                 </ErrorBoundaryWrapper>
-            </GlobalDataProvider>
-        </MobileDashboard>
+            </MobileDashboard>
+        </GlobalDataProvider>
     )
 }

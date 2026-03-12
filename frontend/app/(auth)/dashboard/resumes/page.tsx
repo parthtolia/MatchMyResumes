@@ -69,6 +69,8 @@ export default function ResumesPage() {
     const [deleteSuccess, setDeleteSuccess] = useState(false)
     const [deleting, setDeleting] = useState(false) // instant feedback after confirm
 
+    // Loading detail
+    const [loadingDetail, setLoadingDetail] = useState(false)
     // Track which IDs are mid-delete (Set so multiple concurrent deletes work)
     const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set())
     // Ref persists across re-renders — keeps deleted IDs out of the list even after refreshData()
@@ -214,8 +216,15 @@ export default function ResumesPage() {
     // ── View detail ─────────────────────────────────────────────────────────
     const viewDetail = async (id: string) => {
         if (selectMode) { toggleSelect(id); return }
-        const res = await api.get(`/api/resumes/${id}`)
-        setSelected(res.data)
+        setLoadingDetail(true)
+        try {
+            const res = await api.get(`/api/resumes/${id}`)
+            setSelected(res.data)
+        } catch (e: any) {
+            setError(e.message || "Failed to load resume")
+        } finally {
+            setLoadingDetail(false)
+        }
     }
 
     return (
@@ -409,6 +418,23 @@ export default function ResumesPage() {
                     )}
                 </div>
             </div>
+
+            {/* Full-page loader while fetching resume detail */}
+            <AnimatePresence>
+                {loadingDetail && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+                    >
+                        <div className="flex flex-col items-center gap-3">
+                            <Loader2 size={36} className="text-violet-400 animate-spin" />
+                            <p className="text-sm text-gray-300 font-medium">Loading resume...</p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Delete Modal */}
             <AnimatePresence>
