@@ -16,7 +16,11 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
     matcher: [
-        "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+        // Only run middleware on auth-required routes (dashboard, sign-in, sign-up, api)
+        // Skip marketing pages (/, /privacy, /terms) to avoid loading Clerk server-side
+        "/dashboard(.*)",
+        "/sign-in(.*)",
+        "/sign-up(.*)",
         "/(api|trpc)(.*)",
     ],
 }

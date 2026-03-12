@@ -91,6 +91,23 @@ body {
   background-size: 64px 64px;
 }
 
+/* Landing page hero animations (CSS-only, no JS) */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes grow {
+  from { width: 0%; }
+  to { width: var(--target-width); }
+}
+
 /* Score circle animation */
 @keyframes scoreReveal {
   from {

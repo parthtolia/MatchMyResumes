@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Mail, Loader2, Copy, Check, Download, Edit3, Eye, Bold, Italic, List as ListIcon } from "lucide-react"
 import api from "@/lib/api"
 import { useUser as useClerkUser } from "@clerk/nextjs"
-import ReactMarkdown from "react-markdown"
+import dynamic from "next/dynamic"
+const ReactMarkdown = dynamic(() => import("react-markdown"), { ssr: false })
 import { useGlobalData } from "@/components/dashboard/GlobalDataProvider"
 
 const HAS_REAL_CLERK =

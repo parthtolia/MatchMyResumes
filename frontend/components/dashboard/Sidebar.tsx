@@ -1,21 +1,19 @@
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useEffect, useState } from "react"
 import { UserButton, useUser as useClerkUser } from "@clerk/nextjs"
-import api from "@/lib/api"
 import {
     LayoutDashboard, FileText, Zap, Mail,
     Briefcase, Settings, BarChart3, CreditCard, ScanSearch,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Logo } from "@/components/ui/Logo"
+import { useGlobalData } from "@/components/dashboard/GlobalDataProvider"
 
 const HAS_REAL_CLERK =
     (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "").startsWith("pk_") &&
     !(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "").includes("_...")
 
-// Safe hook: bypass useUser when ClerkProvider isn't present
 function useUserSafe() {
     if (!HAS_REAL_CLERK) {
         return { user: null, isLoaded: true }
@@ -38,19 +36,8 @@ const navItems = [
 
 export default function DashboardSidebar({ onClose }: { onClose?: () => void } = {}) {
     const pathname = usePathname()
-    const { user, isLoaded } = useUserSafe()
-    const [plan, setPlan] = useState<string>("free")
-
-    useEffect(() => {
-        const fetchPlan = () => {
-            if (isLoaded) {
-                api.get("/api/subscriptions/status").then((r: any) => setPlan(r.data.plan)).catch(() => { })
-            }
-        }
-        fetchPlan()
-        window.addEventListener("planUpdated", fetchPlan)
-        return () => window.removeEventListener("planUpdated", fetchPlan)
-    }, [isLoaded])
+    const { user } = useUserSafe()
+    const { plan } = useGlobalData()
 
     const displayName = HAS_REAL_CLERK
         ? (user?.firstName || user?.fullName?.split(" ")[0] || "User")

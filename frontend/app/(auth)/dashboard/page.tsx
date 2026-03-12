@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
+import { LazyMotion, domAnimation, m } from "framer-motion"
 import {
     FileText, BarChart3, Mail, Briefcase,
     TrendingUp, Clock, CheckCircle, Target
@@ -73,9 +73,10 @@ export default function DashboardPage() {
     ]
 
     return (
+        <LazyMotion features={domAnimation}>
         <div className="w-full max-w-[1400px] flex flex-col gap-10 pb-4 min-h-[80vh]">
             {/* Header */}
-            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between border-b border-white/15 pb-3">
+            <m.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between border-b border-white/15 pb-3">
                 <h1 className="text-2xl font-semibold text-white tracking-tight">
                     Welcome, {user?.firstName ? user.firstName.charAt(0).toUpperCase() + user.firstName.slice(1).toLowerCase() : "Developer"}!
                 </h1>
@@ -85,10 +86,10 @@ export default function DashboardPage() {
                         Syncing…
                     </span>
                 )}
-            </motion.div>
+            </m.div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
                 {statCards.map((card, i) => (
-                    <motion.div
+                    <m.div
                         key={card.label}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -101,7 +102,7 @@ export default function DashboardPage() {
                             <div className={`text-4xl font-extrabold tracking-tight transition-all ${refreshing ? "text-white/50" : "text-white"}`}>{card.value}</div>
                             <div className="text-sm text-gray-400 font-semibold">{card.label}</div>
                         </div>
-                    </motion.div>
+                    </m.div>
                 ))}
             </div>
 
@@ -110,7 +111,7 @@ export default function DashboardPage() {
                 <h2 className="text-base font-semibold text-gray-300">Quick Actions</h2>
                 <div className="grid grid-cols-2 xl:grid-cols-4 gap-5">
                     {quickActions.map((action, i) => (
-                        <motion.div
+                        <m.div
                             key={action.href}
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -130,7 +131,7 @@ export default function DashboardPage() {
                                 </div>
                                 <p className="text-xs text-gray-400 leading-relaxed mt-1">{action.desc}</p>
                             </Link>
-                        </motion.div>
+                        </m.div>
                     ))}
                 </div>
             </div>
@@ -161,6 +162,7 @@ export default function DashboardPage() {
                 </div>
             </div>
         </div>
+        </LazyMotion>
     )
 }
 
