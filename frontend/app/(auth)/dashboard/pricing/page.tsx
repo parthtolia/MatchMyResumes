@@ -5,6 +5,7 @@ import { Check, X, Zap, Sparkles, FileText } from "lucide-react"
 import api, { createCheckoutSession, verifySession } from "@/lib/api"
 import { useRouter } from "next/navigation"
 import { useUser as useClerkUser, useSession } from "@clerk/nextjs"
+import { useGlobalData } from "@/components/dashboard/GlobalDataProvider"
 
 const HAS_REAL_CLERK =
     typeof process !== "undefined" &&
@@ -76,13 +77,13 @@ function CellValue({ value }: { value: string }) {
 export default function PricingPage() {
     const { isLoaded, isSignedIn, user } = useUserSafe()
     const { session } = useSessionSafe()
+    const { plan: globalPlan, refreshData } = useGlobalData()
     const [loadingId, setLoadingId] = useState<string | null>(null)
-    const [subStatus, setSubStatus] = useState<any>(null)
     const [checkoutError, setCheckoutError] = useState("")
     const router = useRouter()
 
     const planRank: Record<string, number> = { free: 0, pro: 1, premium: 2 }
-    const currentPlan: string = subStatus?.plan || "free"
+    const currentPlan: string = globalPlan || "free"
     const currentRank = planRank[currentPlan] ?? 0
 
     useEffect(() => {
@@ -95,16 +96,11 @@ export default function PricingPage() {
                     const token = await session?.getToken()
                     await verifySession(sessionId, token)
                     window.history.replaceState({}, document.title, window.location.pathname)
-                    // Re-fetch plan status immediately after verification
-                    const statusRes = await api.get("/api/subscriptions/status")
-                    setSubStatus(statusRes.data)
+                    // Trigger GlobalDataProvider to re-fetch plan from /api/dashboard/init
                     window.dispatchEvent(new Event("planUpdated"))
                 } catch (e) {
                     console.error("Failed to sync session", e)
                 }
-            }
-            if (isSignedIn) {
-                api.get("/api/subscriptions/status").then((r: any) => setSubStatus(r.data)).catch(() => {})
             }
         }
         checkSession()

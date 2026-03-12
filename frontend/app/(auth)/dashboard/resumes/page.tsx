@@ -6,6 +6,7 @@ import { useDropzone } from "react-dropzone"
 import api from "@/lib/api"
 import { formatDate } from "@/lib/utils"
 import { useGlobalData } from "@/components/dashboard/GlobalDataProvider"
+import { downloadTextAsPdf, downloadTextAsDocx } from "@/lib/download"
 
 // ── Custom delete confirmation modal ─────────────────────────────────────────
 function DeleteModal({ count, onConfirm, onCancel }: {
@@ -93,37 +94,16 @@ export default function ResumesPage() {
 
     const downloadPdf = async () => {
         if (!selected?.raw_text) return
-        try {
-            const { jsPDF } = await import("jspdf")
-            const doc = new jsPDF({ format: "letter" })
-            doc.setFont("helvetica")
-            doc.setFontSize(10)
-            const margin = 20
-            const pageWidth = doc.internal.pageSize.getWidth()
-            const pageHeight = doc.internal.pageSize.getHeight()
-            const maxLineWidth = pageWidth - margin * 2
-            const lines = doc.splitTextToSize(selected.raw_text, maxLineWidth)
-            let y = margin
-            for (const line of lines) {
-                if (y > pageHeight - margin) { doc.addPage(); y = margin }
-                doc.text(line, margin, y)
-                y += 4.5
-            }
-            const name = selected.filename?.replace(/\.[^.]+$/, "") || "resume"
-            doc.save(`${name}.pdf`)
-        } catch { alert("Failed to generate PDF") }
+        const name = selected.filename?.replace(/\.[^.]+$/, "") || "resume"
+        try { await downloadTextAsPdf(selected.raw_text, `${name}.pdf`) }
+        catch { alert("Failed to generate PDF") }
     }
 
-    const downloadDocx = () => {
+    const downloadDocx = async () => {
         if (!selected?.raw_text) return
         const name = selected.filename?.replace(/\.[^.]+$/, "") || "resume"
-        // Build a minimal .doc (HTML-based) that Word can open
-        const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><style>body{font-family:Calibri,sans-serif;font-size:11pt;line-height:1.5;white-space:pre-wrap;}</style></head><body>${selected.raw_text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>")}</body></html>`
-        const blob = new Blob([html], { type: "application/msword" })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = url; a.download = `${name}.docx`; a.click()
-        URL.revokeObjectURL(url)
+        try { await downloadTextAsDocx(selected.raw_text, `${name}.docx`) }
+        catch { alert("Failed to generate DOCX") }
     }
 
     // Keep local list in sync with global, always filtering out already-deleted IDs

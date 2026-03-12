@@ -35,9 +35,36 @@ api.interceptors.request.use(async (config) => {
     return config
 })
 
+// Retry logic for timeout and network errors (up to 2 retries = 3 total attempts)
+const MAX_RETRIES = 2
+const RETRY_DELAY = 1500 // ms
+
+function isRetryable(error: any): boolean {
+    if (!error) return false
+    // Network error (server unreachable)
+    if (error.message === "Network Error") return true
+    // Timeout
+    if (error.code === "ECONNABORTED" || error.code === "ETIMEDOUT") return true
+    // Server errors (502, 503, 504)
+    const status = error.response?.status
+    if (status && [502, 503, 504].includes(status)) return true
+    return false
+}
+
 api.interceptors.response.use(
     (response) => response,
-    (error) => {
+    async (error) => {
+        const config = error.config
+        if (!config) return Promise.reject(error)
+
+        config.__retryCount = config.__retryCount || 0
+
+        if (isRetryable(error) && config.__retryCount < MAX_RETRIES) {
+            config.__retryCount += 1
+            await new Promise(r => setTimeout(r, RETRY_DELAY * config.__retryCount))
+            return api.request(config)
+        }
+
         const msg = error?.response?.data?.detail ||
             (error.message === "Network Error" ? "Cannot connect to server. Please ensure the backend is running." : error.message) ||
             "An unexpected error occurred"

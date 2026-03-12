@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { Zap, Loader2, Copy, Check, ArrowRight, Lock, Download } from "lucide-react"
 import api from "@/lib/api"
 import { useGlobalData } from "@/components/dashboard/GlobalDataProvider"
+import { downloadTextAsPdf, downloadTextAsDocx } from "@/lib/download"
 
 import { UserButton, useUser as useClerkUser } from "@clerk/nextjs"
 
@@ -81,38 +82,18 @@ function OptimizeContent() {
 
     const downloadOptimizedPdf = async () => {
         if (!result?.optimized_text) return
-        try {
-            const { jsPDF } = await import("jspdf")
-            const doc = new jsPDF({ format: "letter" })
-            doc.setFont("helvetica")
-            doc.setFontSize(10)
-            const margin = 20
-            const pageWidth = doc.internal.pageSize.getWidth()
-            const pageHeight = doc.internal.pageSize.getHeight()
-            const maxLineWidth = pageWidth - margin * 2
-            const lines = doc.splitTextToSize(result.optimized_text, maxLineWidth)
-            let y = margin
-            for (const line of lines) {
-                if (y > pageHeight - margin) { doc.addPage(); y = margin }
-                doc.text(line, margin, y)
-                y += 4.5
-            }
-            const selectedResume = resumes.find(r => r.id === resumeId)
-            const name = selectedResume?.filename?.replace(/\.[^.]+$/, "") || "resume"
-            doc.save(`${name}_optimized.pdf`)
-        } catch { alert("Failed to generate PDF") }
+        const selectedResume = resumes.find(r => r.id === resumeId)
+        const name = selectedResume?.filename?.replace(/\.[^.]+$/, "") || "resume"
+        try { await downloadTextAsPdf(result.optimized_text, `${name}_optimized.pdf`) }
+        catch { alert("Failed to generate PDF") }
     }
 
-    const downloadOptimizedDocx = () => {
+    const downloadOptimizedDocx = async () => {
         if (!result?.optimized_text) return
         const selectedResume = resumes.find(r => r.id === resumeId)
         const name = selectedResume?.filename?.replace(/\.[^.]+$/, "") || "resume"
-        const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><style>body{font-family:Calibri,sans-serif;font-size:11pt;line-height:1.5;white-space:pre-wrap;}</style></head><body>${result.optimized_text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>")}</body></html>`
-        const blob = new Blob([html], { type: "application/msword" })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = url; a.download = `${name}_optimized.docx`; a.click()
-        URL.revokeObjectURL(url)
+        try { await downloadTextAsDocx(result.optimized_text, `${name}_optimized.docx`) }
+        catch { alert("Failed to generate DOCX") }
     }
 
     // Auto-optimize if navigating from JD Match

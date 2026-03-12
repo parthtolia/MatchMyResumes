@@ -75,7 +75,7 @@ export function GlobalDataProvider({ children }: { children: React.ReactNode }) 
                 sessionStorage.setItem(`user_plan_${userId}`, res.data.plan)
                 sessionStorage.setItem("dash_user_id", userId)
             }
-        } catch { } finally { setLoadingData(false) }
+        } catch { } finally { setLoadingData(false); setLoadingPlan(false) }
     }
 
     useEffect(() => {
