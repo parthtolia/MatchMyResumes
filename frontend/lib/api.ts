@@ -1,9 +1,8 @@
 import axios from "axios"
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"
-
+// API routes are now co-located in Next.js — use relative URLs (same origin)
 const api = axios.create({
-    baseURL: API_BASE,
+    baseURL: "",
     timeout: 60000, // 60 seconds to allow for slow LLM generations
     headers: { "Content-Type": "application/json" },
 })
@@ -66,7 +65,7 @@ api.interceptors.response.use(
         }
 
         const msg = error?.response?.data?.detail ||
-            (error.message === "Network Error" ? "Cannot connect to server. Please ensure the backend is running." : error.message) ||
+            (error.message === "Network Error" ? "Network error. Please check your connection." : error.message) ||
             "An unexpected error occurred"
         return Promise.reject(new Error(msg))
     }
