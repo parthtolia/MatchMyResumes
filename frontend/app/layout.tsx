@@ -1,8 +1,14 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+import { ClerkProvider } from "@clerk/nextjs"
+import { dark } from "@clerk/themes"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
+
+const HAS_REAL_CLERK =
+  (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "").startsWith("pk_") &&
+  !(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "").includes("_...")
 
 export const metadata: Metadata = {
   title: "MatchMyResumes – ATS Resume Optimization Suite",
@@ -24,11 +30,30 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
+  const content = (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-inter antialiased bg-[#0a0a0f] text-white`}>
         {children}
       </body>
     </html>
+  )
+
+  if (!HAS_REAL_CLERK) return content
+
+  return (
+    <ClerkProvider
+      afterSignInUrl="/dashboard"
+      afterSignUpUrl="/dashboard"
+      appearance={{
+        baseTheme: dark,
+        variables: {
+          colorPrimary: "#8b5cf6",
+          colorBackground: "#0a0a0f",
+          colorInputBackground: "rgba(255,255,255,0.05)",
+        }
+      }}
+    >
+      {content}
+    </ClerkProvider>
   )
 }

@@ -279,8 +279,8 @@ export default function ResumesPage() {
             )}
 
             {/* Resume Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" style={{ height: "calc(100vh - 320px)", minHeight: "400px" }}>
-                <div className="lg:col-span-1 space-y-2 overflow-y-auto pr-1 scrollbar-hide">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-1 space-y-2 overflow-y-auto pr-1" style={{ height: "calc(100vh - 320px)", minHeight: "400px" }}>
                     {/* Select controls — shown above the list */}
                     {localResumes.length > 0 && (
                         <div className="flex items-center gap-2 pb-1">
@@ -375,14 +375,14 @@ export default function ResumesPage() {
                 </div>
 
                 {/* Detail Panel */}
-                <div className="lg:col-span-2 overflow-y-auto">
+                <div className="lg:col-span-2">
                     {loadingDetail ? (
                         <div className="glass p-12 h-full flex flex-col items-center justify-center text-center">
                             <Loader2 size={36} className="text-violet-400 animate-spin mb-3" />
                             <p className="text-sm text-gray-300 font-medium">Loading resume...</p>
                         </div>
                     ) : selected && !selectMode ? (
-                        <div className="glass p-6 h-full overflow-y-auto">
+                        <div className="glass p-6">
                             <div className="flex items-start justify-between gap-3 mb-1">
                                 <div>
                                     <h3 className="font-semibold text-white">{selected.filename}</h3>
@@ -411,7 +411,7 @@ export default function ResumesPage() {
                                     ))}
                                 </div>
                             )}
-                            <textarea className="input-styled resize-none text-xs font-mono" rows={16} readOnly value={selected.raw_text} />
+                            <textarea className="input-styled resize-none text-xs font-mono" rows={30} readOnly value={selected.raw_text} />
                         </div>
                     ) : (
                         <div className="glass p-12 h-full flex flex-col items-center justify-center text-center">
