@@ -30,17 +30,17 @@ const testimonials = [
 const plans = [
   {
     name: "Free", price: "$0", period: "/month",
-    features: ["2 resume scans/month", "Basic ATS scoring", "Section completeness check"],
+    features: ["5 ATS Resume Scores / mo", "5 Resume vs JD Matches / mo", "Keyword Gap Analysis", "1 AI Cover Letter / mo", "20 Jobs in Tracker"],
     cta: "Get Started Free", highlight: false,
   },
   {
     name: "Pro", price: "$10", period: "/month",
-    features: ["Unlimited Resumes", "Unlimited Job Descriptions", "Advanced ATS Scoring", "Priority Support"],
+    features: ["Unlimited ATS Scores", "Unlimited JD Matches", "Keyword Gap Analysis", "10 AI Resume Optimizations / mo", "10 AI Cover Letters / mo", "200 Jobs in Tracker"],
     cta: "Start Pro Trial", highlight: true,
   },
   {
     name: "Premium", price: "$25", period: "/month",
-    features: ["Everything in Pro", "AI Cover Letter Generation", "Unlimited Application Tracking", "Exclusive Resume Templates"],
+    features: ["Everything in Pro", "Unlimited AI Resume Optimization", "Unlimited AI Cover Letters", "Unlimited Job Tracker"],
     cta: "Go Premium", highlight: false,
   },
 ]

@@ -2,7 +2,7 @@
 import { useUser as useClerkUser, useSession } from "@clerk/nextjs"
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { User, CreditCard, Bell, Shield, CheckCircle, ExternalLink } from "lucide-react"
+import { User, CreditCard, Shield } from "lucide-react"
 import api, { createPortalSession, verifySession } from "@/lib/api"
 import Link from "next/link"
 
@@ -20,10 +20,10 @@ function useUserSafe() {
     return useClerkUser()
 }
 
-const PLAN_FEATURES = {
-    free: ["2 scans/month", "Basic scoring"],
-    pro: ["Unlimited scans", "AI optimization", "Cover letters", "Version storage"],
-    premium: ["All Pro features", "LinkedIn optimization", "Advanced analytics", "Priority AI"],
+const PLAN_DISPLAY: Record<string, string> = {
+    free: "Free",
+    pro: "Pro",
+    premium: "Premium",
 }
 
 export default function SettingsPage() {
@@ -97,20 +97,11 @@ export default function SettingsPage() {
                 ) : (
                     <div className="space-y-4">
                         <div className="flex items-center justify-between p-4 rounded-xl bg-white/5">
-                            <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-semibold text-white capitalize">{plan} Plan</span>
-                                    {subStatus?.status === "active" && (
-                                        <span className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full">Active</span>
-                                    )}
-                                </div>
-                                <ul className="space-y-1">
-                                    {(PLAN_FEATURES[plan as keyof typeof PLAN_FEATURES] || PLAN_FEATURES.free).map(f => (
-                                        <li key={f} className="flex items-center gap-1.5 text-xs text-gray-400">
-                                            <CheckCircle size={12} className="text-emerald-400" /> {f}
-                                        </li>
-                                    ))}
-                                </ul>
+                            <div className="flex items-center gap-2">
+                                <span className="font-semibold text-white">{PLAN_DISPLAY[plan] || "Free"} Plan</span>
+                                {subStatus?.status === "active" && (
+                                    <span className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full">Active</span>
+                                )}
                             </div>
                         </div>
                         {plan === "free" && (

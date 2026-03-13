@@ -279,8 +279,8 @@ export default function ResumesPage() {
             )}
 
             {/* Resume Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-1 space-y-2">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" style={{ height: "calc(100vh - 320px)", minHeight: "400px" }}>
+                <div className="lg:col-span-1 space-y-2 overflow-y-auto pr-1 scrollbar-hide">
                     {/* Select controls — shown above the list */}
                     {localResumes.length > 0 && (
                         <div className="flex items-center gap-2 pb-1">
@@ -327,7 +327,7 @@ export default function ResumesPage() {
                                 <motion.div
                                     key={resume.id}
                                     layout
-                                    onClick={() => !isDeleting && viewDetail(resume.id)}
+                                    onClick={() => !isDeleting && !loadingDetail && viewDetail(resume.id)}
                                     className={`p-4 rounded-xl border cursor-pointer transition-all ${isDeleting ? "opacity-40 pointer-events-none" : ""} ${isActive ? "border-violet-500/50 bg-violet-500/10" : "border-white/5 bg-[#111118] hover:border-white/10"}`}
                                 >
                                     <div className="flex items-start justify-between">
@@ -375,9 +375,14 @@ export default function ResumesPage() {
                 </div>
 
                 {/* Detail Panel */}
-                <div className="lg:col-span-2">
-                    {selected && !selectMode ? (
-                        <div className="glass p-6 h-full">
+                <div className="lg:col-span-2 overflow-y-auto">
+                    {loadingDetail ? (
+                        <div className="glass p-12 h-full flex flex-col items-center justify-center text-center">
+                            <Loader2 size={36} className="text-violet-400 animate-spin mb-3" />
+                            <p className="text-sm text-gray-300 font-medium">Loading resume...</p>
+                        </div>
+                    ) : selected && !selectMode ? (
+                        <div className="glass p-6 h-full overflow-y-auto">
                             <div className="flex items-start justify-between gap-3 mb-1">
                                 <div>
                                     <h3 className="font-semibold text-white">{selected.filename}</h3>
@@ -418,23 +423,6 @@ export default function ResumesPage() {
                     )}
                 </div>
             </div>
-
-            {/* Full-page loader while fetching resume detail */}
-            <AnimatePresence>
-                {loadingDetail && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-                    >
-                        <div className="flex flex-col items-center gap-3">
-                            <Loader2 size={36} className="text-violet-400 animate-spin" />
-                            <p className="text-sm text-gray-300 font-medium">Loading resume...</p>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
 
             {/* Delete Modal */}
             <AnimatePresence>
