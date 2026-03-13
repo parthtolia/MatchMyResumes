@@ -279,8 +279,8 @@ export default function ResumesPage() {
             )}
 
             {/* Resume Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-1 space-y-2 overflow-y-auto pr-1" style={{ height: "calc(100vh - 320px)", minHeight: "400px" }}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" style={{ height: "calc(100vh - 320px)", minHeight: "400px" }}>
+                <div className="lg:col-span-1 space-y-2 overflow-y-auto pr-1">
                     {/* Select controls — shown above the list */}
                     {localResumes.length > 0 && (
                         <div className="flex items-center gap-2 pb-1">
