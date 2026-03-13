@@ -86,9 +86,19 @@ export default function CVAnalysisPage() {
         try {
             const formData = new FormData()
             formData.append("file", file)
-            const upload = await api.post("/api/resumes/upload", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            })
+            const uploadWithRetry = async () => {
+                const config = { headers: { "Content-Type": "multipart/form-data" } }
+                try {
+                    return await api.post("/api/resumes", formData, config)
+                } catch (err: any) {
+                    if (err?.response?.status && err.response.status >= 500) {
+                        await new Promise(r => setTimeout(r, 1500))
+                        return await api.post("/api/resumes", formData, config)
+                    }
+                    throw err
+                }
+            }
+            const upload = await uploadWithRetry()
             refreshData()
             const score = await api.post("/api/resumes/cv-score", { resume_id: upload.data.id })
             setResult(score.data)

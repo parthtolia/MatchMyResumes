@@ -123,9 +123,19 @@ export default function ResumesPage() {
         try {
             const formData = new FormData()
             formData.append("file", file)
-            const res = await api.post("/api/resumes/upload", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            })
+            const uploadWithRetry = async () => {
+                const config = { headers: { "Content-Type": "multipart/form-data" } }
+                try {
+                    return await api.post("/api/resumes", formData, config)
+                } catch (err: any) {
+                    if (err?.response?.status && err.response.status >= 500) {
+                        await new Promise(r => setTimeout(r, 1500))
+                        return await api.post("/api/resumes", formData, config)
+                    }
+                    throw err
+                }
+            }
+            const res = await uploadWithRetry()
             setLocalResumes(prev => [res.data, ...prev])
             setUploadSuccess(true)
             setTimeout(() => setUploadSuccess(false), 3000)
