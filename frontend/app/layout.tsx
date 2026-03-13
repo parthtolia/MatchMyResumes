@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const content = (
     <html lang="en" suppressHydrationWarning>
-      <head>
+      <body className={`${inter.variable} font-inter antialiased bg-[#0a0a0f] text-white`}>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-JELDQCCJBS"
           strategy="afterInteractive"
@@ -46,8 +46,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             gtag('config', 'G-JELDQCCJBS');
           `}
         </Script>
-      </head>
-      <body className={`${inter.variable} font-inter antialiased bg-[#0a0a0f] text-white`}>
         {children}
       </body>
     </html>
