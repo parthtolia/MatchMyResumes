@@ -28,6 +28,7 @@ export default function Navbar() {
         <Link href="#pricing" className="hover:text-white transition-colors">Pricing</Link>
         <Link href="#how-it-works" className="hover:text-white transition-colors">How it works</Link>
         <Link href="#faq" className="hover:text-white transition-colors">FAQ</Link>
+        <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
       </div>
       <div className="flex items-center gap-3">
         {isLoaded && isSignedIn ? (
