@@ -4,6 +4,8 @@ import { ClerkProvider } from "@clerk/nextjs"
 import { dark } from "@clerk/themes"
 import Script from "next/script"
 import { OrganizationJsonLd, WebAppJsonLd } from "@/components/JsonLd"
+import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
@@ -71,6 +73,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <OrganizationJsonLd />
         <WebAppJsonLd />
         {children}
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   )
