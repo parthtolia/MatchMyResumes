@@ -71,21 +71,9 @@ api.interceptors.response.use(
     }
 )
 
-export const createCheckoutSession = async (priceId: string, email?: string | null, token?: string | null) => {
+export const cancelSubscription = async (token?: string | null) => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {}
-    const res = await api.post("/api/stripe/create-checkout-session", { price_id: priceId, email }, { headers })
-    return res.data
-}
-
-export const createPortalSession = async (token?: string | null) => {
-    const headers = token ? { Authorization: `Bearer ${token}` } : {}
-    const res = await api.post("/api/stripe/create-portal-session", {}, { headers })
-    return res.data
-}
-
-export const verifySession = async (sessionId: string, token?: string | null) => {
-    const headers = token ? { Authorization: `Bearer ${token}` } : {}
-    const res = await api.post("/api/stripe/verify-session", { session_id: sessionId }, { headers })
+    const res = await api.post("/api/paddle/cancel", {}, { headers })
     return res.data
 }
 

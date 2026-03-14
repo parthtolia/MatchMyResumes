@@ -26,7 +26,7 @@ export async function GET() {
     return NextResponse.json({
       plan: user.plan,
       status: "active",
-      current_period_end: user.stripeCurrentPeriodEnd,
+      current_period_end: user.paddleCurrentPeriodEnd,
       cancel_at_period_end: false,
     });
   } catch (error) {

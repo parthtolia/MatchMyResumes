@@ -19,11 +19,13 @@ export const config = {
   geminiEmbeddingModel:
     process.env.GEMINI_EMBEDDING_MODEL || "models/text-embedding-004",
 
-  // Stripe
-  stripeSecretKey: process.env.STRIPE_SECRET_KEY || "",
-  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || "",
-  stripePricePro: process.env.STRIPE_PRICE_PRO || "",
-  stripePricePremium: process.env.STRIPE_PRICE_PREMIUM || "",
+  // Paddle
+  paddleApiKey: process.env.PADDLE_API_KEY || "",
+  paddleWebhookSecret: process.env.PADDLE_WEBHOOK_SECRET || "",
+  paddlePricePro: process.env.PADDLE_PRICE_PRO || "",
+  paddlePricePremium: process.env.PADDLE_PRICE_PREMIUM || "",
+  paddleEnv: process.env.PADDLE_ENV || "sandbox",
+  paddleClientToken: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || "",
 
   // Rate Limiting
   rateLimitPerMinute: parseInt(process.env.RATE_LIMIT_PER_MINUTE || "60", 10),

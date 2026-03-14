@@ -1,16 +1,19 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { Check, X, Zap, Sparkles, FileText } from "lucide-react"
-import api, { createCheckoutSession, verifySession } from "@/lib/api"
 import { useRouter } from "next/navigation"
 import { useUser as useClerkUser, useSession } from "@clerk/nextjs"
 import { useGlobalData } from "@/components/dashboard/GlobalDataProvider"
+import { initializePaddle, type Paddle } from "@paddle/paddle-js"
 
 const HAS_REAL_CLERK =
     typeof process !== "undefined" &&
     (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "").startsWith("pk_") &&
     !(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "").includes("_...")
+
+const PADDLE_CLIENT_TOKEN = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || ""
+const PADDLE_ENV = process.env.NEXT_PUBLIC_PADDLE_ENV || "sandbox"
 
 function useUserSafe() {
     if (!HAS_REAL_CLERK) {
@@ -24,6 +27,11 @@ function useSessionSafe() {
     if (!HAS_REAL_CLERK) return { session: null }
     // eslint-disable-next-line react-hooks/rules-of-hooks
     return useSession()
+}
+
+const PRICE_MAP: Record<string, string> = {
+    pro: process.env.NEXT_PUBLIC_PADDLE_PRICE_PRO || "",
+    premium: process.env.NEXT_PUBLIC_PADDLE_PRICE_PREMIUM || "",
 }
 
 const PLANS = [
@@ -80,51 +88,82 @@ export default function PricingPage() {
     const { plan: globalPlan, refreshData } = useGlobalData()
     const [loadingId, setLoadingId] = useState<string | null>(null)
     const [checkoutError, setCheckoutError] = useState("")
+    const [paddle, setPaddle] = useState<Paddle | null>(null)
     const router = useRouter()
 
     const planRank: Record<string, number> = { free: 0, pro: 1, premium: 2 }
     const currentPlan: string = globalPlan || "free"
     const currentRank = planRank[currentPlan] ?? 0
 
+    // Initialize Paddle client
     useEffect(() => {
-        const checkSession = async () => {
-            if (!isLoaded) return
-            const urlParams = new URLSearchParams(window.location.search)
-            const sessionId = urlParams.get("session_id")
-            if (sessionId) {
-                try {
-                    const token = await session?.getToken()
-                    await verifySession(sessionId, token)
-                    window.history.replaceState({}, document.title, window.location.pathname)
-                    // Trigger GlobalDataProvider to re-fetch plan from /api/dashboard/init
-                    window.dispatchEvent(new Event("planUpdated"))
-                } catch (e) {
-                    console.error("Failed to sync session", e)
+        if (!PADDLE_CLIENT_TOKEN) return
+        initializePaddle({
+            token: PADDLE_CLIENT_TOKEN,
+            environment: PADDLE_ENV === "production" ? "production" : "sandbox",
+            checkout: {
+                settings: {
+                    displayMode: "overlay",
+                    theme: "dark",
+                    locale: "en",
+                },
+            },
+            eventCallback: (event) => {
+                if (event.name === "checkout.completed") {
+                    // Webhook will sync the plan — trigger a re-fetch after a short delay
+                    setTimeout(() => {
+                        window.dispatchEvent(new Event("planUpdated"))
+                    }, 2000)
                 }
-            }
-        }
-        checkSession()
-    }, [isSignedIn, isLoaded, session])
+            },
+        }).then((p) => {
+            if (p) setPaddle(p)
+        })
+    }, [])
 
-    const handleSubscribe = async (planId: string) => {
+    const handleSubscribe = useCallback(async (planId: string) => {
         if (planId === "free") return
         if (isLoaded && !isSignedIn) {
             router.push("/sign-in?redirect_url=/dashboard/pricing")
             return
         }
+
+        const priceId = PRICE_MAP[planId]
+        if (!priceId) {
+            setCheckoutError("Price not configured. Please try again later.")
+            return
+        }
+
+        if (!paddle) {
+            setCheckoutError("Payment system is loading. Please try again.")
+            return
+        }
+
         try {
             setLoadingId(planId)
+            setCheckoutError("")
+
+            const email = (user as any)?.primaryEmailAddress?.emailAddress || undefined
+
+            // Get user ID for custom data
             const token = await session?.getToken()
-            const email = (user as any)?.primaryEmailAddress?.emailAddress || null
-            const data = await createCheckoutSession(planId, email, token)
-            if (data?.checkout_url) window.location.href = data.checkout_url
+            const userId = (user as any)?.id || "dev-user-001"
+
+            paddle.Checkout.open({
+                items: [{ priceId, quantity: 1 }],
+                customData: { user_id: userId },
+                customer: email ? { email } : undefined,
+                settings: {
+                    successUrl: `${window.location.origin}/dashboard/pricing`,
+                },
+            })
         } catch (error: any) {
             console.error("Failed to start checkout:", error)
             setCheckoutError(error.message || "Failed to start checkout. Please try again.")
         } finally {
             setLoadingId(null)
         }
-    }
+    }, [isLoaded, isSignedIn, paddle, user, session, router])
 
     return (
         <div className="w-full pb-12 flex flex-col items-center">
@@ -185,7 +224,7 @@ export default function PricingPage() {
                                 onClick={() => handleSubscribe(plan.id)}
                                 disabled={btnDisabled}
                             >
-                                {isLoading ? "Redirecting…" : btnLabel}
+                                {isLoading ? "Opening checkout…" : btnLabel}
                             </button>
                         </div>
                     )

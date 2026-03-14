@@ -68,9 +68,9 @@ export const users = pgTable(
     clerkId: varchar("clerk_id", { length: 255 }),
     fullName: varchar("full_name", { length: 255 }),
     plan: planTypeEnum("plan").default("free"),
-    stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
-    stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 }),
-    stripeCurrentPeriodEnd: timestamp("stripe_current_period_end", {
+    paddleCustomerId: varchar("paddle_customer_id", { length: 255 }),
+    paddleSubscriptionId: varchar("paddle_subscription_id", { length: 255 }),
+    paddleCurrentPeriodEnd: timestamp("paddle_current_period_end", {
       withTimezone: true,
     }),
     usageCount: integer("usage_count").default(0),
@@ -83,8 +83,8 @@ export const users = pgTable(
   (table) => [
     uniqueIndex("users_email_idx").on(table.email),
     uniqueIndex("users_clerk_id_idx").on(table.clerkId),
-    uniqueIndex("users_stripe_subscription_id_idx").on(
-      table.stripeSubscriptionId
+    uniqueIndex("users_paddle_subscription_id_idx").on(
+      table.paddleSubscriptionId
     ),
   ]
 );
@@ -209,8 +209,8 @@ export const subscriptions = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 }),
-    stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
+    paddleSubscriptionId: varchar("paddle_subscription_id", { length: 255 }),
+    paddleCustomerId: varchar("paddle_customer_id", { length: 255 }),
     plan: subscriptionPlanEnum("plan"),
     status: subscriptionStatusEnum("status").default("incomplete"),
     currentPeriodStart: timestamp("current_period_start", {
@@ -223,8 +223,8 @@ export const subscriptions = pgTable(
   },
   (table) => [
     uniqueIndex("subscriptions_user_id_idx").on(table.userId),
-    uniqueIndex("subscriptions_stripe_subscription_id_idx").on(
-      table.stripeSubscriptionId
+    uniqueIndex("subscriptions_paddle_subscription_id_idx").on(
+      table.paddleSubscriptionId
     ),
   ]
 );

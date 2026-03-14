@@ -45,7 +45,7 @@ export default function PrivacyPage() {
 
         <section className="mb-8">
           <h2 className="text-xl font-semibold text-white mb-3">5. Third-Party Services</h2>
-          <p className="text-gray-400 leading-relaxed">We use Clerk for authentication, Stripe for payment processing, and Supabase for database hosting. Each of these services has their own privacy policies and data handling practices. We share only the minimum data necessary for these services to function.</p>
+          <p className="text-gray-400 leading-relaxed">We use Clerk for authentication, Paddle for payment processing, and Supabase for database hosting. Each of these services has their own privacy policies and data handling practices. We share only the minimum data necessary for these services to function.</p>
         </section>
 
         <section className="mb-8">

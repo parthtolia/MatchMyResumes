@@ -1,4 +1,4 @@
-// This route delegates to the main stripe webhook handler.
+// This route delegates to the main paddle webhook handler.
 // It exists because the Python backend exposed both /api/subscriptions/webhook
-// and /api/stripe/webhook endpoints.
-export { POST } from "@/app/api/stripe/webhook/route";
+// and /api/paddle/webhook endpoints.
+export { POST } from "@/app/api/paddle/webhook/route";

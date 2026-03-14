@@ -1,9 +1,8 @@
 "use client"
 import { useUser as useClerkUser, useSession } from "@clerk/nextjs"
 import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
 import { User, CreditCard, Shield } from "lucide-react"
-import api, { createPortalSession, verifySession } from "@/lib/api"
+import api, { cancelSubscription } from "@/lib/api"
 import Link from "next/link"
 
 const HAS_REAL_CLERK =
@@ -28,10 +27,11 @@ const PLAN_DISPLAY: Record<string, string> = {
 
 export default function SettingsPage() {
     const { user } = useUserSafe()
-    const { isLoaded, session } = useSession() // Get Clerk session
+    const { isLoaded, session } = useSession()
     const [subStatus, setSubStatus] = useState<any>(null)
     const [loading, setLoading] = useState(true)
-    const [managing, setManaging] = useState(false)
+    const [canceling, setCanceling] = useState(false)
+    const [cancelSuccess, setCancelSuccess] = useState(false)
 
     useEffect(() => {
         if (!isLoaded) return
@@ -42,16 +42,21 @@ export default function SettingsPage() {
             .finally(() => setLoading(false))
     }, [isLoaded])
 
-    const handleManage = async () => {
+    const handleCancel = async () => {
+        const confirmed = window.confirm(
+            "Are you sure you want to cancel your subscription? You'll keep access until the end of your billing period."
+        )
+        if (!confirmed) return
+
         try {
-            setManaging(true)
+            setCanceling(true)
             const token = await session?.getToken()
-            const data = await createPortalSession(token)
-            if (data?.portal_url) window.location.href = data.portal_url
+            await cancelSubscription(token)
+            setCancelSuccess(true)
         } catch (error: any) {
-            alert(error.message || "Failed to open portal")
+            alert(error.message || "Failed to cancel subscription")
         } finally {
-            setManaging(false)
+            setCanceling(false)
         }
     }
 
@@ -115,17 +120,21 @@ export default function SettingsPage() {
                                     {subStatus?.current_period_end ? (
                                         <>
                                             Renews: {new Date(subStatus.current_period_end).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
-                                            {subStatus.cancel_at_period_end && " · Cancels at period end"}
+                                            {cancelSuccess && " · Cancels at period end"}
                                         </>
                                     ) : (plan === "premium" ? "Premium Plan" : "Pro Plan")}
                                 </p>
-                                <button
-                                    onClick={handleManage}
-                                    disabled={managing}
-                                    className="text-xs font-medium text-violet-400 hover:text-violet-300 transition-colors bg-violet-500/10 hover:bg-violet-500/20 px-3 py-1.5 rounded-lg disabled:opacity-50"
-                                >
-                                    {managing ? "Opening Portal..." : "Manage Subscription"}
-                                </button>
+                                {cancelSuccess ? (
+                                    <span className="text-xs text-amber-400">Cancellation scheduled</span>
+                                ) : (
+                                    <button
+                                        onClick={handleCancel}
+                                        disabled={canceling}
+                                        className="text-xs font-medium text-red-400 hover:text-red-300 transition-colors bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-lg disabled:opacity-50"
+                                    >
+                                        {canceling ? "Canceling..." : "Cancel Subscription"}
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>
