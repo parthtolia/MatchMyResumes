@@ -22,11 +22,20 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "MatchMyResumes",
     url: "https://matchmyresumes.com",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "MatchMyResumes – Beat the ATS with AI-Powered Resume Intelligence",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "MatchMyResumes – ATS Resume Optimization Suite",
     description: "Beat the ATS with AI-powered resume optimization.",
+    images: ["/og-image.png"],
   },
   metadataBase: new URL("https://matchmyresumes.com"),
   alternates: { canonical: "https://matchmyresumes.com" },
