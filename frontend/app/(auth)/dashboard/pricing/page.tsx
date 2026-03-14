@@ -1,9 +1,9 @@
 "use client"
 
-import React, { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Check, X, Zap, Sparkles, FileText } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useUser as useClerkUser, useSession } from "@clerk/nextjs"
+import { useUser as useClerkUser } from "@clerk/nextjs"
 import { useGlobalData } from "@/components/dashboard/GlobalDataProvider"
 import { initializePaddle, type Paddle } from "@paddle/paddle-js"
 
@@ -21,12 +21,6 @@ function useUserSafe() {
     }
     // eslint-disable-next-line react-hooks/rules-of-hooks
     return useClerkUser()
-}
-
-function useSessionSafe() {
-    if (!HAS_REAL_CLERK) return { session: null }
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useSession()
 }
 
 const PRICE_MAP: Record<string, string> = {
@@ -84,8 +78,7 @@ function CellValue({ value }: { value: string }) {
 
 export default function PricingPage() {
     const { isLoaded, isSignedIn, user } = useUserSafe()
-    const { session } = useSessionSafe()
-    const { plan: globalPlan, refreshData } = useGlobalData()
+    const { plan: globalPlan } = useGlobalData()
     const [loadingId, setLoadingId] = useState<string | null>(null)
     const [checkoutError, setCheckoutError] = useState("")
     const [paddle, setPaddle] = useState<Paddle | null>(null)
@@ -110,10 +103,20 @@ export default function PricingPage() {
             },
             eventCallback: (event) => {
                 if (event.name === "checkout.completed") {
+                    setLoadingId(null)
+                    setCheckoutError("")
                     // Webhook will sync the plan — trigger a re-fetch after a short delay
                     setTimeout(() => {
                         window.dispatchEvent(new Event("planUpdated"))
                     }, 2000)
+                }
+                if (event.name === "checkout.error") {
+                    setLoadingId(null)
+                    setCheckoutError("Checkout failed. Please check your payment details and try again.")
+                    console.error("Paddle checkout error:", event)
+                }
+                if (event.name === "checkout.closed") {
+                    setLoadingId(null)
                 }
             },
         }).then((p) => {
@@ -144,9 +147,6 @@ export default function PricingPage() {
             setCheckoutError("")
 
             const email = (user as any)?.primaryEmailAddress?.emailAddress || undefined
-
-            // Get user ID for custom data
-            const token = await session?.getToken()
             const userId = (user as any)?.id || "dev-user-001"
 
             paddle.Checkout.open({
@@ -159,11 +159,10 @@ export default function PricingPage() {
             })
         } catch (error: any) {
             console.error("Failed to start checkout:", error)
-            setCheckoutError(error.message || "Failed to start checkout. Please try again.")
-        } finally {
             setLoadingId(null)
+            setCheckoutError(error.message || "Failed to start checkout. Please try again.")
         }
-    }, [isLoaded, isSignedIn, paddle, user, session, router])
+    }, [isLoaded, isSignedIn, paddle, user, router])
 
     return (
         <div className="w-full pb-12 flex flex-col items-center">
