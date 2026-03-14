@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { resumes, users } from "@/lib/db/schema";
-import { eq, and, desc, count } from "drizzle-orm";
+import { resumes, users, usageLogs } from "@/lib/db/schema";
+import { eq, and, desc, count, gte } from "drizzle-orm";
 import { getAuthUserId, handleAuthError, AuthError } from "@/lib/auth";
-import { ALLOWED_TYPES, MAX_FILE_SIZE, PLAN_LIMITS } from "@/lib/plan-limits";
+import { ALLOWED_TYPES, MAX_FILE_SIZE, PLAN_LIMITS, monthStart } from "@/lib/plan-limits";
 import { parseResume } from "@/lib/services/resume-parser";
 import { generateEmbedding } from "@/lib/services/embedding-service";
 import { checkRateLimit, generalLimiter } from "@/lib/rate-limit";
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Enforce resume upload limit based on current resume count
+    // Enforce monthly resume upload limit via usageLogs
     const [userRow] = await db
       .select({ plan: users.plan })
       .from(users)
@@ -88,15 +88,21 @@ export async function POST(request: NextRequest) {
       PLAN_LIMITS[plan]?.resume_upload ?? PLAN_LIMITS.free.resume_upload;
 
     if (uploadLimit !== -1) {
-      const [resumeCount] = await db
-        .select({ value: count(resumes.id) })
-        .from(resumes)
-        .where(eq(resumes.userId, userId));
+      const [monthCount] = await db
+        .select({ value: count(usageLogs.id) })
+        .from(usageLogs)
+        .where(
+          and(
+            eq(usageLogs.userId, userId),
+            eq(usageLogs.feature, "resume_upload"),
+            gte(usageLogs.createdAt, monthStart())
+          )
+        );
 
-      if ((resumeCount?.value || 0) >= uploadLimit) {
+      if ((monthCount?.value || 0) >= uploadLimit) {
         return NextResponse.json(
           {
-            detail: `Resume limit reached (${uploadLimit} resumes). Delete an existing resume or upgrade your plan to upload more.`,
+            detail: `Monthly ATS Score limit reached (${uploadLimit}/month). Upgrade to Pro for unlimited scans.`,
           },
           { status: 402 }
         );
@@ -183,6 +189,13 @@ export async function POST(request: NextRequest) {
       embedding,
       versionTag,
       isOptimized: false,
+    });
+
+    // Record upload usage permanently (survives resume deletion)
+    await db.insert(usageLogs).values({
+      id: crypto.randomUUID(),
+      userId,
+      feature: "resume_upload",
     });
 
     const [newResume] = await db
