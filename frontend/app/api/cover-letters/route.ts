@@ -5,6 +5,7 @@ import {
   resumes,
   jobDescriptions,
   users,
+  usageLogs,
 } from "@/lib/db/schema";
 import { eq, and, gte, desc, count } from "drizzle-orm";
 import { getAuthUserId, handleAuthError, AuthError } from "@/lib/auth";
@@ -107,12 +108,13 @@ export async function POST(request: NextRequest) {
 
     if (clLimit !== -1) {
       const [monthCount] = await db
-        .select({ value: count(coverLetters.id) })
-        .from(coverLetters)
+        .select({ value: count(usageLogs.id) })
+        .from(usageLogs)
         .where(
           and(
-            eq(coverLetters.userId, userId),
-            gte(coverLetters.createdAt, monthStart())
+            eq(usageLogs.userId, userId),
+            eq(usageLogs.feature, "cover_letter"),
+            gte(usageLogs.createdAt, monthStart())
           )
         );
 
@@ -190,6 +192,13 @@ export async function POST(request: NextRequest) {
       length,
       companyName: company_name || jd.company,
       jobTitle: job_title || jd.title,
+    });
+
+    // Record usage permanently (survives cover letter deletion)
+    await db.insert(usageLogs).values({
+      id: crypto.randomUUID(),
+      userId,
+      feature: "cover_letter",
     });
 
     const [newCl] = await db

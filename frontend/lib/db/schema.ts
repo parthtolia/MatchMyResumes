@@ -229,6 +229,21 @@ export const subscriptions = pgTable(
   ]
 );
 
+export const usageLogs = pgTable(
+  "usage_logs",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    feature: varchar("feature", { length: 50 }).notNull(), // 'ai_optimize', 'cover_letter', 'jd_match'
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    index("usage_logs_user_id_feature_idx").on(table.userId, table.feature),
+  ]
+);
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -244,3 +259,5 @@ export type Application = typeof applications.$inferSelect;
 export type NewApplication = typeof applications.$inferInsert;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type NewSubscription = typeof subscriptions.$inferInsert;
+export type UsageLog = typeof usageLogs.$inferSelect;
+export type NewUsageLog = typeof usageLogs.$inferInsert;

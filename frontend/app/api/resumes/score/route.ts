@@ -5,6 +5,7 @@ import {
   jobDescriptions,
   resumeScores,
   users,
+  usageLogs,
 } from "@/lib/db/schema";
 import { eq, and, gte, count } from "drizzle-orm";
 import { getAuthUserId, handleAuthError, AuthError } from "@/lib/auth";
@@ -44,13 +45,13 @@ export async function POST(request: NextRequest) {
       const limit = PLAN_LIMITS[plan]?.jd_match ?? PLAN_LIMITS.free.jd_match;
       if (limit !== -1) {
         const [monthCount] = await db
-          .select({ value: count(resumeScores.id) })
-          .from(resumeScores)
-          .innerJoin(resumes, eq(resumeScores.resumeId, resumes.id))
+          .select({ value: count(usageLogs.id) })
+          .from(usageLogs)
           .where(
             and(
-              eq(resumes.userId, userId),
-              gte(resumeScores.createdAt, monthStart())
+              eq(usageLogs.userId, userId),
+              eq(usageLogs.feature, "jd_match"),
+              gte(usageLogs.createdAt, monthStart())
             )
           );
         if ((monthCount?.value || 0) >= limit) {
@@ -142,6 +143,13 @@ export async function POST(request: NextRequest) {
       matchedKeywords: scoreData.matched_keywords,
       missingKeywords: scoreData.missing_keywords,
       breakdown: scoreData.breakdown,
+    });
+
+    // Record usage permanently (survives resume/score deletion)
+    await db.insert(usageLogs).values({
+      id: crypto.randomUUID(),
+      userId,
+      feature: "jd_match",
     });
 
     const [scoreRecord] = await db

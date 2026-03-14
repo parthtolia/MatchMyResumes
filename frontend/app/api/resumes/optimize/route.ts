@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { resumes, resumeScores, jobDescriptions, users } from "@/lib/db/schema";
+import { resumes, resumeScores, jobDescriptions, users, usageLogs } from "@/lib/db/schema";
 import { eq, and, gte, desc, count } from "drizzle-orm";
 import { getAuthUserId, handleAuthError, AuthError } from "@/lib/auth";
 import { checkRateLimit, aiLimiter } from "@/lib/rate-limit";
@@ -53,13 +53,13 @@ export async function POST(request: NextRequest) {
       PLAN_LIMITS[plan]?.ai_optimize ?? PLAN_LIMITS.free.ai_optimize;
     if (limit !== -1) {
       const [monthCount] = await db
-        .select({ value: count(resumes.id) })
-        .from(resumes)
+        .select({ value: count(usageLogs.id) })
+        .from(usageLogs)
         .where(
           and(
-            eq(resumes.userId, userId),
-            eq(resumes.isOptimized, true),
-            gte(resumes.createdAt, monthStart())
+            eq(usageLogs.userId, userId),
+            eq(usageLogs.feature, "ai_optimize"),
+            gte(usageLogs.createdAt, monthStart())
           )
         );
       if ((monthCount?.value || 0) >= limit) {
@@ -216,6 +216,13 @@ export async function POST(request: NextRequest) {
         parentResumeId: rootId,
       });
     }
+
+    // Record usage permanently (survives resume deletion)
+    await db.insert(usageLogs).values({
+      id: crypto.randomUUID(),
+      userId,
+      feature: "ai_optimize",
+    });
 
     return NextResponse.json({
       optimized_text: result.optimized_text || "",
