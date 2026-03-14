@@ -1,7 +1,11 @@
 import Link from "next/link"
 import { Logo } from "@/components/ui/Logo"
 
-export const metadata = { title: "Terms of Service – MatchMyResumes" }
+export const metadata = {
+  title: "Terms of Service – MatchMyResumes",
+  description: "Read the terms and conditions for using MatchMyResumes, including acceptable use, subscriptions, and data handling.",
+  alternates: { canonical: "https://matchmyresumes.com/terms" },
+}
 
 export default function TermsPage() {
   return (

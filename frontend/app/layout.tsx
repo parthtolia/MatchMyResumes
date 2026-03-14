@@ -3,6 +3,7 @@ import { Inter } from "next/font/google"
 import { ClerkProvider } from "@clerk/nextjs"
 import { dark } from "@clerk/themes"
 import Script from "next/script"
+import { OrganizationJsonLd, WebAppJsonLd } from "@/components/JsonLd"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
@@ -28,6 +29,7 @@ export const metadata: Metadata = {
     description: "Beat the ATS with AI-powered resume optimization.",
   },
   metadataBase: new URL("https://matchmyresumes.com"),
+  alternates: { canonical: "https://matchmyresumes.com" },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -46,6 +48,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             gtag('config', 'G-JELDQCCJBS');
           `}
         </Script>
+        <OrganizationJsonLd />
+        <WebAppJsonLd />
         {children}
       </body>
     </html>

@@ -1,7 +1,11 @@
 import Link from "next/link"
 import { Logo } from "@/components/ui/Logo"
 
-export const metadata = { title: "Privacy Policy – MatchMyResumes" }
+export const metadata = {
+  title: "Privacy Policy – MatchMyResumes",
+  description: "Learn how MatchMyResumes collects, uses, and protects your personal data, resumes, and job descriptions.",
+  alternates: { canonical: "https://matchmyresumes.com/privacy" },
+}
 
 export default function PrivacyPage() {
   return (
