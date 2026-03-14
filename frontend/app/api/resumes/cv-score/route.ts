@@ -4,7 +4,7 @@ import { resumes, users } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getAuthUserId, handleAuthError, AuthError } from "@/lib/auth";
 import { checkRateLimit, aiLimiter } from "@/lib/rate-limit";
-import { PLAN_LIMITS, monthStart } from "@/lib/plan-limits";
+import { PLAN_LIMITS, cycleStart } from "@/lib/plan-limits";
 import { computeCvScore } from "@/lib/scoring/cv-scorer";
 
 export async function POST(request: NextRequest) {
@@ -32,12 +32,12 @@ export async function POST(request: NextRequest) {
       .limit(1);
 
     if (user) {
-      const ms = monthStart();
+      const cs = cycleStart(user.createdAt);
       const resetDate = user.usageResetDate;
-      if (!resetDate || resetDate < ms) {
+      if (!resetDate || resetDate < cs) {
         await db
           .update(users)
-          .set({ usageCount: 0, usageResetDate: ms })
+          .set({ usageCount: 0, usageResetDate: cs })
           .where(eq(users.id, userId));
         // Reset in-memory too
         user.usageCount = 0;

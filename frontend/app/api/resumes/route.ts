@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { resumes, users, usageLogs } from "@/lib/db/schema";
 import { eq, and, desc, count, gte } from "drizzle-orm";
 import { getAuthUserId, handleAuthError, AuthError } from "@/lib/auth";
-import { ALLOWED_TYPES, MAX_FILE_SIZE, PLAN_LIMITS, monthStart } from "@/lib/plan-limits";
+import { ALLOWED_TYPES, MAX_FILE_SIZE, PLAN_LIMITS, cycleStart } from "@/lib/plan-limits";
 import { parseResume } from "@/lib/services/resume-parser";
 import { generateEmbedding } from "@/lib/services/embedding-service";
 import { checkRateLimit, generalLimiter } from "@/lib/rate-limit";
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     // Enforce monthly resume upload limit via usageLogs
     const [userRow] = await db
-      .select({ plan: users.plan })
+      .select({ plan: users.plan, createdAt: users.createdAt })
       .from(users)
       .where(eq(users.id, userId))
       .limit(1);
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
           and(
             eq(usageLogs.userId, userId),
             eq(usageLogs.feature, "resume_upload"),
-            gte(usageLogs.createdAt, monthStart())
+            gte(usageLogs.createdAt, cycleStart(userRow?.createdAt))
           )
         );
 

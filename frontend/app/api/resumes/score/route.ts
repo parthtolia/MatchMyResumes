@@ -10,7 +10,7 @@ import {
 import { eq, and, gte, count } from "drizzle-orm";
 import { getAuthUserId, handleAuthError, AuthError } from "@/lib/auth";
 import { checkRateLimit, aiLimiter } from "@/lib/rate-limit";
-import { PLAN_LIMITS, monthStart } from "@/lib/plan-limits";
+import { PLAN_LIMITS, cycleStart } from "@/lib/plan-limits";
 import { generateEmbedding } from "@/lib/services/embedding-service";
 import { computeAtsScore } from "@/lib/scoring/ats-scorer";
 
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
             and(
               eq(usageLogs.userId, userId),
               eq(usageLogs.feature, "jd_match"),
-              gte(usageLogs.createdAt, monthStart())
+              gte(usageLogs.createdAt, cycleStart(user.createdAt))
             )
           );
         if ((monthCount?.value || 0) >= limit) {

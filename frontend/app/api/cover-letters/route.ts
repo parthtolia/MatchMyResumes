@@ -10,7 +10,7 @@ import {
 import { eq, and, gte, desc, count } from "drizzle-orm";
 import { getAuthUserId, handleAuthError, AuthError } from "@/lib/auth";
 import { checkRateLimit, aiLimiter } from "@/lib/rate-limit";
-import { monthStart } from "@/lib/plan-limits";
+import { cycleStart } from "@/lib/plan-limits";
 import { generateCoverLetter } from "@/lib/services/ai-service";
 
 export const maxDuration = 60;
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
           and(
             eq(usageLogs.userId, userId),
             eq(usageLogs.feature, "cover_letter"),
-            gte(usageLogs.createdAt, monthStart())
+            gte(usageLogs.createdAt, cycleStart(user.createdAt))
           )
         );
 
