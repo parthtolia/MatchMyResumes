@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Logo } from "@/components/ui/Logo"
+import { BlogPostingJsonLd } from "@/components/JsonLd"
 import { blogPosts, getPostBySlug } from "../posts"
 import type { Metadata } from "next"
 
@@ -25,6 +26,7 @@ export async function generateMetadata({
       description: post.description,
       type: "article",
       publishedTime: post.date,
+      authors: ["MatchMyResumes"],
     },
   }
 }
@@ -40,6 +42,7 @@ export default async function BlogPostPage({
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white">
+      <BlogPostingJsonLd post={post} />
       <nav className="flex items-center justify-between px-8 py-4 border-b border-white/5">
         <Link href="/">
           <Logo />

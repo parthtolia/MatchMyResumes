@@ -6,7 +6,6 @@ export function OrganizationJsonLd() {
     url: "https://matchmyresumes.com",
     logo: "https://matchmyresumes.com/icon.png",
     description: "AI-powered ATS resume optimization suite.",
-    sameAs: [],
   }
 
   return (
@@ -38,6 +37,42 @@ export function WebAppJsonLd() {
       "Cover Letter Generation",
       "Job Description Analysis",
     ],
+  }
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
+  )
+}
+
+export function BlogPostingJsonLd({ post }: { post: { title: string; description: string; date: string; slug: string } }) {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.description,
+    datePublished: post.date,
+    dateModified: post.date,
+    url: `https://matchmyresumes.com/blog/${post.slug}`,
+    author: {
+      "@type": "Organization",
+      name: "MatchMyResumes",
+      url: "https://matchmyresumes.com",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "MatchMyResumes",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://matchmyresumes.com/icon.png",
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://matchmyresumes.com/blog/${post.slug}`,
+    },
   }
 
   return (
