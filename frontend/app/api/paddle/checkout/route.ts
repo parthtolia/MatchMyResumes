@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { clerkClient } from "@clerk/nextjs/server";
 import { getAuthUserId, handleAuthError, AuthError } from "@/lib/auth";
 import { getPaddle } from "@/lib/services/paddle-service";
 import { config } from "@/lib/config";
@@ -21,12 +22,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user email for Paddle customer
+    // Get Paddle customer ID from DB
     const [user] = await db
-      .select({ email: users.email, paddleCustomerId: users.paddleCustomerId })
+      .select({ paddleCustomerId: users.paddleCustomerId })
       .from(users)
       .where(eq(users.id, userId))
       .limit(1);
+
+    // Get real email from Clerk (DB may have placeholder)
+    let email: string | null = null;
+    try {
+      const clerk = await clerkClient();
+      const clerkUser = await clerk.users.getUser(userId);
+      email = clerkUser.emailAddresses?.[0]?.emailAddress || null;
+    } catch {
+      // Non-critical — checkout will just ask for email
+    }
 
     const paddle = getPaddle();
 
@@ -47,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       transactionId: transaction.id,
-      email: user?.email || null,
+      email,
     });
   } catch (error: any) {
     if (error instanceof AuthError) return handleAuthError(error);
