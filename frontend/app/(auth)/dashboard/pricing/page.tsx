@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useUser as useClerkUser } from "@clerk/nextjs"
 import { useGlobalData } from "@/components/dashboard/GlobalDataProvider"
 import { initializePaddle, type Paddle } from "@paddle/paddle-js"
+import api from "@/lib/api"
 
 const HAS_REAL_CLERK =
     typeof process !== "undefined" &&
@@ -21,11 +22,6 @@ function useUserSafe() {
     }
     // eslint-disable-next-line react-hooks/rules-of-hooks
     return useClerkUser()
-}
-
-const PRICE_MAP: Record<string, string> = {
-    pro: process.env.NEXT_PUBLIC_PADDLE_PRICE_PRO || "",
-    premium: process.env.NEXT_PUBLIC_PADDLE_PRICE_PREMIUM || "",
 }
 
 const PLANS = [
@@ -77,7 +73,7 @@ function CellValue({ value }: { value: string }) {
 }
 
 export default function PricingPage() {
-    const { isLoaded, isSignedIn, user } = useUserSafe()
+    const { isLoaded, isSignedIn } = useUserSafe()
     const { plan: globalPlan } = useGlobalData()
     const [loadingId, setLoadingId] = useState<string | null>(null)
     const [checkoutError, setCheckoutError] = useState("")
@@ -131,12 +127,6 @@ export default function PricingPage() {
             return
         }
 
-        const priceId = PRICE_MAP[planId]
-        if (!priceId) {
-            setCheckoutError("Price not configured. Please try again later.")
-            return
-        }
-
         if (!paddle) {
             setCheckoutError("Payment system is loading. Please try again.")
             return
@@ -146,13 +136,11 @@ export default function PricingPage() {
             setLoadingId(planId)
             setCheckoutError("")
 
-            const email = (user as any)?.primaryEmailAddress?.emailAddress || undefined
-            const userId = (user as any)?.id || "dev-user-001"
+            // Create transaction server-side — gives us real Paddle API errors
+            const { data } = await api.post("/api/paddle/checkout", { planId })
 
             paddle.Checkout.open({
-                items: [{ priceId, quantity: 1 }],
-                customData: { user_id: userId },
-                customer: email ? { email } : undefined,
+                transactionId: data.transactionId,
                 settings: {
                     successUrl: `${window.location.origin}/dashboard/pricing`,
                 },
@@ -160,9 +148,13 @@ export default function PricingPage() {
         } catch (error: any) {
             console.error("Failed to start checkout:", error)
             setLoadingId(null)
-            setCheckoutError(error.message || "Failed to start checkout. Please try again.")
+            setCheckoutError(
+                error.response?.data?.detail ||
+                error.message ||
+                "Failed to start checkout. Please try again."
+            )
         }
-    }, [isLoaded, isSignedIn, paddle, user, router])
+    }, [isLoaded, isSignedIn, paddle, router])
 
     return (
         <div className="w-full pb-12 flex flex-col items-center">
