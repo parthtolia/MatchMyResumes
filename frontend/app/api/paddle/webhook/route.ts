@@ -4,7 +4,11 @@ import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getPaddle } from "@/lib/services/paddle-service";
 import { config } from "@/lib/config";
-import type { EventEntity, SubscriptionNotification } from "@paddle/paddle-node-sdk";
+import type {
+  EventEntity,
+  SubscriptionNotification,
+  TransactionNotification,
+} from "@paddle/paddle-node-sdk";
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -18,15 +22,23 @@ export async function POST(request: NextRequest) {
   try {
     const paddle = getPaddle();
     event = await paddle.webhooks.unmarshal(body, config.paddleWebhookSecret, signature);
-  } catch {
+  } catch (e) {
+    console.error("Paddle webhook signature verification failed:", e);
     return NextResponse.json(
       { error: "Invalid signature" },
       { status: 400 }
     );
   }
 
+  console.log(`Paddle webhook received: ${event.eventType}`);
+
   try {
     switch (event.eventType) {
+      case "transaction.completed": {
+        const txn = event.data as TransactionNotification;
+        await handleTransactionCompleted(txn);
+        break;
+      }
       case "subscription.created":
       case "subscription.updated": {
         const sub = event.data as SubscriptionNotification;
@@ -44,6 +56,49 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({ status: "success" });
+}
+
+async function handleTransactionCompleted(txn: TransactionNotification) {
+  const customData = (txn.customData as Record<string, string>) || {};
+  const userId = customData.user_id;
+
+  if (!userId) {
+    console.log("transaction.completed: no user_id in customData, skipping");
+    return;
+  }
+
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  if (!user) {
+    console.log(`transaction.completed: user ${userId} not found`);
+    return;
+  }
+
+  const priceId = txn.items?.[0]?.price?.id;
+  let plan: "free" | "pro" | "premium" = user.plan || "free";
+
+  if (priceId === config.paddlePricePremium) plan = "premium";
+  else if (priceId === config.paddlePricePro) plan = "pro";
+
+  if (plan === user.plan) {
+    console.log(`transaction.completed: plan already ${plan}, skipping`);
+    return;
+  }
+
+  await db
+    .update(users)
+    .set({
+      paddleCustomerId: txn.customerId || user.paddleCustomerId,
+      paddleSubscriptionId: txn.subscriptionId || user.paddleSubscriptionId,
+      plan,
+    })
+    .where(eq(users.id, user.id));
+
+  console.log(`transaction.completed: user ${user.email} upgraded to ${plan}`);
 }
 
 async function handleSubscriptionChange(sub: SubscriptionNotification) {

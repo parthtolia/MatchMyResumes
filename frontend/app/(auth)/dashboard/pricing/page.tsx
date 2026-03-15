@@ -101,10 +101,10 @@ export default function PricingPage() {
                 if (event.name === "checkout.completed") {
                     setLoadingId(null)
                     setCheckoutError("")
-                    // Webhook will sync the plan — trigger a re-fetch after a short delay
-                    setTimeout(() => {
+                    // Sync plan from Paddle, then refresh frontend data
+                    api.post("/api/paddle/sync").finally(() => {
                         window.dispatchEvent(new Event("planUpdated"))
-                    }, 2000)
+                    })
                 }
                 if (event.name === "checkout.error") {
                     setLoadingId(null)
