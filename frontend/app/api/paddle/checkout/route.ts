@@ -45,7 +45,10 @@ export async function POST(request: NextRequest) {
         : {}),
     });
 
-    return NextResponse.json({ transactionId: transaction.id });
+    return NextResponse.json({
+      transactionId: transaction.id,
+      email: user?.email || null,
+    });
   } catch (error: any) {
     if (error instanceof AuthError) return handleAuthError(error);
     console.error("Paddle checkout error:", error);

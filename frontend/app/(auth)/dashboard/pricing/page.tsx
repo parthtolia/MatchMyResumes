@@ -141,6 +141,7 @@ export default function PricingPage() {
 
             paddle.Checkout.open({
                 transactionId: data.transactionId,
+                customer: data.email ? { email: data.email } : undefined,
                 settings: {
                     successUrl: `${window.location.origin}/dashboard/pricing`,
                 },
