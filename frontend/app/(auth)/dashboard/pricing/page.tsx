@@ -136,9 +136,17 @@ export default function PricingPage() {
             setLoadingId(planId)
             setCheckoutError("")
 
-            // Create transaction server-side — gives us real Paddle API errors
+            // Create transaction or upgrade existing subscription server-side
             const { data } = await api.post("/api/paddle/checkout", { planId })
 
+            if (data.upgraded) {
+                // Subscription was updated server-side (upgrade/downgrade)
+                setLoadingId(null)
+                window.dispatchEvent(new Event("planUpdated"))
+                return
+            }
+
+            // New subscription — open Paddle checkout overlay
             paddle.Checkout.open({
                 transactionId: data.transactionId,
                 customer: data.email ? { email: data.email } : undefined,

@@ -22,14 +22,50 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get Paddle customer ID from DB
     const [user] = await db
-      .select({ paddleCustomerId: users.paddleCustomerId })
+      .select({
+        paddleCustomerId: users.paddleCustomerId,
+        paddleSubscriptionId: users.paddleSubscriptionId,
+        plan: users.plan,
+      })
       .from(users)
       .where(eq(users.id, userId))
       .limit(1);
 
-    // Get real email from Clerk (DB may have placeholder)
+    const paddle = getPaddle();
+
+    // If user already has an active subscription, update it (upgrade/downgrade)
+    // This swaps the price on the existing subscription instead of creating a
+    // second one, so the old plan is automatically replaced.
+    if (user?.paddleSubscriptionId) {
+      const updated = await paddle.subscriptions.update(
+        user.paddleSubscriptionId,
+        {
+          items: [{ priceId, quantity: 1 }],
+          prorationBillingMode: "prorated_immediately",
+          customData: { user_id: userId },
+        }
+      );
+
+      // Update plan in DB immediately (webhook will also confirm)
+      let plan: "free" | "pro" | "premium" = "free";
+      if (priceId === config.paddlePricePremium) plan = "premium";
+      else if (priceId === config.paddlePricePro) plan = "pro";
+
+      await db
+        .update(users)
+        .set({ plan })
+        .where(eq(users.id, userId));
+
+      return NextResponse.json({
+        upgraded: true,
+        plan,
+        transactionId: null,
+        email: null,
+      });
+    }
+
+    // New subscription — create a transaction for the checkout overlay
     let email: string | null = null;
     try {
       const clerk = await clerkClient();
@@ -39,10 +75,6 @@ export async function POST(request: NextRequest) {
       // Non-critical — checkout will just ask for email
     }
 
-    const paddle = getPaddle();
-
-    // Build the origin from the incoming request so the checkout URL
-    // works in both preview and production deployments.
     const origin = request.headers.get("origin") || request.nextUrl.origin;
 
     const transaction = await paddle.transactions.create({
@@ -57,6 +89,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({
+      upgraded: false,
       transactionId: transaction.id,
       email,
     });

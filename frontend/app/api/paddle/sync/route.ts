@@ -26,44 +26,38 @@ export async function POST() {
       return NextResponse.json({ plan: "free" });
     }
 
-    // If already upgraded, return current plan
-    if (user.plan !== "free") {
-      return NextResponse.json({ plan: user.plan });
+    if (!user.paddleCustomerId) {
+      return NextResponse.json({ plan: user.plan || "free" });
     }
 
-    // No subscription ID yet (webhook hasn't arrived) — check Paddle directly
-    // Look up transactions with this user's custom data
+    // Check Paddle for the most recent completed transaction
     const paddle = getPaddle();
     const transactions = paddle.transactions.list({
-      customerId: user.paddleCustomerId ? [user.paddleCustomerId] : undefined,
+      customerId: [user.paddleCustomerId],
       status: ["completed"],
     });
 
+    let latestPlan: "free" | "pro" | "premium" = user.plan || "free";
+
     for await (const txn of transactions) {
-      const customData = (txn.customData as Record<string, string>) || {};
-      if (customData.user_id !== userId) continue;
-
       const priceId = txn.items?.[0]?.price?.id;
-      let plan: "free" | "pro" | "premium" = "free";
 
-      if (priceId === config.paddlePricePremium) plan = "premium";
-      else if (priceId === config.paddlePricePro) plan = "pro";
-
-      if (plan !== "free") {
-        await db
-          .update(users)
-          .set({
-            paddleCustomerId: txn.customerId || user.paddleCustomerId,
-            paddleSubscriptionId: txn.subscriptionId || user.paddleSubscriptionId,
-            plan,
-          })
-          .where(eq(users.id, userId));
-
-        return NextResponse.json({ plan });
+      if (priceId === config.paddlePricePremium) {
+        latestPlan = "premium";
+        break; // Premium is highest tier
+      } else if (priceId === config.paddlePricePro && latestPlan !== "premium") {
+        latestPlan = "pro";
       }
     }
 
-    return NextResponse.json({ plan: "free" });
+    if (latestPlan !== user.plan) {
+      await db
+        .update(users)
+        .set({ plan: latestPlan })
+        .where(eq(users.id, userId));
+    }
+
+    return NextResponse.json({ plan: latestPlan });
   } catch (error) {
     if (error instanceof AuthError) return handleAuthError(error);
     console.error("Paddle sync error:", error);
