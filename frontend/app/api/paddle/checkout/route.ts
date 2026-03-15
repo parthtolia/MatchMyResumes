@@ -30,9 +30,16 @@ export async function POST(request: NextRequest) {
 
     const paddle = getPaddle();
 
+    // Build the origin from the incoming request so the checkout URL
+    // works in both preview and production deployments.
+    const origin = request.headers.get("origin") || request.nextUrl.origin;
+
     const transaction = await paddle.transactions.create({
       items: [{ priceId, quantity: 1 }],
       customData: { user_id: userId },
+      checkout: {
+        url: `${origin}/dashboard/pricing`,
+      },
       ...(user?.paddleCustomerId
         ? { customerId: user.paddleCustomerId }
         : {}),
