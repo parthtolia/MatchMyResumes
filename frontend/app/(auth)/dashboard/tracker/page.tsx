@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Plus, Briefcase, Calendar, ExternalLink, X, Loader2, ChevronDown, ChevronUp, Edit3, Check } from "lucide-react"
+import ConfirmModal from "@/components/ui/ConfirmModal"
 import api from "@/lib/api"
 import { formatDate } from "@/lib/utils"
 import { useUser as useClerkUser } from "@clerk/nextjs"
@@ -208,6 +209,7 @@ export default function TrackerPage() {
     const [formError, setFormError] = useState("")
     const datePickerRef = useRef<HTMLInputElement>(null)
     const [dragOverCol, setDragOverCol] = useState<Status | null>(null)
+    const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
 
     const fetchApps = async () => {
         if (!isLoaded || !isSignedIn) return
@@ -263,8 +265,11 @@ export default function TrackerPage() {
         }
     }
 
-    const deleteApp = async (id: string) => {
-        if (!window.confirm("Delete this application? This cannot be undone.")) return
+    const requestDeleteApp = (id: string) => setDeleteConfirmId(id)
+    const confirmDeleteApp = async () => {
+        const id = deleteConfirmId
+        if (!id) return
+        setDeleteConfirmId(null)
         setApplications(prev => prev.filter(a => a.id !== id))
         try {
             await api.delete(`/api/applications/${id}`)
@@ -425,7 +430,7 @@ export default function TrackerPage() {
                                                 key={app.id}
                                                 app={app}
                                                 onMove={moveStatus}
-                                                onDelete={deleteApp}
+                                                onDelete={requestDeleteApp}
                                                 onUpdateNotes={updateNotes}
                                             />
                                         ))}
@@ -441,6 +446,17 @@ export default function TrackerPage() {
                     ))}
                 </div>
             )}
+
+            <ConfirmModal
+                open={!!deleteConfirmId}
+                title="Delete Application"
+                message="Are you sure you want to delete this application? This action cannot be undone."
+                confirmLabel="Delete"
+                cancelLabel="Cancel"
+                variant="danger"
+                onConfirm={confirmDeleteApp}
+                onCancel={() => setDeleteConfirmId(null)}
+            />
         </div>
     )
 }

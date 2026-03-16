@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { FileText, Upload, Trash2, Tag, Loader2, CheckCircle2, AlertTriangle, Check, Copy, Download } from "lucide-react"
+import AlertModal from "@/components/ui/AlertModal"
 import { useDropzone } from "react-dropzone"
 import api from "@/lib/api"
 import { formatDate } from "@/lib/utils"
@@ -86,6 +87,8 @@ export default function ResumesPage() {
 
     // Copy state
     const [copied, setCopied] = useState(false)
+    // Alert modal
+    const [alertMsg, setAlertMsg] = useState("")
 
     const copyText = () => {
         if (!selected?.raw_text) return
@@ -98,14 +101,14 @@ export default function ResumesPage() {
         if (!selected?.raw_text) return
         const name = selected.filename?.replace(/\.[^.]+$/, "") || "resume"
         try { await downloadTextAsPdf(selected.raw_text, `${name}.pdf`) }
-        catch { alert("Failed to generate PDF") }
+        catch { setAlertMsg("Failed to generate PDF. Please try again.") }
     }
 
     const downloadDocx = async () => {
         if (!selected?.raw_text) return
         const name = selected.filename?.replace(/\.[^.]+$/, "") || "resume"
         try { await downloadTextAsDocx(selected.raw_text, `${name}.docx`) }
-        catch { alert("Failed to generate DOCX") }
+        catch { setAlertMsg("Failed to generate DOCX. Please try again.") }
     }
 
     // Keep local list in sync with global, always filtering out already-deleted IDs
@@ -444,6 +447,12 @@ export default function ResumesPage() {
                     />
                 )}
             </AnimatePresence>
+            <AlertModal
+                open={!!alertMsg}
+                title="Download Failed"
+                message={alertMsg}
+                onClose={() => setAlertMsg("")}
+            />
         </div>
     )
 }

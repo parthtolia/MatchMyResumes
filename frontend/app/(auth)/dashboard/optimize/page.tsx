@@ -3,6 +3,7 @@ import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import { Zap, Loader2, Copy, Check, ArrowRight, Lock, Download } from "lucide-react"
+import AlertModal from "@/components/ui/AlertModal"
 import api from "@/lib/api"
 import { useGlobalData } from "@/components/dashboard/GlobalDataProvider"
 import { downloadTextAsPdf, downloadTextAsDocx } from "@/lib/download"
@@ -37,6 +38,7 @@ function OptimizeContent() {
     const [loading, setLoading] = useState(false)
     const [copied, setCopied] = useState(false)
     const [error, setError] = useState("")
+    const [alertMsg, setAlertMsg] = useState("")
 
     useEffect(() => {
         if (resumeId && isLoaded && isSignedIn) {
@@ -85,7 +87,7 @@ function OptimizeContent() {
         const selectedResume = resumes.find(r => r.id === resumeId)
         const name = selectedResume?.filename?.replace(/\.[^.]+$/, "") || "resume"
         try { await downloadTextAsPdf(result.optimized_text, `${name}_optimized.pdf`) }
-        catch { alert("Failed to generate PDF") }
+        catch { setAlertMsg("Failed to generate PDF. Please try again.") }
     }
 
     const downloadOptimizedDocx = async () => {
@@ -93,7 +95,7 @@ function OptimizeContent() {
         const selectedResume = resumes.find(r => r.id === resumeId)
         const name = selectedResume?.filename?.replace(/\.[^.]+$/, "") || "resume"
         try { await downloadTextAsDocx(result.optimized_text, `${name}_optimized.docx`) }
-        catch { alert("Failed to generate DOCX") }
+        catch { setAlertMsg("Failed to generate DOCX. Please try again.") }
     }
 
     // Auto-optimize if navigating from JD Match
@@ -276,6 +278,12 @@ function OptimizeContent() {
                     )}
                 </motion.div>
             )}
+            <AlertModal
+                open={!!alertMsg}
+                title="Download Failed"
+                message={alertMsg}
+                onClose={() => setAlertMsg("")}
+            />
         </div>
     )
 }

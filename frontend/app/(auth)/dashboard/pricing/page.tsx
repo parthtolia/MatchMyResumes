@@ -101,10 +101,21 @@ export default function PricingPage() {
                 if (event.name === "checkout.completed") {
                     setLoadingId(null)
                     setCheckoutError("")
-                    // Sync plan from Paddle, then refresh frontend data
-                    api.post("/api/paddle/sync").finally(() => {
+                    // Sync plan from Paddle with retry — webhook may not have arrived yet
+                    const syncPlan = async (retries = 3) => {
+                        for (let i = 0; i < retries; i++) {
+                            try {
+                                const res = await api.post("/api/paddle/sync")
+                                if (res.data?.plan && res.data.plan !== "free") {
+                                    window.dispatchEvent(new Event("planUpdated"))
+                                    return
+                                }
+                            } catch { }
+                            await new Promise(r => setTimeout(r, 2000 * (i + 1)))
+                        }
                         window.dispatchEvent(new Event("planUpdated"))
-                    })
+                    }
+                    syncPlan()
                 }
                 if (event.name === "checkout.error") {
                     setLoadingId(null)

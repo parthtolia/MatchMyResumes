@@ -86,11 +86,11 @@ export async function POST(request: NextRequest) {
       if ((total?.value || 0) >= trackerLimit) {
         const upgradeMsg =
           plan === "free"
-            ? "Upgrade to Pro for 200 jobs."
-            : "Upgrade to Premium for unlimited.";
+            ? "Upgrade to Pro to track up to 200 applications."
+            : "Upgrade to Premium for unlimited tracking.";
         return NextResponse.json(
           {
-            detail: `Job tracker limit reached (${trackerLimit} applications). ${upgradeMsg}`,
+            detail: `You've reached the maximum of ${trackerLimit} tracked applications on the ${plan.charAt(0).toUpperCase() + plan.slice(1)} plan. ${upgradeMsg}`,
           },
           { status: 402 }
         );

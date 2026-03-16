@@ -3,6 +3,7 @@ import { useState, useEffect, Suspense, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Mail, Loader2, Copy, Check, Download, Edit3, Eye, Bold, Italic, List as ListIcon } from "lucide-react"
+import AlertModal from "@/components/ui/AlertModal"
 import api from "@/lib/api"
 import { useUser as useClerkUser } from "@clerk/nextjs"
 import dynamic from "next/dynamic"
@@ -54,6 +55,7 @@ function CoverLetterContent() {
     const [loadingStep, setLoadingStep] = useState(0)
     const [copied, setCopied] = useState(false)
     const [error, setError] = useState("")
+    const [alertMsg, setAlertMsg] = useState("")
 
     const [viewMode, setViewMode] = useState<"edit" | "preview">("edit")
     const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -142,7 +144,7 @@ function CoverLetterContent() {
             doc.save("Cover_Letter.pdf");
         } catch (e) {
             console.error(e);
-            alert("Failed to generate PDF");
+            setAlertMsg("Failed to generate PDF. Please try again.");
         }
     }
 
@@ -361,6 +363,12 @@ function CoverLetterContent() {
                     )}
                 </div>
             </div>
+            <AlertModal
+                open={!!alertMsg}
+                title="Download Failed"
+                message={alertMsg}
+                onClose={() => setAlertMsg("")}
+            />
         </div>
     )
 }

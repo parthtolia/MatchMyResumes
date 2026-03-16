@@ -90,6 +90,7 @@ function ScanPageContent() {
                 setResumeId(r.id)
                 setResumeName(r.filename)
                 setResumeSource("select")
+                setError("")
                 setStep("jd")
             }
         }
@@ -102,6 +103,7 @@ function ScanPageContent() {
             setResumeId(r.id)
             setResumeName(r.filename)
             setResumeSource("select")
+            setError("")
             setStep("jd")
         }
     }

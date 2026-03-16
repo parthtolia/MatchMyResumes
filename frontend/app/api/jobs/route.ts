@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { jobDescriptions, users } from "@/lib/db/schema";
+import { jobDescriptions, users, applications } from "@/lib/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { getAuthUserId, handleAuthError, AuthError } from "@/lib/auth";
 import { parseJobDescription } from "@/lib/services/jd-parser";
@@ -116,6 +116,20 @@ export async function POST(request: NextRequest) {
       parsedJson: parsed,
       embedding,
     });
+
+    // Auto-create a "saved" application so the JD appears in Job Tracker
+    try {
+      await db.insert(applications).values({
+        id: crypto.randomUUID(),
+        userId,
+        companyName: company || title || "Unknown Company",
+        jobTitle: title || "Untitled Position",
+        jdId,
+        status: "saved",
+      });
+    } catch {
+      // Non-critical — don't fail JD creation if application insert fails
+    }
 
     const [newJd] = await db
       .select()

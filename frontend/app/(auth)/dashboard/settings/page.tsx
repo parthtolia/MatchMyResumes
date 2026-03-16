@@ -2,6 +2,8 @@
 import { useUser as useClerkUser, useSession } from "@clerk/nextjs"
 import { useState, useEffect } from "react"
 import { User, CreditCard, Shield } from "lucide-react"
+import ConfirmModal from "@/components/ui/ConfirmModal"
+import AlertModal from "@/components/ui/AlertModal"
 import api, { cancelSubscription } from "@/lib/api"
 import Link from "next/link"
 
@@ -32,6 +34,8 @@ export default function SettingsPage() {
     const [loading, setLoading] = useState(true)
     const [canceling, setCanceling] = useState(false)
     const [cancelSuccess, setCancelSuccess] = useState(false)
+    const [showCancelConfirm, setShowCancelConfirm] = useState(false)
+    const [alertMsg, setAlertMsg] = useState("")
 
     useEffect(() => {
         if (!isLoaded) return
@@ -43,18 +47,14 @@ export default function SettingsPage() {
     }, [isLoaded])
 
     const handleCancel = async () => {
-        const confirmed = window.confirm(
-            "Are you sure you want to cancel your subscription? You'll keep access until the end of your billing period."
-        )
-        if (!confirmed) return
-
+        setShowCancelConfirm(false)
         try {
             setCanceling(true)
             const token = await session?.getToken()
             await cancelSubscription(token)
             setCancelSuccess(true)
         } catch (error: any) {
-            alert(error.message || "Failed to cancel subscription")
+            setAlertMsg(error.message || "Failed to cancel subscription")
         } finally {
             setCanceling(false)
         }
@@ -128,7 +128,7 @@ export default function SettingsPage() {
                                     <span className="text-xs text-amber-400">Cancellation scheduled</span>
                                 ) : (
                                     <button
-                                        onClick={handleCancel}
+                                        onClick={() => setShowCancelConfirm(true)}
                                         disabled={canceling}
                                         className="text-xs font-medium text-red-400 hover:text-red-300 transition-colors bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-lg disabled:opacity-50"
                                     >
@@ -153,6 +153,23 @@ export default function SettingsPage() {
                     <p>Resume files are processed server-side and not stored permanently.</p>
                 </div>
             </div>
+
+            <ConfirmModal
+                open={showCancelConfirm}
+                title="Cancel Subscription"
+                message="Are you sure you want to cancel your subscription? You'll keep access until the end of your billing period."
+                confirmLabel="Cancel Subscription"
+                cancelLabel="Keep Plan"
+                variant="danger"
+                onConfirm={handleCancel}
+                onCancel={() => setShowCancelConfirm(false)}
+            />
+            <AlertModal
+                open={!!alertMsg}
+                title="Error"
+                message={alertMsg}
+                onClose={() => setAlertMsg("")}
+            />
         </div>
     )
 }
