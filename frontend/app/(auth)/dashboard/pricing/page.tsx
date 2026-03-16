@@ -101,11 +101,18 @@ export default function PricingPage() {
                 if (event.name === "checkout.completed") {
                     setLoadingId(null)
                     setCheckoutError("")
-                    // Sync plan from Paddle with retry — webhook may not have arrived yet
+                    // Extract customer + transaction data from the checkout event
+                    // and pass to sync so it can update the DB directly
+                    const eventData = (event as any).data
+                    const customerId = eventData?.customer?.id || null
+                    const transactionId = eventData?.transaction_id || null
                     const syncPlan = async (retries = 3) => {
                         for (let i = 0; i < retries; i++) {
                             try {
-                                const res = await api.post("/api/paddle/sync")
+                                const res = await api.post("/api/paddle/sync", {
+                                    customerId,
+                                    transactionId,
+                                })
                                 if (res.data?.plan && res.data.plan !== "free") {
                                     window.dispatchEvent(new Event("planUpdated"))
                                     return
