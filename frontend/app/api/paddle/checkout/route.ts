@@ -88,6 +88,15 @@ export async function POST(request: NextRequest) {
         : {}),
     });
 
+    // Save the Paddle customerId immediately so /api/paddle/sync can
+    // query transactions even before the webhook arrives.
+    if (transaction.customerId && transaction.customerId !== user?.paddleCustomerId) {
+      await db
+        .update(users)
+        .set({ paddleCustomerId: transaction.customerId })
+        .where(eq(users.id, userId));
+    }
+
     return NextResponse.json({
       upgraded: false,
       transactionId: transaction.id,

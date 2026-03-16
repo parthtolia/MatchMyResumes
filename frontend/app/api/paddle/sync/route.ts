@@ -27,6 +27,8 @@ export async function POST() {
     }
 
     if (!user.paddleCustomerId) {
+      // paddleCustomerId not yet set — return current DB plan
+      // (checkout route should have saved it, but webhook may update it too)
       return NextResponse.json({ plan: user.plan || "free" });
     }
 
@@ -61,6 +63,13 @@ export async function POST() {
   } catch (error) {
     if (error instanceof AuthError) return handleAuthError(error);
     console.error("Paddle sync error:", error);
-    return NextResponse.json({ plan: "free" });
+    // On error, still return current DB plan rather than defaulting to free
+    try {
+      const userId = await getAuthUserId();
+      const [u] = await db.select({ plan: users.plan }).from(users).where(eq(users.id, userId)).limit(1);
+      return NextResponse.json({ plan: u?.plan || "free" });
+    } catch {
+      return NextResponse.json({ plan: "free" });
+    }
   }
 }

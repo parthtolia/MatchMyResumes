@@ -251,7 +251,7 @@ export default function TrackerPage() {
             setShowForm(false)
             setForm({ company_name: "", job_title: "", job_url: "", status: "applied", notes: "", date_applied: "" })
         } catch (e: any) {
-            setFormError(e?.response?.data?.detail || "Failed to add application. Please try again.")
+            setFormError(e?.response?.data?.detail || e?.message || "Failed to add application. Please try again.")
         } finally { setSaving(false) }
     }
 
