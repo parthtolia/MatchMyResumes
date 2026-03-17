@@ -209,6 +209,86 @@ export function computeQuantificationScore(
   return [Math.round(score * 100) / 100, found];
 }
 
+// --- Resume-only ATS score (no JD required) ---
+// Weights: Formatting 30%, Section 25%, Quantification 20%, Keyword Richness 25%
+
+const RESUME_ONLY_WEIGHTS = {
+  formatting: 0.3,
+  section: 0.25,
+  quantification: 0.2,
+  keywordRichness: 0.25,
+};
+
+/**
+ * Evaluate keyword richness of a resume without a JD.
+ * Checks how many distinct skill/technical terms the resume contains.
+ */
+export function computeKeywordRichnessScore(
+  resumeText: string
+): [number, string[]] {
+  const keywords = extractTopKeywords(resumeText, 40);
+  // A good resume should have 15+ distinct relevant keywords
+  const count = keywords.length;
+  const score = Math.min(100, (count / 15) * 100);
+  return [Math.round(score * 100) / 100, keywords];
+}
+
+export async function computeAtsScoreResumeOnly(
+  resumeText: string,
+  structuredJson: Record<string, any>,
+  fileType: string = "pdf"
+): Promise<Record<string, any>> {
+  const [fmtScore, fmtDetails] = computeFormattingScore(resumeText, fileType);
+  const [secScore, secDetails] = computeSectionScore(structuredJson);
+  const [quantScore, quantDetails] = computeQuantificationScore(resumeText);
+  const [richScore, resumeKeywords] = computeKeywordRichnessScore(resumeText);
+
+  const total =
+    fmtScore * RESUME_ONLY_WEIGHTS.formatting +
+    secScore * RESUME_ONLY_WEIGHTS.section +
+    quantScore * RESUME_ONLY_WEIGHTS.quantification +
+    richScore * RESUME_ONLY_WEIGHTS.keywordRichness;
+
+  // Generate tips
+  const formattingTips: string[] = [];
+  if (!fmtDetails.no_tables) formattingTips.push("Avoid using tables — many ATS systems cannot parse them correctly.");
+  if (!fmtDetails.minimal_special_chars) formattingTips.push("Reduce special characters and symbols — stick to standard bullet points.");
+  if (!fmtDetails.standard_headings) formattingTips.push("Use standard section headings like Experience, Education, Skills, and Summary.");
+  if (!fmtDetails.appropriate_length) formattingTips.push("Aim for 200–1,500 words — too short or too long hurts ATS parsing.");
+  if (!fmtDetails.has_contact_info) formattingTips.push("Add a professional email address to your contact information.");
+
+  const sectionTips: string[] = [];
+  if (!secDetails.experience) sectionTips.push("Add a detailed Experience section with job titles, companies, and dates.");
+  if (!secDetails.education) sectionTips.push("Include an Education section with your degree(s) and institution(s).");
+  if (!secDetails.skills) sectionTips.push("Add a Skills section listing your technical and professional skills.");
+  if (!secDetails.summary) sectionTips.push("Consider adding a Summary or Objective section at the top of your resume.");
+
+  const quantTips: string[] = [];
+  if (quantScore < 50) quantTips.push("Add more quantified achievements (e.g., 'Increased revenue by 30%', 'Managed a team of 12').");
+
+  const keywordTips: string[] = [];
+  if (richScore < 60) keywordTips.push("Your resume lacks distinct skill keywords. Add more specific tools, technologies, and domain terms.");
+
+  return {
+    total_score: Math.round(total * 10) / 10,
+    formatting_score: fmtScore,
+    section_score: secScore,
+    quantification_score: quantScore,
+    keyword_richness_score: richScore,
+    resume_keywords: resumeKeywords,
+    breakdown: {
+      formatting: { score: fmtScore, weight: "30%", checks: fmtDetails },
+      section: { score: secScore, weight: "25%", sections: secDetails },
+      quantification: { score: quantScore, weight: "20%", found: quantDetails },
+      keyword_richness: { score: richScore, weight: "25%", keywords_found: resumeKeywords.length },
+      formatting_tips: formattingTips,
+      section_tips: sectionTips,
+      quantification_tips: quantTips,
+      keyword_tips: keywordTips,
+    },
+  };
+}
+
 export async function computeAtsScore(
   resumeText: string,
   jdText: string,

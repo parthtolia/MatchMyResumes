@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, publicAiLimiter } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
 import { parseResume } from "@/lib/services/resume-parser";
-import { generateEmbedding } from "@/lib/services/embedding-service";
-import { computeAtsScore } from "@/lib/scoring/ats-scorer";
+import { computeAtsScoreResumeOnly } from "@/lib/scoring/ats-scorer";
 
 export const maxDuration = 60;
 
@@ -20,7 +19,6 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
-    const jdText = (formData.get("jd_text") as string) || "";
 
     if (!file) {
       return NextResponse.json(
@@ -39,20 +37,6 @@ export async function POST(request: NextRequest) {
     if (file.size > 5 * 1024 * 1024) {
       return NextResponse.json(
         { detail: "File size must be under 5MB" },
-        { status: 400 }
-      );
-    }
-
-    if (jdText.length < 50) {
-      return NextResponse.json(
-        { detail: "Job description must be at least 50 characters" },
-        { status: 400 }
-      );
-    }
-
-    if (jdText.length > 10000) {
-      return NextResponse.json(
-        { detail: "Job description must be under 10,000 characters" },
         { status: 400 }
       );
     }
@@ -77,17 +61,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate embeddings in parallel
-    const [resumeEmbedding, jdEmbedding] = await Promise.all([
-      generateEmbedding(parsed.raw_text).catch(() => null),
-      generateEmbedding(jdText).catch(() => null),
-    ]);
-
-    const scoreData = await computeAtsScore(
+    const scoreData = await computeAtsScoreResumeOnly(
       parsed.raw_text,
-      jdText,
-      resumeEmbedding,
-      jdEmbedding,
       parsed.structured_json,
       fileType
     );
@@ -95,15 +70,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       total_score: scoreData.total_score,
       breakdown: {
-        keyword_score: scoreData.keyword_score,
-        semantic_score: scoreData.semantic_score,
         formatting_score: scoreData.formatting_score,
         section_score: scoreData.section_score,
         quantification_score: scoreData.quantification_score,
+        keyword_richness_score: scoreData.keyword_richness_score,
         details: scoreData.breakdown,
       },
-      matched_keywords: scoreData.matched_keywords || [],
-      missing_keywords: scoreData.missing_keywords || [],
+      resume_keywords: scoreData.resume_keywords || [],
     });
   } catch (error) {
     console.error("Public ATS score error:", error);

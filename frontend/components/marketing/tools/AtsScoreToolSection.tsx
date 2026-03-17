@@ -6,15 +6,13 @@ import AtsScoreResult from "@/components/marketing/results/AtsScoreResult"
 interface ATSResult {
   total_score: number
   breakdown: {
-    keyword_score: number
-    semantic_score: number
     formatting_score: number
     section_score: number
     quantification_score: number
+    keyword_richness_score: number
     details: Record<string, unknown>
   }
-  matched_keywords: string[]
-  missing_keywords: string[]
+  resume_keywords: string[]
 }
 
 export default function AtsScoreToolSection() {
@@ -55,7 +53,7 @@ export default function AtsScoreToolSection() {
           Try It <span className="gradient-text">Now</span>
         </h2>
         <p className="text-gray-400 text-center mb-10 max-w-xl mx-auto">
-          Upload your resume and paste a job description to get your ATS compatibility score instantly.
+          Upload your resume to get your ATS compatibility score instantly — no job description needed.
         </p>
 
         {result ? (
@@ -77,6 +75,7 @@ export default function AtsScoreToolSection() {
               loading={loading}
               error={error}
               submitLabel="Check ATS Score"
+              needsJd={false}
             />
           </div>
         )}

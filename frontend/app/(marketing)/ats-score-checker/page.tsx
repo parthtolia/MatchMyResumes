@@ -13,9 +13,9 @@ import {
 import AtsScoreToolSection from "@/components/marketing/tools/AtsScoreToolSection"
 
 export const metadata: Metadata = {
-  title: "Free ATS Score Checker — Check Resume ATS Compatibility | MatchMyResumes",
+  title: "Free ATS Resume Score Checker — Check ATS Compatibility | MatchMyResumes",
   description:
-    "Check your resume ATS score instantly. Get a detailed 0-100 compatibility breakdown across 5 dimensions — keywords, semantics, formatting, quantification, and sections. Free, no limits.",
+    "Upload your resume and get a free ATS compatibility score instantly. Detailed 0-100 breakdown across formatting, sections, keywords, and quantification — no job description needed.",
   keywords: [
     "ATS score checker",
     "ATS resume score",
@@ -24,11 +24,12 @@ export const metadata: Metadata = {
     "ATS resume checker free",
     "applicant tracking system score",
     "resume score checker",
+    "free resume checker",
   ],
   alternates: { canonical: "https://matchmyresumes.com/ats-score-checker" },
   openGraph: {
-    title: "Free ATS Score Checker | MatchMyResumes",
-    description: "Get your resume ATS score in seconds — 5-dimension breakdown, actionable tips, completely free.",
+    title: "Free ATS Resume Score Checker | MatchMyResumes",
+    description: "Upload your resume and get an instant ATS score — 4-dimension breakdown with actionable tips, completely free.",
     url: "https://matchmyresumes.com/ats-score-checker",
     type: "website",
   },
@@ -37,11 +38,15 @@ export const metadata: Metadata = {
 const faqs = [
   {
     q: "What is an ATS score?",
-    a: "An ATS (Applicant Tracking System) score measures how well your resume matches the criteria used by automated screening software. A higher score means your resume is more likely to pass through the ATS filter and reach a human recruiter.",
+    a: "An ATS (Applicant Tracking System) score measures how well your resume is structured for automated screening software. A higher score means your resume is more likely to be parsed correctly and pass through ATS filters to reach a human recruiter.",
   },
   {
-    q: "What are the 5 scoring dimensions?",
-    a: "We analyze your resume across Keyword Match (relevant terms), Semantic Match (contextual understanding), Formatting (ATS-friendly structure), Quantification (measurable achievements), and Section Completeness (required sections like Experience, Education, Skills).",
+    q: "Do I need a job description to check my ATS score?",
+    a: "No! Our ATS Score Checker evaluates your resume's general ATS compatibility — formatting, section structure, keyword richness, and quantified achievements. For job-specific matching, sign up free to use our JD Match tool.",
+  },
+  {
+    q: "What are the 4 scoring dimensions?",
+    a: "We analyze your resume across ATS Formatting (clean, parseable structure), Section Completeness (required sections like Experience, Education, Skills), Keyword Richness (density of relevant skill and technology terms), and Quantification (measurable achievements with numbers and metrics).",
   },
   {
     q: "What score should I aim for?",
@@ -64,7 +69,7 @@ export default function AtsScoreCheckerPage() {
         badge="Free ATS Resume Scanner"
         title="Check Your Resume"
         titleAccent="ATS Score Instantly"
-        subtitle="Upload your resume and get a detailed 0-100 ATS compatibility score with actionable improvement tips — across 5 key dimensions that recruiters and ATS systems care about."
+        subtitle="Upload your resume and get a detailed 0-100 ATS compatibility score with actionable improvement tips — no job description required. Just upload and get your score."
         ctaText="Check Your ATS Score Now"
         ctaHref="#tool"
       />
@@ -74,8 +79,8 @@ export default function AtsScoreCheckerPage() {
         titleAccent="ATS Score?"
         paragraphs={[
           "Over 99% of Fortune 500 companies use Applicant Tracking Systems (ATS) to automatically screen resumes before a human recruiter ever sees them. If your resume isn't optimized for these systems, it gets filtered out — regardless of how qualified you are.",
-          "An ATS score quantifies how well your resume aligns with what these systems look for: relevant keywords, proper formatting, measurable achievements, and complete sections. Think of it as a compatibility check between your resume and the automated gatekeepers of modern hiring.",
-          "Our ATS Score Checker analyzes your resume across 5 critical dimensions and gives you a clear 0-100 score with specific, actionable tips to improve each area. No guesswork — just data-driven insights to help you get past the bots and in front of real decision-makers.",
+          "An ATS score quantifies how well your resume is structured for these automated gatekeepers: proper formatting, complete sections, relevant keywords, and measurable achievements. Even before matching to a specific job, your resume needs to be ATS-friendly to get through.",
+          "Our ATS Score Checker analyzes your resume across 4 critical dimensions and gives you a clear 0-100 score with specific, actionable tips to improve each area. Just upload your resume — no job description needed.",
         ]}
       />
 
@@ -88,8 +93,8 @@ export default function AtsScoreCheckerPage() {
           },
           {
             num: "02",
-            title: "Get 5-Dimension Breakdown",
-            desc: "Receive a detailed score across Keyword Match, Semantic Match, Formatting, Quantification, and Section Completeness — each scored 0-100.",
+            title: "Get 4-Dimension Breakdown",
+            desc: "Receive a detailed score across ATS Formatting, Section Completeness, Keyword Richness, and Quantification — each scored 0-100.",
           },
           {
             num: "03",
@@ -130,11 +135,10 @@ export default function AtsScoreCheckerPage() {
 
           {/* Dimension bars */}
           <div className="flex-1 w-full space-y-4">
-            <ProgressBar label="Keyword Match" value={92} color="bg-emerald-500" />
-            <ProgressBar label="Semantic Match" value={85} color="bg-violet-500" />
-            <ProgressBar label="Formatting" value={90} color="bg-blue-500" />
+            <ProgressBar label="ATS Formatting" value={92} color="bg-emerald-500" />
+            <ProgressBar label="Section Completeness" value={88} color="bg-violet-500" />
+            <ProgressBar label="Keyword Richness" value={85} color="bg-blue-500" />
             <ProgressBar label="Quantification" value={78} color="bg-amber-500" />
-            <ProgressBar label="Section Score" value={88} color="bg-pink-500" />
           </div>
         </div>
 
@@ -153,10 +157,10 @@ export default function AtsScoreCheckerPage() {
         title="Why Use Our"
         titleAccent="ATS Checker?"
         benefits={[
-          { text: "Instant feedback — get your score in under 30 seconds" },
-          { text: "5-dimension analysis covers everything ATS systems evaluate" },
+          { text: "Just upload your resume — no job description required" },
+          { text: "Instant feedback — get your score in under 10 seconds" },
+          { text: "4-dimension analysis covers everything ATS systems evaluate" },
           { text: "Actionable tips tell you exactly what to fix and how" },
-          { text: "Industry-standard algorithms used by real ATS platforms" },
           { text: "Completely free — unlimited scans, no credit card required" },
           { text: "Supports PDF and DOCX formats for maximum compatibility" },
         ]}
@@ -167,7 +171,7 @@ export default function AtsScoreCheckerPage() {
       <CtaSection
         title="Ready to Beat the"
         titleAccent="ATS?"
-        subtitle="Join 50,000+ job seekers who improved their ATS scores by an average of 85%. Start in seconds."
+        subtitle="Join thousands of job seekers who improved their ATS scores. Upload your resume and get your score in seconds."
         ctaText="Check Your ATS Score Now"
         ctaHref="#tool"
       />
