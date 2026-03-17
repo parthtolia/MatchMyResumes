@@ -9,6 +9,7 @@ import {
   FaqSection,
   CtaSection,
 } from "@/components/marketing/ToolPageSections"
+import OptimizerToolSection from "@/components/marketing/tools/OptimizerToolSection"
 
 export const metadata: Metadata = {
   title: "AI Resume Optimizer — Optimize Your Resume for ATS | MatchMyResumes",
@@ -64,6 +65,7 @@ export default function AiResumeOptimizerPage() {
         titleAccent="with AI in Seconds"
         subtitle="Our AI analyzes your resume against a target job description, then rewrites and enhances it to naturally integrate missing keywords — without fabricating a single thing."
         ctaText="Optimize Your Resume Now"
+        ctaHref="#tool"
       />
 
       <ExplainerSection
@@ -95,6 +97,8 @@ export default function AiResumeOptimizerPage() {
           },
         ]}
       />
+
+      <OptimizerToolSection />
 
       <MockPreviewCard>
         <div className="space-y-6">
@@ -164,6 +168,7 @@ export default function AiResumeOptimizerPage() {
         titleAccent="with AI"
         subtitle="Stop spending hours tailoring resumes manually. Let AI do the heavy lifting while you focus on landing interviews."
         ctaText="Optimize Your Resume Now"
+        ctaHref="#tool"
       />
     </ToolPageShell>
   )

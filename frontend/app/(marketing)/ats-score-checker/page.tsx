@@ -10,6 +10,7 @@ import {
   FaqSection,
   CtaSection,
 } from "@/components/marketing/ToolPageSections"
+import AtsScoreToolSection from "@/components/marketing/tools/AtsScoreToolSection"
 
 export const metadata: Metadata = {
   title: "Free ATS Score Checker — Check Resume ATS Compatibility | MatchMyResumes",
@@ -65,6 +66,7 @@ export default function AtsScoreCheckerPage() {
         titleAccent="ATS Score Instantly"
         subtitle="Upload your resume and get a detailed 0-100 ATS compatibility score with actionable improvement tips — across 5 key dimensions that recruiters and ATS systems care about."
         ctaText="Check Your ATS Score Now"
+        ctaHref="#tool"
       />
 
       <ExplainerSection
@@ -96,6 +98,8 @@ export default function AtsScoreCheckerPage() {
           },
         ]}
       />
+
+      <AtsScoreToolSection />
 
       <MockPreviewCard>
         <div className="flex flex-col md:flex-row items-center gap-10">
@@ -165,6 +169,7 @@ export default function AtsScoreCheckerPage() {
         titleAccent="ATS?"
         subtitle="Join 50,000+ job seekers who improved their ATS scores by an average of 85%. Start in seconds."
         ctaText="Check Your ATS Score Now"
+        ctaHref="#tool"
       />
     </ToolPageShell>
   )

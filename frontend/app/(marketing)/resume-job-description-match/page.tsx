@@ -10,6 +10,7 @@ import {
   FaqSection,
   CtaSection,
 } from "@/components/marketing/ToolPageSections"
+import JdMatchToolSection from "@/components/marketing/tools/JdMatchToolSection"
 
 export const metadata: Metadata = {
   title: "Resume vs Job Description Match Score — Compare Your Resume to Any JD | MatchMyResumes",
@@ -65,6 +66,7 @@ export default function ResumeJdMatchPage() {
         titleAccent="Any Job Description"
         subtitle="Upload your resume and paste a job description to get an instant match score, keyword gap analysis, and semantic similarity breakdown. Know exactly where you stand before you apply."
         ctaText="Match Your Resume Now"
+        ctaHref="#tool"
       />
 
       <ExplainerSection
@@ -96,6 +98,8 @@ export default function ResumeJdMatchPage() {
           },
         ]}
       />
+
+      <JdMatchToolSection />
 
       <MockPreviewCard>
         <div className="flex flex-col md:flex-row gap-10">
@@ -178,6 +182,7 @@ export default function ResumeJdMatchPage() {
         titleAccent="Matching"
         subtitle="Compare your resume against any job description and know exactly where you stand. Free, instant, unlimited."
         ctaText="Match Your Resume Now"
+        ctaHref="#tool"
       />
     </ToolPageShell>
   )

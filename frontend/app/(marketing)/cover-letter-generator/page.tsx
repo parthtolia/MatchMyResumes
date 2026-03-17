@@ -9,6 +9,7 @@ import {
   FaqSection,
   CtaSection,
 } from "@/components/marketing/ToolPageSections"
+import CoverLetterToolSection from "@/components/marketing/tools/CoverLetterToolSection"
 
 export const metadata: Metadata = {
   title: "AI Cover Letter Generator — Tailored Cover Letters in Seconds | MatchMyResumes",
@@ -64,6 +65,7 @@ export default function CoverLetterGeneratorPage() {
         titleAccent="in Seconds"
         subtitle="Upload your resume, paste the job description, choose your tone — and get a personalized, professional cover letter that highlights your most relevant experience for the role."
         ctaText="Generate Your Cover Letter"
+        ctaHref="#tool"
       />
 
       <ExplainerSection
@@ -95,6 +97,8 @@ export default function CoverLetterGeneratorPage() {
           },
         ]}
       />
+
+      <CoverLetterToolSection />
 
       <MockPreviewCard>
         <div className="space-y-6">
@@ -153,6 +157,7 @@ export default function CoverLetterGeneratorPage() {
         titleAccent="Every Time"
         subtitle="Stop stressing over cover letters. Let AI craft tailored, professional letters that highlight your best qualifications for every role."
         ctaText="Generate Your Cover Letter"
+        ctaHref="#tool"
       />
     </ToolPageShell>
   )
