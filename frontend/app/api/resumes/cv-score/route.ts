@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { resumes, users } from "@/lib/db/schema";
+import { resumes } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getAuthUserId, handleAuthError, AuthError } from "@/lib/auth";
 import { checkRateLimit, aiLimiter } from "@/lib/rate-limit";
-import { PLAN_LIMITS, cycleStart } from "@/lib/plan-limits";
 import { computeCvScore } from "@/lib/scoring/cv-scorer";
 
 export async function POST(request: NextRequest) {
@@ -22,43 +21,6 @@ export async function POST(request: NextRequest) {
         { detail: "resume_id is required" },
         { status: 400 }
       );
-    }
-
-    // Enforce monthly cv-score limit (tracked via usage_count + usage_reset_date)
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
-
-    if (user) {
-      const cs = cycleStart(user.createdAt);
-      const resetDate = user.usageResetDate;
-      if (!resetDate || resetDate < cs) {
-        await db
-          .update(users)
-          .set({ usageCount: 0, usageResetDate: cs })
-          .where(eq(users.id, userId));
-        // Reset in-memory too
-        user.usageCount = 0;
-      }
-
-      const plan = user.plan || "free";
-      const limit = PLAN_LIMITS[plan]?.cv_score ?? PLAN_LIMITS.free.cv_score;
-      if (limit !== -1 && (user.usageCount || 0) >= limit) {
-        return NextResponse.json(
-          {
-            detail: `Monthly ATS Score limit reached (${limit}/month). Upgrade to Pro for unlimited scans.`,
-          },
-          { status: 402 }
-        );
-      }
-
-      // Increment usage
-      await db
-        .update(users)
-        .set({ usageCount: (user.usageCount || 0) + 1 })
-        .where(eq(users.id, userId));
     }
 
     // Fetch resume

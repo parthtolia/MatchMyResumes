@@ -2,7 +2,7 @@
 import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
-import { Zap, Loader2, Copy, Check, ArrowRight, Lock, Download } from "lucide-react"
+import { Zap, Loader2, Copy, Check, ArrowRight, Download } from "lucide-react"
 import AlertModal from "@/components/ui/AlertModal"
 import api from "@/lib/api"
 import { useGlobalData } from "@/components/dashboard/GlobalDataProvider"
@@ -26,7 +26,7 @@ function useUserSafe() {
 function OptimizeContent() {
     const params = useSearchParams()
     const { isLoaded, isSignedIn } = useUserSafe()
-    const { resumes, jobs, loadingData, plan, loadingPlan, refreshData } = useGlobalData()
+    const { resumes, jobs, loadingData, loadingPlan, refreshData } = useGlobalData()
     const [resumeId, setResumeId] = useState(params.get("resume_id") || "")
     const [jdId, setJdId] = useState(params.get("jd_id") || "")
     const [jdInputType, setJdInputType] = useState<"saved" | "text">("saved")
@@ -100,10 +100,10 @@ function OptimizeContent() {
 
     // Auto-optimize if navigating from JD Match
     useEffect(() => {
-        if (isLoaded && isSignedIn && plan !== "free" && params.get("resume_id") && params.get("jd_id") && !result && !loading && !error) {
+        if (isLoaded && isSignedIn && params.get("resume_id") && params.get("jd_id") && !result && !loading && !error) {
             optimize()
         }
-    }, [isLoaded, isSignedIn, plan, params.get("resume_id"), params.get("jd_id")])
+    }, [isLoaded, isSignedIn, params.get("resume_id"), params.get("jd_id")])
 
     return (
         <div className="space-y-6">
@@ -179,16 +179,7 @@ function OptimizeContent() {
                 {loadingPlan ? (
                     <div className="p-5 rounded-xl bg-white/5 border border-white/10 text-center flex items-center justify-center">
                         <Loader2 size={20} className="text-violet-400 animate-spin mr-2" />
-                        <span className="text-gray-400 text-sm">Verifying subscription access...</span>
-                    </div>
-                ) : plan === "free" ? (
-                    <div className="p-5 rounded-xl bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/20 text-center flex flex-col items-center">
-                        <Lock size={20} className="text-violet-400 mb-2" />
-                        <h3 className="text-white font-semibold mb-1">Pro Feature</h3>
-                        <p className="text-sm text-gray-400 mb-4 max-w-sm">Upgrade to a paid plan to unlock AI-powered resume rewrites tailored perfectly to the job description.</p>
-                        <a href="/dashboard/pricing" className="btn-glow px-5 py-2.5 rounded-xl text-white font-medium text-sm">
-                            View Upgrade Plans
-                        </a>
+                        <span className="text-gray-400 text-sm">Loading...</span>
                     </div>
                 ) : (
                     <>

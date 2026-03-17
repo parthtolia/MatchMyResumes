@@ -71,12 +71,6 @@ api.interceptors.response.use(
     }
 )
 
-export const cancelSubscription = async (token?: string | null) => {
-    const headers = token ? { Authorization: `Bearer ${token}` } : {}
-    const res = await api.post("/api/paddle/cancel", {}, { headers })
-    return res.data
-}
-
 // --- Client-Side Generic Cache for Seamless Navigation ---
 if (typeof window !== "undefined") {
     const cache = new Map<string, { data: any; timestamp: number; promise?: Promise<any> }>();

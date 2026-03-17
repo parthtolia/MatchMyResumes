@@ -4,11 +4,10 @@ import { usePathname } from "next/navigation"
 import { UserButton, useUser as useClerkUser } from "@clerk/nextjs"
 import {
     LayoutDashboard, FileText, Zap, Mail,
-    Briefcase, Settings, BarChart3, CreditCard, ScanSearch, Download,
+    Briefcase, Settings, BarChart3, ScanSearch, Download,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Logo } from "@/components/ui/Logo"
-import { useGlobalData } from "@/components/dashboard/GlobalDataProvider"
 
 const HAS_REAL_CLERK =
     (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "").startsWith("pk_") &&
@@ -31,14 +30,12 @@ const navItems = [
     { href: "/dashboard/resumes", icon: FileText, label: "My Resumes" },
     { href: "/dashboard/resume-templates", icon: Download, label: "Templates" },
     { href: "/dashboard/tracker", icon: Briefcase, label: "Job Tracker" },
-    { href: "/dashboard/pricing", icon: CreditCard, label: "Pricing" },
     { href: "/dashboard/settings", icon: Settings, label: "Settings" },
 ]
 
 export default function DashboardSidebar({ onClose }: { onClose?: () => void } = {}) {
     const pathname = usePathname()
     const { user } = useUserSafe()
-    const { plan } = useGlobalData()
 
     const displayName = HAS_REAL_CLERK
         ? (user?.firstName || user?.fullName?.split(" ")[0] || "User")
@@ -93,11 +90,6 @@ export default function DashboardSidebar({ onClose }: { onClose?: () => void } =
                     <div className="flex flex-col min-w-0">
                         <div className="flex items-center gap-2 max-w-full">
                             <span className="text-sm font-semibold text-white truncate">{displayName}</span>
-                            {plan && plan !== "free" && (
-                                <span className={`shrink-0 px-1.5 py-[1px] rounded text-[9px] font-bold uppercase tracking-wider ${plan === 'premium' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-violet-500/20 text-violet-400'}`}>
-                                    {plan}
-                                </span>
-                            )}
                         </div>
                         <span className="text-xs text-gray-500 truncate">{displaySub}</span>
                     </div>

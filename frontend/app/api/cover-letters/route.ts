@@ -4,13 +4,11 @@ import {
   coverLetters,
   resumes,
   jobDescriptions,
-  users,
   usageLogs,
 } from "@/lib/db/schema";
-import { eq, and, gte, desc, count } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { getAuthUserId, handleAuthError, AuthError } from "@/lib/auth";
 import { checkRateLimit, aiLimiter } from "@/lib/rate-limit";
-import { cycleStart } from "@/lib/plan-limits";
 import { generateCoverLetter } from "@/lib/services/ai-service";
 
 export const maxDuration = 60;
@@ -69,67 +67,6 @@ export async function POST(request: NextRequest) {
         { detail: "resume_id and jd_id are required" },
         { status: 400 }
       );
-    }
-
-    // Check plan and monthly cover letter limit
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
-
-    if (!user) {
-      return NextResponse.json(
-        {
-          detail:
-            "Cover letter generation requires Pro or Premium plan",
-        },
-        { status: 402 }
-      );
-    }
-
-    const clLimits: Record<string, number> = {
-      free: 1,
-      pro: 10,
-      premium: -1,
-    };
-    const plan = user.plan || "free";
-    const clLimit = clLimits[plan] ?? 1;
-
-    if (clLimit === 0) {
-      return NextResponse.json(
-        {
-          detail:
-            "Cover letter generation requires Pro or Premium plan",
-        },
-        { status: 402 }
-      );
-    }
-
-    if (clLimit !== -1) {
-      const [monthCount] = await db
-        .select({ value: count(usageLogs.id) })
-        .from(usageLogs)
-        .where(
-          and(
-            eq(usageLogs.userId, userId),
-            eq(usageLogs.feature, "cover_letter"),
-            gte(usageLogs.createdAt, cycleStart(user.createdAt))
-          )
-        );
-
-      if ((monthCount?.value || 0) >= clLimit) {
-        const upgradeMsg =
-          plan === "free"
-            ? "Upgrade to Pro for 10/month."
-            : "Upgrade to Premium for unlimited.";
-        return NextResponse.json(
-          {
-            detail: `Monthly cover letter limit reached (${clLimit}/month). ${upgradeMsg}`,
-          },
-          { status: 402 }
-        );
-      }
     }
 
     // Fetch resume

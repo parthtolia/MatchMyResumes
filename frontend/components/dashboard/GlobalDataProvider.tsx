@@ -57,7 +57,7 @@ export function GlobalDataProvider({ children }: { children: React.ReactNode }) 
     const [resumes,     setResumes]     = useState<any[]>(() => preloadFromCache()?.resumes ?? [])
     const [jobs,        setJobs]        = useState<any[]>(() => preloadFromCache()?.jobs ?? [])
     const [loadingData, setLoadingData] = useState(() => !preloadFromCache()?.resumes)
-    const [plan,        setPlan]        = useState<string>(() => preloadFromCache()?.plan ?? "free")
+    const [plan,        setPlan]        = useState<string>(() => preloadFromCache()?.plan ?? "premium")
     const [loadingPlan, setLoadingPlan] = useState(() => !preloadFromCache()?.plan)
 
     const refreshData = async () => {
@@ -106,13 +106,6 @@ export function GlobalDataProvider({ children }: { children: React.ReactNode }) 
 
         refreshData()
     }, [isLoaded, isSignedIn, userId])
-
-    // Re-fetch when plan is updated (e.g. after Paddle payment)
-    useEffect(() => {
-        const handler = () => refreshData()
-        window.addEventListener("planUpdated", handler)
-        return () => window.removeEventListener("planUpdated", handler)
-    }, [isLoaded, isSignedIn])
 
     return (
         <GlobalDataContext.Provider value={{ resumes, jobs, loadingData, plan, loadingPlan, refreshData }}>

@@ -3,15 +3,16 @@ import Link from "next/link"
 import { LazyMotion, domAnimation, m } from "framer-motion"
 import {
   Zap, Target, FileText, BarChart3,
-  CheckCircle, ArrowRight, Star, TrendingUp
+  ArrowRight, Star, TrendingUp, ScanSearch
 } from "lucide-react"
 import { Logo } from "@/components/ui/Logo"
 
 const features = [
-  { icon: Target, title: "ATS Score Engine", desc: "Get a detailed 0–100 ATS compatibility score with breakdown across 5 dimensions." },
-  { icon: Zap, title: "AI Resume Optimizer", desc: "AI rewrites your resume to naturally integrate missing keywords without fabrication." },
-  { icon: FileText, title: "Cover Letter Generator", desc: "Generate tailored, tone-perfect cover letters in seconds from your resume + JD." },
-  { icon: BarChart3, title: "Application Tracker", desc: "Track every application in a Kanban board with status, notes, and analytics." },
+  { icon: Target, title: "ATS Score Checker", desc: "Get a detailed 0–100 ATS compatibility score with breakdown across 5 dimensions.", href: "/ats-score-checker" },
+  { icon: ScanSearch, title: "Resume vs JD Match", desc: "Compare your resume against any job description and find keyword gaps instantly.", href: "/resume-job-description-match" },
+  { icon: Zap, title: "AI Resume Optimizer", desc: "AI rewrites your resume to naturally integrate missing keywords without fabrication.", href: "/ai-resume-optimizer" },
+  { icon: FileText, title: "Cover Letter Generator", desc: "Generate tailored, tone-perfect cover letters in seconds from your resume + JD.", href: "/cover-letter-generator" },
+  { icon: BarChart3, title: "Application Tracker", desc: "Track every application in a Kanban board with status, notes, and analytics.", href: "/sign-up" },
 ]
 
 const stats = [
@@ -24,25 +25,7 @@ const stats = [
 const testimonials = [
   { quote: "MatchMyResumes helped me land a senior role at Stripe in just 2 weeks. The ATS scanner is incredibly accurate.", author: "Sarah J.", role: "Senior Engineer" },
   { quote: "I was struggling to get callbacks until I used the AI optimizer. It totally transformed my resume without sounding fake.", author: "David M.", role: "Product Manager" },
-  { quote: "The cover letter generator alone is worth the price. It matched my tone perfectly and saved me hours.", author: "Elena R.", role: "Marketing Director" }
-]
-
-const plans = [
-  {
-    name: "Free", price: "$0", period: "/month",
-    features: ["5 ATS Resume Scores / mo", "5 Resume vs JD Matches / mo", "Keyword Gap Analysis", "1 AI Cover Letter / mo", "20 Jobs in Tracker"],
-    cta: "Get Started Free", highlight: false,
-  },
-  {
-    name: "Pro", price: "$10", period: "/month",
-    features: ["Unlimited ATS Scores", "Unlimited JD Matches", "Keyword Gap Analysis", "10 AI Resume Optimizations / mo", "10 AI Cover Letters / mo", "200 Jobs in Tracker"],
-    cta: "Start Pro Trial", highlight: true,
-  },
-  {
-    name: "Premium", price: "$25", period: "/month",
-    features: ["Everything in Pro", "Unlimited AI Resume Optimization", "Unlimited AI Cover Letters", "Unlimited Job Tracker"],
-    cta: "Go Premium", highlight: false,
-  },
+  { quote: "The cover letter generator is incredible. It matched my tone perfectly and saved me hours every week.", author: "Elena R.", role: "Marketing Director" }
 ]
 
 export default function LandingSections() {
@@ -76,22 +59,24 @@ export default function LandingSections() {
             </h2>
             <p className="text-gray-400 text-lg">Powered by state-of-the-art AI and cutting-edge ATS analysis algorithms</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, i) => (
-              <m.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                viewport={{ once: true }}
-                className="glass p-6 hover:border-violet-500/40 transition-all group"
-              >
-                <div className="w-12 h-12 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-4 group-hover:bg-violet-500/20 transition-all">
-                  <feature.icon size={22} className="text-violet-400" />
-                </div>
-                <h3 className="font-semibold text-white mb-2">{feature.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">{feature.desc}</p>
-              </m.div>
+              <Link key={feature.title} href={feature.href}>
+                <m.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  viewport={{ once: true }}
+                  className="glass p-6 hover:border-violet-500/40 transition-all group h-full"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-4 group-hover:bg-violet-500/20 transition-all">
+                    <feature.icon size={22} className="text-violet-400" />
+                  </div>
+                  <h3 className="font-semibold text-white mb-2">{feature.title}</h3>
+                  <p className="text-gray-400 text-sm leading-relaxed mb-3">{feature.desc}</p>
+                  <span className="text-violet-400 text-sm font-medium group-hover:text-violet-300 transition-colors">Learn more &rarr;</span>
+                </m.div>
+              </Link>
             ))}
           </div>
         </div>
@@ -176,7 +161,7 @@ export default function LandingSections() {
               { q: "Does the AI Optimizer fabricate experience?", a: "Never. Our AI only restructures and enhances existing content — it never invents skills, roles, or achievements you don't have. It integrates relevant keywords naturally while preserving 100% of your authentic experience." },
               { q: "What file formats are supported?", a: "We support PDF and DOCX resume uploads. For best results, use a standard single-column PDF without complex tables or graphics." },
               { q: "Is my data secure?", a: "Yes. Your resumes and job descriptions are stored securely in an encrypted database and are only accessible to you. We never share your data with third parties or use it to train AI models." },
-              { q: "Can I cancel my subscription anytime?", a: "Absolutely. There are no contracts or lock-ins. Cancel anytime from your account settings and you'll retain access until the end of your billing period." },
+              { q: "Is MatchMyResumes really free?", a: "Yes! All features — ATS scoring, JD matching, AI resume optimization, cover letter generation, and job tracking — are completely free with no limits." },
             ].map((item, i) => (
               <m.details
                 key={i}
@@ -192,61 +177,6 @@ export default function LandingSections() {
                 </summary>
                 <p className="text-gray-400 text-sm mt-3 leading-relaxed">{item.a}</p>
               </m.details>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section id="pricing" className="py-24">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Simple, <span className="gradient-text">transparent pricing</span></h2>
-            <p className="text-gray-400">Start free. Upgrade when you&apos;re ready.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {plans.map((plan, i) => (
-              <m.div
-                key={plan.name}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                viewport={{ once: true }}
-                className={`flex flex-col relative rounded-2xl p-10 border ${plan.highlight
-                  ? "bg-gradient-to-b from-violet-600/20 to-purple-900/10 border-violet-500/40"
-                  : "bg-[#111118] border-white/10"
-                  }`}
-              >
-                {plan.highlight && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-violet-500 to-purple-500 text-white text-xs font-bold px-4 py-1 rounded-full">
-                    MOST POPULAR
-                  </div>
-                )}
-                <div className="flex flex-col gap-2 mb-6">
-                  <h3 className="text-2xl font-bold text-white">{plan.name}</h3>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-black text-white">{plan.price}</span>
-                    <span className="text-gray-400 font-medium">{plan.period}</span>
-                  </div>
-                </div>
-                <ul className="flex flex-col gap-4 mb-10 flex-1">
-                  {plan.features.map(f => (
-                    <li key={f} className="flex items-start gap-3 text-[15px] text-gray-300">
-                      <CheckCircle size={20} className="text-emerald-400 shrink-0 mt-[2px]" />
-                      <span className="leading-relaxed">{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/sign-up"
-                  className={`block text-center py-4 rounded-xl font-bold text-[15px] transition-all ${plan.highlight
-                    ? "btn-glow text-white"
-                    : "border border-white/20 text-white hover:bg-white/5"
-                    }`}
-                >
-                  {plan.cta}
-                </Link>
-              </m.div>
             ))}
           </div>
         </div>
@@ -269,16 +199,39 @@ export default function LandingSections() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/5 py-12 px-6 text-center">
-        <div className="flex justify-center mb-6">
-          <Logo className="scale-75 origin-center" />
-        </div>
-        <p className="text-gray-400 text-sm">&copy; 2026 MatchMyResumes. All rights reserved.</p>
-        <div className="flex justify-center gap-6 mt-4 text-sm text-gray-400">
-          <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
-          <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
-          <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
-          <Link href="mailto:support@matchmyresumes.com" className="hover:text-white transition-colors">Contact</Link>
+      <footer className="border-t border-white/5 py-12 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex justify-center mb-8">
+            <Logo className="scale-75 origin-center" />
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8 mb-8 text-sm">
+            <div>
+              <h4 className="font-semibold text-white mb-3">Tools</h4>
+              <div className="flex flex-col gap-2 text-gray-400">
+                <Link href="/ats-score-checker" className="hover:text-white transition-colors">ATS Score Checker</Link>
+                <Link href="/resume-job-description-match" className="hover:text-white transition-colors">Resume vs JD Match</Link>
+                <Link href="/ai-resume-optimizer" className="hover:text-white transition-colors">AI Resume Optimizer</Link>
+                <Link href="/cover-letter-generator" className="hover:text-white transition-colors">Cover Letter Generator</Link>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-semibold text-white mb-3">Resources</h4>
+              <div className="flex flex-col gap-2 text-gray-400">
+                <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
+                <Link href="#faq" className="hover:text-white transition-colors">FAQ</Link>
+                <Link href="#how-it-works" className="hover:text-white transition-colors">How It Works</Link>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-semibold text-white mb-3">Legal</h4>
+              <div className="flex flex-col gap-2 text-gray-400">
+                <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+                <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+                <Link href="mailto:support@matchmyresumes.com" className="hover:text-white transition-colors">Contact</Link>
+              </div>
+            </div>
+          </div>
+          <p className="text-gray-500 text-sm text-center">&copy; 2026 MatchMyResumes. All rights reserved.</p>
         </div>
       </footer>
     </LazyMotion>

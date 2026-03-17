@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { resumes, resumeScores, jobDescriptions, users, usageLogs } from "@/lib/db/schema";
-import { eq, and, gte, desc, count } from "drizzle-orm";
+import { resumes, resumeScores, jobDescriptions, usageLogs } from "@/lib/db/schema";
+import { eq, and, desc, count } from "drizzle-orm";
 import { getAuthUserId, handleAuthError, AuthError } from "@/lib/auth";
 import { checkRateLimit, aiLimiter } from "@/lib/rate-limit";
-import { PLAN_LIMITS, cycleStart } from "@/lib/plan-limits";
 import { optimizeResume } from "@/lib/services/ai-service";
 import { generateEmbedding } from "@/lib/services/embedding-service";
 import { computeKeywordScore } from "@/lib/scoring/ats-scorer";
@@ -32,44 +31,6 @@ export async function POST(request: NextRequest) {
         { detail: "resume_id is required" },
         { status: 400 }
       );
-    }
-
-    // Check plan access
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
-
-    if (!user || user.plan === "free") {
-      return NextResponse.json(
-        { detail: "AI optimization requires Pro or Premium plan" },
-        { status: 402 }
-      );
-    }
-
-    const plan = user.plan || "free";
-    const limit =
-      PLAN_LIMITS[plan]?.ai_optimize ?? PLAN_LIMITS.free.ai_optimize;
-    if (limit !== -1) {
-      const [monthCount] = await db
-        .select({ value: count(usageLogs.id) })
-        .from(usageLogs)
-        .where(
-          and(
-            eq(usageLogs.userId, userId),
-            eq(usageLogs.feature, "ai_optimize"),
-            gte(usageLogs.createdAt, cycleStart(user.createdAt))
-          )
-        );
-      if ((monthCount?.value || 0) >= limit) {
-        return NextResponse.json(
-          {
-            detail: `Monthly AI optimization limit reached (${limit}/month). Upgrade to Premium for unlimited.`,
-          },
-          { status: 402 }
-        );
-      }
     }
 
     // Fetch resume

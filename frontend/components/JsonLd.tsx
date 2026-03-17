@@ -29,7 +29,7 @@ export function WebAppJsonLd() {
       "@type": "Offer",
       price: "0",
       priceCurrency: "USD",
-      description: "Free tier available with premium plans",
+      description: "Completely free — all features, no limits",
     },
     featureList: [
       "ATS Resume Scoring",
@@ -83,6 +83,57 @@ export function BlogPostingJsonLd({ post }: { post: { title: string; description
   )
 }
 
+export function ToolPageJsonLd({
+  title,
+  description,
+  url,
+  faqs,
+}: {
+  title: string
+  description: string
+  url: string
+  faqs: { q: string; a: string }[]
+}) {
+  const webPage = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: title,
+    description,
+    url,
+    isPartOf: {
+      "@type": "WebSite",
+      name: "MatchMyResumes",
+      url: "https://matchmyresumes.com",
+    },
+  }
+
+  const faqPage = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.a,
+      },
+    })),
+  }
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPage) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPage) }}
+      />
+    </>
+  )
+}
+
 export function FaqJsonLd() {
   const faqs = [
     { q: "What is an ATS and why does it matter?", a: "Applicant Tracking Systems (ATS) are software tools used by 99% of Fortune 500 companies to automatically filter resumes before a human ever sees them. A low ATS score means your resume gets rejected automatically, regardless of your qualifications." },
@@ -90,7 +141,7 @@ export function FaqJsonLd() {
     { q: "Does the AI Optimizer fabricate experience?", a: "Never. Our AI only restructures and enhances existing content — it never invents skills, roles, or achievements you don't have. It integrates relevant keywords naturally while preserving 100% of your authentic experience." },
     { q: "What file formats are supported?", a: "We support PDF and DOCX resume uploads. For best results, use a standard single-column PDF without complex tables or graphics." },
     { q: "Is my data secure?", a: "Yes. Your resumes and job descriptions are stored securely in an encrypted database and are only accessible to you. We never share your data with third parties or use it to train AI models." },
-    { q: "Can I cancel my subscription anytime?", a: "Absolutely. There are no contracts or lock-ins. Cancel anytime from your account settings and you'll retain access until the end of your billing period." },
+    { q: "Is MatchMyResumes really free?", a: "Yes! All features — ATS scoring, JD matching, AI resume optimization, cover letter generation, and job tracking — are completely free with no limits." },
   ]
 
   const data = {

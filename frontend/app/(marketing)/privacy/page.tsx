@@ -27,8 +27,8 @@ export default function PrivacyPage() {
           <h2 className="text-xl font-semibold text-white mb-3">2. How We Use Your Information</h2>
           <ul className="text-gray-400 space-y-2 list-disc list-inside leading-relaxed">
             <li>To provide and improve MatchMyResumes features (ATS scoring, AI optimization, cover letter generation)</li>
-            <li>To authenticate your account and manage your subscription</li>
-            <li>To send transactional emails (account confirmations, billing receipts)</li>
+            <li>To authenticate your account</li>
+            <li>To send transactional emails (account confirmations)</li>
             <li>To analyze aggregate usage trends for product improvement</li>
           </ul>
         </section>
@@ -45,7 +45,7 @@ export default function PrivacyPage() {
 
         <section className="mb-8">
           <h2 className="text-xl font-semibold text-white mb-3">5. Third-Party Services</h2>
-          <p className="text-gray-400 leading-relaxed">We use Clerk for authentication, Paddle for payment processing, and Supabase for database hosting. Each of these services has their own privacy policies and data handling practices. We share only the minimum data necessary for these services to function.</p>
+          <p className="text-gray-400 leading-relaxed">We use Clerk for authentication and Supabase for database hosting. Each of these services has their own privacy policies and data handling practices. We share only the minimum data necessary for these services to function.</p>
         </section>
 
         <section className="mb-8">

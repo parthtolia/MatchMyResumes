@@ -4,13 +4,11 @@ import {
   resumes,
   jobDescriptions,
   resumeScores,
-  users,
   usageLogs,
 } from "@/lib/db/schema";
-import { eq, and, gte, count } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { getAuthUserId, handleAuthError, AuthError } from "@/lib/auth";
 import { checkRateLimit, aiLimiter } from "@/lib/rate-limit";
-import { PLAN_LIMITS, cycleStart } from "@/lib/plan-limits";
 import { generateEmbedding } from "@/lib/services/embedding-service";
 import { computeAtsScore } from "@/lib/scoring/ats-scorer";
 
@@ -31,38 +29,6 @@ export async function POST(request: NextRequest) {
         { detail: "resume_id and jd_id are required" },
         { status: 400 }
       );
-    }
-
-    // Enforce monthly JD-match limit
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
-
-    if (user) {
-      const plan = user.plan || "free";
-      const limit = PLAN_LIMITS[plan]?.jd_match ?? PLAN_LIMITS.free.jd_match;
-      if (limit !== -1) {
-        const [monthCount] = await db
-          .select({ value: count(usageLogs.id) })
-          .from(usageLogs)
-          .where(
-            and(
-              eq(usageLogs.userId, userId),
-              eq(usageLogs.feature, "jd_match"),
-              gte(usageLogs.createdAt, cycleStart(user.createdAt))
-            )
-          );
-        if ((monthCount?.value || 0) >= limit) {
-          return NextResponse.json(
-            {
-              detail: `Monthly JD Match limit reached (${limit}/month). Upgrade to Pro for unlimited scans.`,
-            },
-            { status: 402 }
-          );
-        }
-      }
     }
 
     // Fetch resume

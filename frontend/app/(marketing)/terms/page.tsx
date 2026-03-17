@@ -49,8 +49,8 @@ export default function TermsPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-white mb-3">6. Subscriptions and Billing</h2>
-          <p className="text-gray-400 leading-relaxed">Paid subscriptions are billed monthly in advance. You may cancel at any time and will retain access until the end of your current billing period. We do not offer refunds for partial months. Prices may change with 30 days notice.</p>
+          <h2 className="text-xl font-semibold text-white mb-3">6. Service Availability</h2>
+          <p className="text-gray-400 leading-relaxed">All features of MatchMyResumes are provided free of charge. We reserve the right to modify, suspend, or discontinue any part of the service at any time with reasonable notice.</p>
         </section>
 
         <section className="mb-8">

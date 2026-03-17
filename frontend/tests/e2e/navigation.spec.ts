@@ -99,16 +99,6 @@ test.describe("Navigation — Dashboard Routes", () => {
         await page.waitForURL(/\/dashboard\/tracker/, { timeout: 10_000 })
     })
 
-    test("should navigate to Pricing page", async ({ page }) => {
-        await navigateToDashboard(page)
-
-        const pricingLink = page.locator(
-            'a[href*="/dashboard/pricing"], a:has-text("Pricing"), a:has-text("Upgrade")'
-        ).first()
-        await pricingLink.click()
-
-        await page.waitForURL(/\/dashboard\/pricing/, { timeout: 10_000 })
-    })
 })
 
 test.describe("Navigation — Quick Actions on Dashboard", () => {

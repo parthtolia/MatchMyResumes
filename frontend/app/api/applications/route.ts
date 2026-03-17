@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { applications, users } from "@/lib/db/schema";
-import { eq, desc, count } from "drizzle-orm";
+import { applications } from "@/lib/db/schema";
+import { eq, desc } from "drizzle-orm";
 import { getAuthUserId, handleAuthError, AuthError } from "@/lib/auth";
 
 export async function GET() {
@@ -60,41 +60,6 @@ export async function POST(request: NextRequest) {
         { detail: "company_name and job_title are required" },
         { status: 400 }
       );
-    }
-
-    // Enforce tracker limit per plan
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
-
-    const trackerLimits: Record<string, number> = {
-      free: 20,
-      pro: 200,
-      premium: -1,
-    };
-    const plan = user?.plan || "free";
-    const trackerLimit = trackerLimits[plan] ?? 20;
-
-    if (trackerLimit !== -1) {
-      const [total] = await db
-        .select({ value: count(applications.id) })
-        .from(applications)
-        .where(eq(applications.userId, userId));
-
-      if ((total?.value || 0) >= trackerLimit) {
-        const upgradeMsg =
-          plan === "free"
-            ? "Upgrade to Pro to track up to 200 applications."
-            : "Upgrade to Premium for unlimited tracking.";
-        return NextResponse.json(
-          {
-            detail: `You've reached the maximum of ${trackerLimit} tracked applications on the ${plan.charAt(0).toUpperCase() + plan.slice(1)} plan. ${upgradeMsg}`,
-          },
-          { status: 402 }
-        );
-      }
     }
 
     const appId = crypto.randomUUID();

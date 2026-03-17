@@ -4,20 +4,20 @@ export const PLAN_LIMITS: Record<
   Record<string, number>
 > = {
   free: {
-    resume_upload: 5,
-    cv_score: 5,
-    jd_match: 5,
-    ai_optimize: 0,
-    cover_letter: 1,
-    tracker: 20,
+    resume_upload: -1,
+    cv_score: -1,
+    jd_match: -1,
+    ai_optimize: -1,
+    cover_letter: -1,
+    tracker: -1,
   },
   pro: {
     resume_upload: -1,
     cv_score: -1,
     jd_match: -1,
-    ai_optimize: 10,
-    cover_letter: 10,
-    tracker: 200,
+    ai_optimize: -1,
+    cover_letter: -1,
+    tracker: -1,
   },
   premium: {
     resume_upload: -1,
