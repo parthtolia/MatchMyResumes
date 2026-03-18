@@ -6,6 +6,7 @@ import {
     uploadFileViaDropzone,
     mockApiError,
     mockApiTimeout,
+    uniqueJdTitle,
 } from "../utils/test-helpers"
 
 test.describe("ATS Score Generation — CV Analysis (standalone)", () => {
@@ -92,7 +93,7 @@ test.describe("ATS Score Generation — JD Match Score", () => {
             'input[placeholder*="title" i], input[name*="title" i]'
         ).first()
         if (await titleInput.isVisible({ timeout: 2_000 }).catch(() => false)) {
-            await titleInput.fill(SAMPLE_JD.title)
+            await titleInput.fill(uniqueJdTitle())
         }
 
         const jdTextarea = page.locator(
@@ -126,7 +127,7 @@ test.describe("ATS Score Generation — JD Match Score", () => {
 
         const titleInput = page.locator('input[placeholder*="title" i]').first()
         if (await titleInput.isVisible({ timeout: 2_000 }).catch(() => false)) {
-            await titleInput.fill(SAMPLE_JD.title)
+            await titleInput.fill(uniqueJdTitle())
         }
 
         const jdTextarea = page.locator("textarea").first()

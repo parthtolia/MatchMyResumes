@@ -95,15 +95,17 @@ test.describe("Resume Upload Flow", () => {
 
     // ── Duplicate upload ────────────────────────────────────────────
     test("should show error for duplicate filename upload", async ({ page }) => {
-        // Upload once
-        await uploadFileViaDropzone(page, FILES.validPdf)
+        const dupeFilename = `dupe-test-${Date.now()}.pdf`
+
+        // Upload once with a specific name
+        await uploadFileViaDropzone(page, FILES.validPdf, { customName: dupeFilename })
         await expect(
             page.getByText(/uploaded successfully/i).first()
         ).toBeVisible({ timeout: 30_000 })
 
-        // Wait for state to settle, then upload same file again
+        // Wait for state to settle, then upload with the SAME name
         await page.waitForTimeout(1_000)
-        await uploadFileViaDropzone(page, FILES.validPdf)
+        await uploadFileViaDropzone(page, FILES.validPdf, { customName: dupeFilename })
 
         // Should show duplicate/already exists error
         await expect(

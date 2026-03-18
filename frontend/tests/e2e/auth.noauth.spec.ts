@@ -34,6 +34,7 @@ test.describe("Authentication — No Auth Required", () => {
     })
 
     test("should login with valid credentials and redirect to dashboard", async ({ page }) => {
+        test.setTimeout(180_000) // Allow time for manual verification code entry
         // Skip if no real test credentials are configured
         test.skip(
             !process.env.TEST_USER_EMAIL,

@@ -7,13 +7,9 @@
    ```bash
    npx playwright install chromium
    ```
-3. **Frontend dev server** running on port 3000:
+3. **Frontend dev server** running on port 3000 (or use production URL):
    ```bash
    cd frontend && npm run dev
-   ```
-4. **Backend server** running on port 8000:
-   ```bash
-   cd backend && venv/Scripts/python.exe -m uvicorn app.main:app --port 8000
    ```
 
 ## Environment Variables
@@ -26,8 +22,9 @@ TEST_USER_EMAIL=test@matchmyresumes.ai
 TEST_USER_PASSWORD=TestPassword123!
 TEST_USER_FIRST_NAME=Test
 
-# Optional: override base URL (defaults to http://localhost:3000)
-BASE_URL=http://localhost:3000
+# Override base URL (defaults to http://localhost:3000)
+# For production testing:
+BASE_URL=https://matchmyresumes.com
 ```
 
 > **Dev mode**: If your Clerk keys are placeholder (not real `pk_*`), auth
@@ -37,8 +34,11 @@ BASE_URL=http://localhost:3000
 ## Running Tests
 
 ```bash
-# Run all tests
+# Run all tests against local dev
 npx playwright test
+
+# Run all tests against production
+BASE_URL=https://matchmyresumes.com npx playwright test
 
 # Run with browser visible
 npx playwright test --headed
@@ -66,27 +66,37 @@ npx playwright show-report
 
 ```
 tests/
-├── .auth/                    # Saved auth state (gitignored)
+├── .auth/                          # Saved auth state (gitignored)
 │   └── user.json
 ├── e2e/
-│   ├── auth.setup.ts         # Auth setup — runs first, saves login state
-│   ├── auth.noauth.spec.ts   # Login, signup, redirect tests (no pre-auth)
-│   ├── logout.spec.ts        # Logout flow
-│   ├── resume-upload.spec.ts # Upload valid/invalid/large/corrupt files
-│   ├── ats-scoring.spec.ts   # CV Analysis + JD Match scoring flows
-│   ├── error-scenarios.spec.ts # API failures, timeouts, refreshes
-│   ├── navigation.spec.ts    # All dashboard page navigation
-│   └── navigation.mobile.spec.ts # Mobile viewport navigation
+│   ├── auth.setup.ts               # Auth setup — runs first, saves login state
+│   ├── auth.noauth.spec.ts         # Login, signup, redirect tests (no pre-auth)
+│   ├── public-pages.noauth.spec.ts # Landing, blog, privacy, terms, SEO, 404
+│   ├── logout.spec.ts              # Logout flow
+│   ├── dashboard-home.spec.ts      # Stats cards, quick actions, tips
+│   ├── resume-upload.spec.ts       # Upload valid/invalid/large/corrupt files
+│   ├── resume-management.spec.ts   # View details, copy, download, delete
+│   ├── ats-scoring.spec.ts         # CV Analysis + JD Match scoring flows
+│   ├── cover-letter.spec.ts        # Cover letter generation, tones, editor
+│   ├── optimizer.spec.ts           # AI optimizer, plan gating, side-by-side
+│   ├── job-tracker.spec.ts         # Application tracker CRUD, kanban board
+│   ├── pricing.spec.ts             # Plan cards, feature table, upgrade CTAs
+│   ├── settings.spec.ts            # Profile, subscription, security sections
+│   ├── templates.spec.ts           # Template grid, filters, search, CTA
+│   ├── plan-limits.spec.ts         # 402/429 limit enforcement via mocks
+│   ├── error-scenarios.spec.ts     # API failures, timeouts, refreshes
+│   ├── navigation.spec.ts          # All dashboard page navigation
+│   └── navigation.mobile.spec.ts   # Mobile viewport navigation
 ├── fixtures/
-│   ├── sample-resume.pdf     # Valid small PDF
-│   ├── sample-resume.docx    # Valid small DOCX
-│   ├── large-file-15mb.pdf   # 15MB file (exceeds 10MB limit)
-│   ├── script.js             # Unsupported file type
-│   ├── corrupted.pdf         # Corrupted PDF (garbage data)
-│   └── empty.pdf             # 0-byte file
+│   ├── sample-resume.pdf           # Valid small PDF
+│   ├── sample-resume.docx          # Valid small DOCX
+│   ├── large-file-15mb.pdf         # 15MB file (exceeds 10MB limit)
+│   ├── script.js                   # Unsupported file type
+│   ├── corrupted.pdf               # Corrupted PDF (garbage data)
+│   └── empty.pdf                   # 0-byte file
 ├── utils/
-│   └── test-helpers.ts       # Reusable helpers, selectors, mock utils
-└── README.md                 # This file
+│   └── test-helpers.ts             # Reusable helpers, selectors, mock utils
+└── README.md                       # This file
 ```
 
 ## Test Categories
@@ -94,14 +104,24 @@ tests/
 | File | Tests | Auth Required | Description |
 |------|-------|---------------|-------------|
 | `auth.noauth.spec.ts` | 6 | No | Signup/login UI, invalid login, redirect |
+| `public-pages.noauth.spec.ts` | 8 | No | Landing, blog, privacy, terms, SEO, 404 |
 | `logout.spec.ts` | 1 | Yes | Logout flow |
+| `dashboard-home.spec.ts` | 10 | Yes | Stats cards, quick actions, tips, console errors |
 | `resume-upload.spec.ts` | 8 | Yes | PDF/DOCX upload, rejection, duplicates |
+| `resume-management.spec.ts` | 9 | Yes | View details, copy text, select/delete mode |
 | `ats-scoring.spec.ts` | 11 | Yes | CV scoring, JD match, error handling |
+| `cover-letter.spec.ts` | 11 | Yes | Generation, tones, lengths, editor tabs, errors |
+| `optimizer.spec.ts` | 8 | Yes | Plan gating, form, optimization, side-by-side |
+| `job-tracker.spec.ts` | 9 | Yes | Add application, kanban columns, persistence |
+| `pricing.spec.ts` | 10 | Yes | Plan cards, feature table, upgrade buttons |
+| `settings.spec.ts` | 9 | Yes | Profile, subscription, security sections |
+| `templates.spec.ts` | 11 | Yes | Search, category/level filters, grid, CTA |
+| `plan-limits.spec.ts` | 7 | Yes | 402 limit enforcement, 429 rate limiting |
 | `error-scenarios.spec.ts` | 10 | Yes | API failures, 429, timeouts, navigation |
 | `navigation.spec.ts` | 11 | Yes | All dashboard routes + quick actions |
 | `navigation.mobile.spec.ts` | 4 | Yes | Mobile menu, no-overflow check |
 
-**Total: 51 tests**
+**Total: ~143 tests**
 
 ## Adding New Tests
 

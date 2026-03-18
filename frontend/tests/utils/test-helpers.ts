@@ -1,5 +1,6 @@
 import { Page, expect, Locator } from "@playwright/test"
 import path from "path"
+import fs from "fs"
 
 // ── Fixtures directory ──────────────────────────────────────────────
 export const FIXTURES_DIR = path.join(__dirname, "..", "fixtures")
@@ -52,10 +53,37 @@ export async function navigateToDashboard(page: Page, subpath = "") {
     await page.waitForLoadState("domcontentloaded")
 }
 
-/** Upload a file via a dropzone. Finds the hidden file input and sets the file. */
-export async function uploadFileViaDropzone(page: Page, filePath: string) {
+/** Upload a file via a dropzone with a unique filename to avoid 409 duplicates.
+ *  Pass `customName` to control the filename (useful for duplicate-detection tests). */
+export async function uploadFileViaDropzone(
+    page: Page,
+    filePath: string,
+    options?: { customName?: string }
+) {
+    const fileInput = page.locator('input[type="file"]').first()
+    const buffer = fs.readFileSync(filePath)
+    const ext = path.extname(filePath)
+    const baseName = path.basename(filePath, ext)
+    const uniqueName = options?.customName ?? `${baseName}-${Date.now()}${ext}`
+    const mimeType =
+        ext === ".pdf"
+            ? "application/pdf"
+            : ext === ".docx"
+            ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            : "application/octet-stream"
+
+    await fileInput.setInputFiles({ name: uniqueName, mimeType, buffer })
+}
+
+/** Upload using the exact on-disk filename (for testing duplicate detection). */
+export async function uploadFileViaDropzoneExact(page: Page, filePath: string) {
     const fileInput = page.locator('input[type="file"]').first()
     await fileInput.setInputFiles(filePath)
+}
+
+/** Generate a unique JD title to avoid 409 duplicate title errors. */
+export function uniqueJdTitle(base = SAMPLE_JD.title): string {
+    return `${base} ${Date.now()}`
 }
 
 /** Select a saved resume from a dropdown/select. */
@@ -117,7 +145,33 @@ export async function mockApiTimeout(page: Page, urlPattern: string | RegExp) {
     })
 }
 
-/** Clerk login via the Clerk sign-in UI. */
+/** Delete all resumes for the test user via API (for cleanup). */
+export async function deleteAllTestResumes(page: Page) {
+    const response = await page.request.get("/api/resumes")
+    if (response.ok()) {
+        const resumes = await response.json()
+        for (const r of resumes) {
+            await page.request.delete(`/api/resumes/${r.id}`)
+        }
+    }
+}
+
+/** Delete all JDs for the test user via API (for cleanup). */
+export async function deleteAllTestJobs(page: Page) {
+    const response = await page.request.get("/api/jobs")
+    if (response.ok()) {
+        const jobs = await response.json()
+        for (const j of jobs) {
+            await page.request.delete(`/api/jobs/${j.id}`)
+        }
+    }
+}
+
+/** Clerk login via the Clerk sign-in UI.
+ *  Handles the email → password → optional verification code flow.
+ *  When Clerk sends a verification code, the test pauses for up to 120s
+ *  so you can enter the code manually in the headed browser.
+ */
 export async function clerkLogin(page: Page, email: string, password: string) {
     await page.goto("/sign-in")
     await page.waitForLoadState("domcontentloaded")
@@ -142,6 +196,35 @@ export async function clerkLogin(page: Page, email: string, password: string) {
     // Submit — click Clerk's primary form button on the password step
     await page.locator(".cl-formButtonPrimary").click()
 
-    // Wait for redirect to dashboard
-    await page.waitForURL(/dashboard/, { timeout: 30_000 })
+    // Check if Clerk asks for a verification code (email OTP)
+    // If we land on dashboard immediately, great — no code needed.
+    // Otherwise, wait up to 120s for the user to enter the code manually.
+    const dashboardOrCode = await Promise.race([
+        page.waitForURL(/dashboard/, { timeout: 5_000 }).then(() => "dashboard" as const),
+        page.locator('input[name="code"], input[autocomplete="one-time-code"], input[inputmode="numeric"]')
+            .first()
+            .waitFor({ state: "visible", timeout: 5_000 })
+            .then(() => "code" as const),
+    ]).catch(() => "unknown" as const)
+
+    if (dashboardOrCode === "dashboard") {
+        return // Already signed in, no verification needed
+    }
+
+    if (dashboardOrCode === "code") {
+        // Verification code step detected — pause and let the user enter it
+        console.log("\n╔══════════════════════════════════════════════════════╗")
+        console.log("║  VERIFICATION CODE REQUIRED                        ║")
+        console.log("║  Check your email and enter the code in the        ║")
+        console.log("║  browser window. Waiting up to 120 seconds...      ║")
+        console.log("╚══════════════════════════════════════════════════════╝\n")
+
+        // Wait for the user to enter the code and get redirected to dashboard
+        await page.waitForURL(/dashboard/, { timeout: 120_000 })
+        return
+    }
+
+    // Fallback: neither dashboard nor code input detected — wait longer
+    // This handles edge cases like slow Clerk redirects
+    await page.waitForURL(/dashboard/, { timeout: 120_000 })
 }

@@ -3,17 +3,15 @@ import { defineConfig, devices } from "@playwright/test"
 /**
  * Playwright configuration for MatchMyResumes E2E tests.
  *
- * Prerequisites:
- *   1. Frontend dev server running: `npm run dev` (port 3000)
- *   2. Backend server running: `uvicorn app.main:app --port 8000`
- *   3. Environment variables set (see tests/README.md)
- *
- * Run all tests:        npx playwright test
- * Run specific file:    npx playwright test tests/e2e/auth.spec.ts
- * Run with UI:          npx playwright test --ui
- * Run headed:           npx playwright test --headed
- * Debug single test:    npx playwright test --debug -g "should login"
+ * Run against production:  BASE_URL=https://matchmyresumes.com npx playwright test
+ * Run against local dev:   npx playwright test
+ * Run specific file:       npx playwright test tests/e2e/auth.spec.ts
+ * Run with UI:             npx playwright test --ui
+ * Run headed:              npx playwright test --headed
+ * Debug single test:       npx playwright test --debug -g "should login"
  */
+
+const isProduction = (process.env.BASE_URL || "").includes("matchmyresumes.com")
 export default defineConfig({
     testDir: "./tests/e2e",
     fullyParallel: true,
@@ -67,11 +65,15 @@ export default defineConfig({
         },
     ],
 
-    /* Start dev server automatically if not running */
-    webServer: {
-        command: "npm run dev",
-        url: "http://localhost:3000",
-        reuseExistingServer: true,
-        timeout: 60_000,
-    },
+    /* Start dev server automatically if not running (skip for production) */
+    ...(isProduction
+        ? {}
+        : {
+              webServer: {
+                  command: "npm run dev",
+                  url: "http://localhost:3000",
+                  reuseExistingServer: true,
+                  timeout: 60_000,
+              },
+          }),
 })
