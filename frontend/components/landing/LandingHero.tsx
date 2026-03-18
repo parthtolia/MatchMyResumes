@@ -30,7 +30,7 @@ export default function LandingHero() {
               keyword gap analysis, and AI-optimized resume in under 30 seconds.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/sign-up" className="btn-glow px-8 py-4 rounded-2xl text-white font-semibold text-lg flex items-center gap-2 justify-center">
+              <Link href="/ats-score-checker#tool" className="btn-glow px-8 py-4 rounded-2xl text-white font-semibold text-lg flex items-center gap-2 justify-center">
                 Get Your ATS Score Instantly
                 <ArrowRight size={20} />
               </Link>

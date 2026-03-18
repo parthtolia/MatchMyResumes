@@ -63,10 +63,11 @@ export default function CoverLetterGeneratorPage() {
         badge="Free AI Cover Letter Writer"
         title="Generate Tailored Cover Letters"
         titleAccent="in Seconds"
-        subtitle="Upload your resume, paste the job description, choose your tone — and get a personalized, professional cover letter that highlights your most relevant experience for the role."
-        ctaText="Generate Your Cover Letter"
-        ctaHref="#tool"
+        subtitle="Upload your resume, paste the job description, choose your tone — and get a personalized, professional cover letter instantly."
+        compact
       />
+
+      <CoverLetterToolSection />
 
       <ExplainerSection
         title="Why a Tailored Cover Letter"
@@ -98,11 +99,8 @@ export default function CoverLetterGeneratorPage() {
         ]}
       />
 
-      <CoverLetterToolSection />
-
       <MockPreviewCard>
         <div className="space-y-6">
-          {/* Tone selector */}
           <div className="flex items-center gap-3">
             <span className="text-xs text-gray-400">Tone:</span>
             <span className="px-3 py-1 text-xs rounded-full bg-violet-500/20 text-violet-400 border border-violet-500/30 font-medium">Professional</span>
@@ -110,7 +108,6 @@ export default function CoverLetterGeneratorPage() {
             <span className="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-400 border border-white/10">Enthusiastic</span>
           </div>
 
-          {/* Sample letter */}
           <div className="p-6 rounded-xl bg-white/[0.02] border border-white/5 font-mono text-sm text-gray-300 leading-relaxed space-y-4">
             <p>Dear Hiring Manager,</p>
             <p>
@@ -128,7 +125,6 @@ export default function CoverLetterGeneratorPage() {
             <p>Best regards,<br />Alex Johnson</p>
           </div>
 
-          {/* Meta info */}
           <div className="flex items-center justify-between text-xs text-gray-500 pt-2">
             <span>Word count: 287</span>
             <span>Tone: Professional</span>

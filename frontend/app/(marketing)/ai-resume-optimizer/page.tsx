@@ -63,10 +63,11 @@ export default function AiResumeOptimizerPage() {
         badge="Free AI-Powered Optimization"
         title="Optimize Your Resume"
         titleAccent="with AI in Seconds"
-        subtitle="Our AI analyzes your resume against a target job description, then rewrites and enhances it to naturally integrate missing keywords — without fabricating a single thing."
-        ctaText="Optimize Your Resume Now"
-        ctaHref="#tool"
+        subtitle="Upload your resume and paste a job description. Our AI rewrites and enhances it to naturally integrate missing keywords — without fabricating a single thing."
+        compact
       />
+
+      <OptimizerToolSection />
 
       <ExplainerSection
         title="How AI Resume"
@@ -98,13 +99,10 @@ export default function AiResumeOptimizerPage() {
         ]}
       />
 
-      <OptimizerToolSection />
-
       <MockPreviewCard>
         <div className="space-y-6">
           <h4 className="text-sm font-semibold text-white mb-4">Before &amp; After Comparison</h4>
 
-          {/* Example 1 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-4 rounded-xl bg-red-500/5 border border-red-500/10">
               <span className="text-xs font-medium text-red-400 mb-2 block">Before</span>
@@ -120,7 +118,6 @@ export default function AiResumeOptimizerPage() {
             </div>
           </div>
 
-          {/* Example 2 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-4 rounded-xl bg-red-500/5 border border-red-500/10">
               <span className="text-xs font-medium text-red-400 mb-2 block">Before</span>
@@ -136,7 +133,6 @@ export default function AiResumeOptimizerPage() {
             </div>
           </div>
 
-          {/* Changes summary */}
           <div className="pt-4 border-t border-white/5">
             <h5 className="text-xs font-medium text-violet-400 mb-2">Keywords Added</h5>
             <div className="flex flex-wrap gap-2">

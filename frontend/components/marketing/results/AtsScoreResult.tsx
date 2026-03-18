@@ -134,10 +134,10 @@ export default function AtsScoreResult({ total_score, breakdown, resume_keywords
       <div className="text-center pt-4">
         <p className="text-gray-500 text-sm mb-3">Want to match your resume against a specific job description?</p>
         <Link
-          href="/sign-up"
+          href="/resume-job-description-match#tool"
           className="inline-flex items-center gap-2 text-violet-400 hover:text-violet-300 font-medium text-sm transition-colors"
         >
-          Sign up free for JD-matched scoring <ArrowRight size={16} />
+          Try Resume vs JD Match <ArrowRight size={16} />
         </Link>
       </div>
     </motion.div>

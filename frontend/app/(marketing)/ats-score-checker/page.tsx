@@ -42,7 +42,7 @@ const faqs = [
   },
   {
     q: "Do I need a job description to check my ATS score?",
-    a: "No! Our ATS Score Checker evaluates your resume's general ATS compatibility — formatting, section structure, keyword richness, and quantified achievements. For job-specific matching, sign up free to use our JD Match tool.",
+    a: "No! Our ATS Score Checker evaluates your resume's general ATS compatibility — formatting, section structure, keyword richness, and quantified achievements. For job-specific matching, use our free JD Match tool.",
   },
   {
     q: "What are the 4 scoring dimensions?",
@@ -69,10 +69,11 @@ export default function AtsScoreCheckerPage() {
         badge="Free ATS Resume Scanner"
         title="Check Your Resume"
         titleAccent="ATS Score Instantly"
-        subtitle="Upload your resume and get a detailed 0-100 ATS compatibility score with actionable improvement tips — no job description required. Just upload and get your score."
-        ctaText="Check Your ATS Score Now"
-        ctaHref="#tool"
+        subtitle="Upload your resume and get a detailed 0-100 ATS compatibility score with actionable improvement tips — no job description required."
+        compact
       />
+
+      <AtsScoreToolSection />
 
       <ExplainerSection
         title="What is an"
@@ -104,11 +105,8 @@ export default function AtsScoreCheckerPage() {
         ]}
       />
 
-      <AtsScoreToolSection />
-
       <MockPreviewCard>
         <div className="flex flex-col md:flex-row items-center gap-10">
-          {/* Score circle */}
           <div className="flex flex-col items-center gap-3 shrink-0">
             <div className="relative">
               <svg width={160} height={160} className="-rotate-90">
@@ -133,7 +131,6 @@ export default function AtsScoreCheckerPage() {
             <span className="text-sm font-medium text-emerald-400">Great Score!</span>
           </div>
 
-          {/* Dimension bars */}
           <div className="flex-1 w-full space-y-4">
             <ProgressBar label="ATS Formatting" value={92} color="bg-emerald-500" />
             <ProgressBar label="Section Completeness" value={88} color="bg-violet-500" />
@@ -142,7 +139,6 @@ export default function AtsScoreCheckerPage() {
           </div>
         </div>
 
-        {/* Sample tips */}
         <div className="mt-8 pt-6 border-t border-white/5">
           <h4 className="text-sm font-semibold text-white mb-3">Improvement Tips</h4>
           <div className="space-y-2 text-sm text-gray-400">

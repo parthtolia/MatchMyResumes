@@ -53,6 +53,7 @@ export function HeroSection({
   subtitle,
   ctaText = "Get Started Free",
   ctaHref = "/sign-up",
+  compact = false,
 }: {
   badge: string
   title: string
@@ -60,37 +61,40 @@ export function HeroSection({
   subtitle: string
   ctaText?: string
   ctaHref?: string
+  compact?: boolean
 }) {
   return (
-    <section className="relative overflow-hidden py-24 md:py-32">
+    <section className={`relative overflow-hidden ${compact ? "py-10 md:py-14" : "py-24 md:py-32"}`}>
       {/* Background blobs */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-violet-600/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="relative max-w-4xl mx-auto px-6 text-center">
         <AnimatedSection>
-          <span className="inline-block mb-6 px-4 py-1.5 rounded-full text-xs font-medium bg-violet-500/10 text-violet-300 border border-violet-500/20">
+          <span className="inline-block mb-4 px-4 py-1.5 rounded-full text-xs font-medium bg-violet-500/10 text-violet-300 border border-violet-500/20">
             {badge}
           </span>
         </AnimatedSection>
         <AnimatedSection delay={0.1}>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+          <h1 className={`${compact ? "text-3xl md:text-5xl mb-4" : "text-4xl md:text-6xl mb-6"} font-bold leading-tight`}>
             {title} <span className="gradient-text">{titleAccent}</span>
           </h1>
         </AnimatedSection>
         <AnimatedSection delay={0.2}>
-          <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+          <p className={`text-lg md:text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed ${compact ? "mb-0" : "mb-10"}`}>
             {subtitle}
           </p>
         </AnimatedSection>
-        <AnimatedSection delay={0.3}>
-          <Link
-            href={ctaHref}
-            className="btn-glow inline-flex items-center gap-2 px-8 py-4 rounded-2xl text-white font-semibold text-lg"
-          >
-            {ctaText} <ArrowRight size={20} />
-          </Link>
-        </AnimatedSection>
+        {!compact && (
+          <AnimatedSection delay={0.3}>
+            <Link
+              href={ctaHref}
+              className="btn-glow inline-flex items-center gap-2 px-8 py-4 rounded-2xl text-white font-semibold text-lg"
+            >
+              {ctaText} <ArrowRight size={20} />
+            </Link>
+          </AnimatedSection>
+        )}
       </div>
     </section>
   )

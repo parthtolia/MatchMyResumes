@@ -106,12 +106,12 @@ export default function JdMatchResult({ total_score, breakdown, matched_keywords
 
       {/* CTA */}
       <div className="text-center pt-4">
-        <p className="text-gray-500 text-sm mb-3">Want to track match scores across multiple job descriptions?</p>
+        <p className="text-gray-500 text-sm mb-3">Want to automatically fix those missing keywords?</p>
         <Link
-          href="/sign-up"
+          href="/ai-resume-optimizer#tool"
           className="inline-flex items-center gap-2 text-violet-400 hover:text-violet-300 font-medium text-sm transition-colors"
         >
-          Sign up free <ArrowRight size={16} />
+          Optimize your resume with AI <ArrowRight size={16} />
         </Link>
       </div>
     </motion.div>

@@ -53,7 +53,7 @@ const faqs = [
   },
   {
     q: "Is this tool free?",
-    a: "Completely free — unlimited resume-to-JD matches with full keyword gap analysis. No signup required to learn about it, and creating an account is free too.",
+    a: "Completely free — unlimited resume-to-JD matches with full keyword gap analysis. No signup required.",
   },
 ]
 
@@ -64,10 +64,11 @@ export default function ResumeJdMatchPage() {
         badge="Free Resume Match Analyzer"
         title="See How Well Your Resume Matches"
         titleAccent="Any Job Description"
-        subtitle="Upload your resume and paste a job description to get an instant match score, keyword gap analysis, and semantic similarity breakdown. Know exactly where you stand before you apply."
-        ctaText="Match Your Resume Now"
-        ctaHref="#tool"
+        subtitle="Upload your resume and paste a job description to get an instant match score, keyword gap analysis, and semantic similarity breakdown."
+        compact
       />
+
+      <JdMatchToolSection />
 
       <ExplainerSection
         title="Why Resume-JD Matching"
@@ -99,11 +100,8 @@ export default function ResumeJdMatchPage() {
         ]}
       />
 
-      <JdMatchToolSection />
-
       <MockPreviewCard>
         <div className="flex flex-col md:flex-row gap-10">
-          {/* Match score */}
           <div className="flex flex-col items-center gap-3 shrink-0">
             <div className="relative">
               <svg width={160} height={160} className="-rotate-90">
@@ -128,7 +126,6 @@ export default function ResumeJdMatchPage() {
             <span className="text-sm font-medium text-violet-400">Good Match</span>
           </div>
 
-          {/* Dimension breakdown */}
           <div className="flex-1 w-full space-y-4">
             <ProgressBar label="Keyword Match" value={72} color="bg-emerald-500" />
             <ProgressBar label="Semantic Similarity" value={85} color="bg-violet-500" />
@@ -138,7 +135,6 @@ export default function ResumeJdMatchPage() {
           </div>
         </div>
 
-        {/* Keyword gap table */}
         <div className="mt-8 pt-6 border-t border-white/5">
           <h4 className="text-sm font-semibold text-white mb-4">Keyword Gap Analysis</h4>
           <div className="grid grid-cols-2 gap-4">

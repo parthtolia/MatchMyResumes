@@ -47,15 +47,8 @@ export default function AtsScoreToolSection() {
   }
 
   return (
-    <section id="tool" className="py-20 border-t border-white/5">
+    <section id="tool" className="py-10 md:py-14">
       <div className="max-w-4xl mx-auto px-6">
-        <h2 className="text-3xl md:text-4xl font-bold mb-4 text-center">
-          Try It <span className="gradient-text">Now</span>
-        </h2>
-        <p className="text-gray-400 text-center mb-10 max-w-xl mx-auto">
-          Upload your resume to get your ATS compatibility score instantly — no job description needed.
-        </p>
-
         {result ? (
           <div className="space-y-6">
             <AtsScoreResult {...result} />
