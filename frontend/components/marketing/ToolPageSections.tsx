@@ -69,7 +69,7 @@ const tools = [
 export function FeatureStrip({ active }: { active: string }) {
   const isSignedIn = useIsSignedIn()
   return (
-    <div className="border-b border-white/5 bg-white/[0.02] mt-6">
+    <div className="border-b border-white/5 bg-white/[0.02]">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
           {tools.map((t) => {
