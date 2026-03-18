@@ -93,118 +93,151 @@ const testimonials = [
 ]
 
 /* ------------------------------------------------------------------ */
-/*  Animated Center Illustration — resume → success transformation     */
+/*  Lightbulb color configs per feature                                */
+/* ------------------------------------------------------------------ */
+const bulbConfigs: Record<number, { bulbColor: string; glowColor: string; sparkColor: string; word: string }> = {
+  0: { bulbColor: "#10b981", glowColor: "rgba(16,185,129,0.35)", sparkColor: "#6ee7b7", word: "Success" },
+  1: { bulbColor: "#8b5cf6", glowColor: "rgba(139,92,246,0.35)", sparkColor: "#c4b5fd", word: "Alignment" },
+  2: { bulbColor: "#f59e0b", glowColor: "rgba(245,158,11,0.35)", sparkColor: "#fcd34d", word: "Improvement" },
+  3: { bulbColor: "#3b82f6", glowColor: "rgba(59,130,246,0.35)", sparkColor: "#93c5fd", word: "Expression" },
+  4: { bulbColor: "#ec4899", glowColor: "rgba(236,72,153,0.35)", sparkColor: "#f9a8d4", word: "Momentum" },
+}
+const defaultBulb = { bulbColor: "#a78bfa", glowColor: "rgba(139,92,246,0.2)", sparkColor: "#c4b5fd", word: "Discover" }
+
+/* ------------------------------------------------------------------ */
+/*  Animated Center — pulsating lightbulb with dynamic color & text    */
 /* ------------------------------------------------------------------ */
 function CenterIllustration({ active, activeIdx }: { active: boolean; activeIdx: number | null }) {
-  // Dynamic score based on which feature is hovered
-  const scores: Record<number, number> = { 0: 95, 1: 88, 2: 92, 3: 97, 4: 100 }
-  const displayScore = activeIdx !== null ? scores[activeIdx] ?? 85 : 85
-  const glowColors: Record<number, string> = {
-    0: "from-emerald-500/30 to-emerald-400/10",
-    1: "from-violet-500/30 to-violet-400/10",
-    2: "from-amber-500/30 to-amber-400/10",
-    3: "from-blue-500/30 to-blue-400/10",
-    4: "from-pink-500/30 to-pink-400/10",
-  }
-  const glowGradient = activeIdx !== null ? glowColors[activeIdx] ?? "from-violet-500/20 to-emerald-500/20" : "from-violet-500/20 to-emerald-500/20"
+  const cfg = activeIdx !== null ? bulbConfigs[activeIdx] ?? defaultBulb : defaultBulb
 
   return (
     <m.div
-      animate={{ scale: active ? 0.95 : 1 }}
-      transition={{ type: "spring", stiffness: 300, damping: 25 }}
-      className="relative w-40 h-40 flex items-center justify-center"
+      animate={{ scale: active ? 1.05 : 1 }}
+      transition={{ type: "spring", stiffness: 260, damping: 20 }}
+      className="relative w-44 h-44 flex items-center justify-center"
     >
-      {/* Outer spinning ring */}
+      {/* Ambient glow behind bulb */}
       <m.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-        className="absolute inset-0 rounded-full"
-        style={{
-          background: "conic-gradient(from 0deg, transparent, rgba(139,92,246,0.15), transparent, rgba(16,185,129,0.15), transparent)",
+        animate={{
+          opacity: active ? 0.9 : 0.4,
+          scale: active ? 1.15 : 1,
+          backgroundColor: cfg.glowColor,
         }}
+        transition={{ duration: 0.5 }}
+        className="absolute inset-0 rounded-full blur-2xl"
       />
-      {/* Reactive glow ring */}
+
+      {/* Outer pulsing halo */}
       <m.div
-        animate={{ opacity: active ? 1 : 0.5, scale: active ? 1.05 : 1 }}
-        transition={{ duration: 0.3 }}
-        className={`absolute inset-1 rounded-full bg-gradient-to-br ${glowGradient} blur-sm`}
+        animate={{
+          scale: [1, 1.08, 1],
+          opacity: [0.3, 0.6, 0.3],
+        }}
+        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute inset-0 rounded-full border-2"
+        style={{ borderColor: active ? cfg.bulbColor + "40" : "rgba(167,139,250,0.15)" }}
       />
-      {/* Inner glass circle */}
-      <div className="absolute inset-3 rounded-full bg-[#0d0d1a]/80 border border-white/10 shadow-xl shadow-violet-500/10 backdrop-blur-md" />
 
-      {/* Center content — animated document with score */}
-      <div className="relative z-10 flex flex-col items-center gap-1">
-        {/* Document icon */}
-        <div className="relative">
-          <div className="w-12 h-[58px] rounded-sm bg-gradient-to-b from-white/[0.12] to-white/[0.04] border border-white/15 flex flex-col items-center justify-center gap-1 overflow-hidden">
-            {/* Doc lines */}
-            <div className="w-7 h-[2px] rounded-full bg-white/20" />
-            <div className="w-5 h-[2px] rounded-full bg-white/15" />
-            <div className="w-6 h-[2px] rounded-full bg-white/10" />
-            {/* Score overlay */}
-            <m.div
-              key={displayScore}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="mt-0.5"
-            >
-              <span className="text-[13px] font-black bg-gradient-to-r from-violet-400 to-emerald-400 bg-clip-text text-transparent">
-                {displayScore}
-              </span>
-            </m.div>
-          </div>
-          {/* Corner fold */}
-          <div className="absolute top-0 right-0 w-2.5 h-2.5 bg-gradient-to-br from-white/20 to-white/5 border-b border-l border-white/10" style={{ clipPath: "polygon(100% 0, 0 100%, 100% 100%)" }} />
-        </div>
+      {/* Inner circle base */}
+      <div className="absolute inset-4 rounded-full bg-[#0d0d1a]/90 border border-white/[0.08] shadow-2xl backdrop-blur-md" />
 
-        {/* Score label */}
-        <m.div
-          animate={{ opacity: [0.6, 1, 0.6] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-          className="text-[9px] font-semibold text-gray-400 tracking-wider uppercase"
+      {/* Lightbulb SVG */}
+      <div className="relative z-10 flex flex-col items-center">
+        <m.svg
+          width="56"
+          height="72"
+          viewBox="0 0 56 72"
+          fill="none"
+          animate={{ filter: active ? `drop-shadow(0 0 12px ${cfg.glowColor})` : "drop-shadow(0 0 6px rgba(167,139,250,0.2))" }}
+          transition={{ duration: 0.4 }}
         >
-          ATS Score
-        </m.div>
+          {/* Bulb glass */}
+          <m.path
+            d="M28 4C16.954 4 8 12.954 8 24c0 7.5 4 13.5 10 17v6h20v-6c6-3.5 10-9.5 10-17C48 12.954 39.046 4 28 4z"
+            animate={{ fill: cfg.bulbColor + "25", stroke: cfg.bulbColor }}
+            transition={{ duration: 0.4 }}
+            strokeWidth="1.5"
+          />
+          {/* Inner glow gradient */}
+          <m.ellipse
+            cx="28"
+            cy="22"
+            rx="10"
+            ry="10"
+            animate={{ fill: cfg.bulbColor + "20" }}
+            transition={{ duration: 0.4 }}
+          />
+          {/* Filament */}
+          <m.path
+            d="M22 28c2-4 4-6 6-6s4 2 6 6"
+            animate={{ stroke: cfg.sparkColor }}
+            transition={{ duration: 0.3 }}
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            fill="none"
+          />
+          {/* Filament center dot */}
+          <m.circle
+            cx="28"
+            cy="22"
+            r="1.5"
+            animate={{ fill: cfg.sparkColor, opacity: [0.6, 1, 0.6] }}
+            transition={{ opacity: { duration: 1.5, repeat: Infinity, ease: "easeInOut" }, fill: { duration: 0.3 } }}
+          />
+          {/* Base / screw cap */}
+          <rect x="18" y="47" width="20" height="3" rx="1" fill="rgba(255,255,255,0.15)" />
+          <rect x="19" y="51" width="18" height="3" rx="1" fill="rgba(255,255,255,0.10)" />
+          <rect x="20" y="55" width="16" height="3" rx="1" fill="rgba(255,255,255,0.07)" />
+          <path d="M22 58h12l-2 6h-8l-2-6z" fill="rgba(255,255,255,0.05)" />
+        </m.svg>
+
+        {/* Spark particles on hover */}
+        <AnimatePresence>
+          {active && (
+            <>
+              {[
+                { x: -16, y: -28, delay: 0 },
+                { x: 18, y: -24, delay: 0.15 },
+                { x: -12, y: -14, delay: 0.3 },
+                { x: 14, y: -18, delay: 0.1 },
+                { x: 0, y: -34, delay: 0.2 },
+              ].map((spark, i) => (
+                <m.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
+                  animate={{
+                    opacity: [0, 1, 0],
+                    scale: [0, 1, 0.5],
+                    x: spark.x,
+                    y: spark.y,
+                  }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 1.2, delay: spark.delay, repeat: Infinity, repeatDelay: 0.8 }}
+                  className="absolute top-4 w-1.5 h-1.5 rounded-full"
+                  style={{ backgroundColor: cfg.sparkColor }}
+                />
+              ))}
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* Dynamic text under bulb */}
+        <div className="h-5 mt-1.5 flex items-center justify-center">
+          <AnimatePresence mode="wait">
+            <m.span
+              key={cfg.word}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.3 }}
+              className="text-[11px] font-bold tracking-widest uppercase"
+              style={{ color: active ? cfg.bulbColor : "rgba(167,139,250,0.7)" }}
+            >
+              {cfg.word}
+            </m.span>
+          </AnimatePresence>
+        </div>
       </div>
-
-      {/* Orbiting particles */}
-      <m.div
-        animate={{ rotate: -360 }}
-        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-        className="absolute inset-0"
-      >
-        <div className="absolute top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-emerald-400/60 shadow-sm shadow-emerald-400/40" />
-      </m.div>
-      <m.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-        className="absolute inset-0"
-      >
-        <div className="absolute bottom-2 right-2 w-1 h-1 rounded-full bg-violet-400/60 shadow-sm shadow-violet-400/40" />
-      </m.div>
-
-      {/* Floating success indicators */}
-      <m.div
-        animate={{ y: [-3, 3, -3], opacity: [0.5, 1, 0.5] }}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute -top-2 -right-2 w-6 h-6 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center backdrop-blur-sm"
-      >
-        <span className="text-[10px] text-emerald-400">&#10003;</span>
-      </m.div>
-      <m.div
-        animate={{ y: [3, -3, 3], opacity: [0.4, 0.9, 0.4] }}
-        transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1.2 }}
-        className="absolute -bottom-1 -left-2 w-5 h-5 rounded-lg bg-violet-500/15 border border-violet-500/25 flex items-center justify-center backdrop-blur-sm"
-      >
-        <Star size={10} className="text-violet-400" />
-      </m.div>
-      <m.div
-        animate={{ y: [-2, 4, -2], opacity: [0.3, 0.8, 0.3] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
-        className="absolute top-1/2 -right-3 w-5 h-5 rounded-lg bg-amber-500/15 border border-amber-500/25 flex items-center justify-center backdrop-blur-sm"
-      >
-        <TrendingUp size={10} className="text-amber-400" />
-      </m.div>
     </m.div>
   )
 }
@@ -218,7 +251,7 @@ function OrbitFeaturesSection() {
   const isSignedIn = useIsSignedIn()
 
   return (
-    <section id="features" className="py-14 relative overflow-hidden">
+    <section id="features" className="py-10 relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-600/5 rounded-full blur-[100px] pointer-events-none" />
 
@@ -238,27 +271,43 @@ function OrbitFeaturesSection() {
         {/* Desktop orbit layout */}
         <div className="hidden lg:block">
           <div className="relative w-full max-w-[600px] mx-auto" style={{ aspectRatio: "1" }}>
-            {/* SVG connector lines */}
+            {/* SVG connector lines — match orbit item positioning (50 + 40*cos/sin %) */}
             <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" viewBox="0 0 600 600">
+              <defs>
+                {orbitFeatures.map((f, i) => {
+                  const cfg = bulbConfigs[i] ?? defaultBulb
+                  return (
+                    <linearGradient key={`lg-${i}`} id={`line-grad-${i}`} x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor={cfg.bulbColor} stopOpacity="0.6" />
+                      <stop offset="100%" stopColor={cfg.bulbColor} stopOpacity="0.15" />
+                    </linearGradient>
+                  )
+                })}
+              </defs>
               {orbitFeatures.map((f, i) => {
                 const rad = (f.angle * Math.PI) / 180
-                const radius = 0.40 * 300
-                const x = 300 + radius * Math.cos(rad)
-                const y = 300 + radius * Math.sin(rad)
+                const orbitR = 40
+                // Convert percentage position to SVG coords (600x600 viewBox)
+                const x = (50 + orbitR * Math.cos(rad)) * 6
+                const y = (50 + orbitR * Math.sin(rad)) * 6
                 const isActive = activeIdx === i
+                const cfg = bulbConfigs[i] ?? defaultBulb
                 return (
                   <line
                     key={f.title}
                     x1="300" y1="300" x2={x} y2={y}
-                    stroke={isActive ? "rgba(139,92,246,0.4)" : "rgba(255,255,255,0.06)"}
-                    strokeWidth={isActive ? 2 : 1}
-                    strokeDasharray={isActive ? "none" : "4 4"}
-                    className="transition-all duration-300"
+                    stroke={isActive ? `url(#line-grad-${i})` : "rgba(255,255,255,0.06)"}
+                    strokeWidth={isActive ? 2.5 : 1}
+                    strokeDasharray={isActive ? "none" : "6 6"}
+                    className="transition-all duration-500"
+                    style={isActive ? {
+                      filter: `drop-shadow(0 0 4px ${cfg.glowColor})`,
+                    } : undefined}
                   />
                 )
               })}
-              {/* Orbit ring */}
-              <circle cx="300" cy="300" r={0.40 * 300} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+              {/* Orbit ring — matches the orbit radius */}
+              <circle cx="300" cy="300" r={40 * 6} fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" strokeDasharray="8 8" />
             </svg>
 
             {/* Center element */}
