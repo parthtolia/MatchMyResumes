@@ -7,6 +7,19 @@ import {
   ArrowRight, Star, TrendingUp, ScanSearch
 } from "lucide-react"
 import { Logo } from "@/components/ui/Logo"
+import { useUser as useClerkUser } from "@clerk/nextjs"
+import { getToolHref } from "@/lib/tool-routes"
+
+const HAS_REAL_CLERK =
+  (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "").startsWith("pk_") &&
+  !(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "").includes("_...")
+
+function useIsSignedIn() {
+  if (!HAS_REAL_CLERK) return false
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { isSignedIn } = useClerkUser()
+  return !!isSignedIn
+}
 
 const orbitFeatures = [
   {
@@ -80,64 +93,117 @@ const testimonials = [
 ]
 
 /* ------------------------------------------------------------------ */
-/*  Animated Center Illustration — person at laptop with rising score  */
+/*  Animated Center Illustration — resume → success transformation     */
 /* ------------------------------------------------------------------ */
-function CenterIllustration({ active }: { active: boolean }) {
+function CenterIllustration({ active, activeIdx }: { active: boolean; activeIdx: number | null }) {
+  // Dynamic score based on which feature is hovered
+  const scores: Record<number, number> = { 0: 95, 1: 88, 2: 92, 3: 97, 4: 100 }
+  const displayScore = activeIdx !== null ? scores[activeIdx] ?? 85 : 85
+  const glowColors: Record<number, string> = {
+    0: "from-emerald-500/30 to-emerald-400/10",
+    1: "from-violet-500/30 to-violet-400/10",
+    2: "from-amber-500/30 to-amber-400/10",
+    3: "from-blue-500/30 to-blue-400/10",
+    4: "from-pink-500/30 to-pink-400/10",
+  }
+  const glowGradient = activeIdx !== null ? glowColors[activeIdx] ?? "from-violet-500/20 to-emerald-500/20" : "from-violet-500/20 to-emerald-500/20"
+
   return (
     <m.div
-      animate={{ scale: active ? 0.92 : 1 }}
-      className="relative w-36 h-36 flex items-center justify-center"
+      animate={{ scale: active ? 0.95 : 1 }}
+      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+      className="relative w-40 h-40 flex items-center justify-center"
     >
-      {/* Outer pulse ring */}
-      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-500/15 to-emerald-500/15 animate-[pulse_3s_ease-in-out_infinite]" />
-      {/* Inner glow */}
-      <div className="absolute inset-3 rounded-full bg-gradient-to-br from-violet-500/10 to-emerald-500/10 border border-white/10 shadow-lg shadow-violet-500/20 backdrop-blur-sm" />
+      {/* Outer spinning ring */}
+      <m.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        className="absolute inset-0 rounded-full"
+        style={{
+          background: "conic-gradient(from 0deg, transparent, rgba(139,92,246,0.15), transparent, rgba(16,185,129,0.15), transparent)",
+        }}
+      />
+      {/* Reactive glow ring */}
+      <m.div
+        animate={{ opacity: active ? 1 : 0.5, scale: active ? 1.05 : 1 }}
+        transition={{ duration: 0.3 }}
+        className={`absolute inset-1 rounded-full bg-gradient-to-br ${glowGradient} blur-sm`}
+      />
+      {/* Inner glass circle */}
+      <div className="absolute inset-3 rounded-full bg-[#0d0d1a]/80 border border-white/10 shadow-xl shadow-violet-500/10 backdrop-blur-md" />
 
-      {/* Laptop + person illustration (CSS) */}
-      <div className="relative z-10 flex flex-col items-center">
-        {/* Person silhouette */}
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-400/60 to-purple-400/60 border border-violet-400/30 mb-1 flex items-center justify-center">
-          <div className="w-3 h-3 rounded-full bg-violet-300/50" />
-        </div>
-        {/* Body */}
-        <div className="w-10 h-3 rounded-t-lg bg-gradient-to-br from-violet-500/40 to-purple-500/40 -mt-0.5" />
-        {/* Laptop */}
-        <div className="relative -mt-0.5">
-          <div className="w-14 h-8 rounded-t-md bg-gradient-to-b from-[#1a1a2e] to-[#16162a] border border-white/10 flex items-center justify-center overflow-hidden">
-            {/* Screen content — animated score */}
+      {/* Center content — animated document with score */}
+      <div className="relative z-10 flex flex-col items-center gap-1">
+        {/* Document icon */}
+        <div className="relative">
+          <div className="w-12 h-[58px] rounded-sm bg-gradient-to-b from-white/[0.12] to-white/[0.04] border border-white/15 flex flex-col items-center justify-center gap-1 overflow-hidden">
+            {/* Doc lines */}
+            <div className="w-7 h-[2px] rounded-full bg-white/20" />
+            <div className="w-5 h-[2px] rounded-full bg-white/15" />
+            <div className="w-6 h-[2px] rounded-full bg-white/10" />
+            {/* Score overlay */}
             <m.div
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="text-center"
+              key={displayScore}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="mt-0.5"
             >
-              <div className="text-[10px] font-black text-emerald-400">85</div>
-              <div className="w-8 h-0.5 rounded-full bg-gradient-to-r from-violet-500 to-emerald-500 mt-0.5" />
+              <span className="text-[13px] font-black bg-gradient-to-r from-violet-400 to-emerald-400 bg-clip-text text-transparent">
+                {displayScore}
+              </span>
             </m.div>
-            {/* Blinking cursor */}
-            <m.div
-              animate={{ opacity: [1, 0, 1] }}
-              transition={{ duration: 1, repeat: Infinity }}
-              className="absolute bottom-1 right-1.5 w-0.5 h-2 bg-violet-400/60"
-            />
           </div>
-          <div className="w-16 h-1 rounded-b-md bg-gray-600/40 border-x border-b border-white/5 mx-auto" style={{ marginLeft: "-1px" }} />
+          {/* Corner fold */}
+          <div className="absolute top-0 right-0 w-2.5 h-2.5 bg-gradient-to-br from-white/20 to-white/5 border-b border-l border-white/10" style={{ clipPath: "polygon(100% 0, 0 100%, 100% 100%)" }} />
         </div>
+
+        {/* Score label */}
+        <m.div
+          animate={{ opacity: [0.6, 1, 0.6] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+          className="text-[9px] font-semibold text-gray-400 tracking-wider uppercase"
+        >
+          ATS Score
+        </m.div>
       </div>
 
-      {/* Floating checkmarks */}
+      {/* Orbiting particles */}
       <m.div
-        animate={{ y: [-2, 2, -2], opacity: [0.4, 0.8, 0.4] }}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center"
+        animate={{ rotate: -360 }}
+        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+        className="absolute inset-0"
       >
-        <span className="text-[8px] text-emerald-400">&#10003;</span>
+        <div className="absolute top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-emerald-400/60 shadow-sm shadow-emerald-400/40" />
       </m.div>
       <m.div
-        animate={{ y: [2, -2, 2], opacity: [0.3, 0.7, 0.3] }}
-        transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className="absolute -bottom-0 -left-1 w-4 h-4 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+        className="absolute inset-0"
       >
-        <span className="text-[7px] text-violet-400">&#10003;</span>
+        <div className="absolute bottom-2 right-2 w-1 h-1 rounded-full bg-violet-400/60 shadow-sm shadow-violet-400/40" />
+      </m.div>
+
+      {/* Floating success indicators */}
+      <m.div
+        animate={{ y: [-3, 3, -3], opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute -top-2 -right-2 w-6 h-6 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center backdrop-blur-sm"
+      >
+        <span className="text-[10px] text-emerald-400">&#10003;</span>
+      </m.div>
+      <m.div
+        animate={{ y: [3, -3, 3], opacity: [0.4, 0.9, 0.4] }}
+        transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1.2 }}
+        className="absolute -bottom-1 -left-2 w-5 h-5 rounded-lg bg-violet-500/15 border border-violet-500/25 flex items-center justify-center backdrop-blur-sm"
+      >
+        <Star size={10} className="text-violet-400" />
+      </m.div>
+      <m.div
+        animate={{ y: [-2, 4, -2], opacity: [0.3, 0.8, 0.3] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
+        className="absolute top-1/2 -right-3 w-5 h-5 rounded-lg bg-amber-500/15 border border-amber-500/25 flex items-center justify-center backdrop-blur-sm"
+      >
+        <TrendingUp size={10} className="text-amber-400" />
       </m.div>
     </m.div>
   )
@@ -149,6 +215,7 @@ function CenterIllustration({ active }: { active: boolean }) {
 function OrbitFeaturesSection() {
   const [activeIdx, setActiveIdx] = useState<number | null>(null)
   const active = activeIdx !== null ? orbitFeatures[activeIdx] : null
+  const isSignedIn = useIsSignedIn()
 
   return (
     <section id="features" className="py-14 relative overflow-hidden">
@@ -196,7 +263,7 @@ function OrbitFeaturesSection() {
 
             {/* Center element */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-              <CenterIllustration active={activeIdx !== null} />
+              <CenterIllustration active={activeIdx !== null} activeIdx={activeIdx} />
             </div>
 
             {/* Orbit items */}
@@ -220,7 +287,7 @@ function OrbitFeaturesSection() {
                   style={{ left: `${x}%`, top: `${y}%` }}
                 >
                   <Link
-                    href={f.href}
+                    href={getToolHref(f.href, isSignedIn)}
                     onMouseEnter={() => setActiveIdx(i)}
                     onMouseLeave={() => setActiveIdx(null)}
                   >
@@ -275,7 +342,7 @@ function OrbitFeaturesSection() {
                   className="text-center"
                 >
                   <p className="text-gray-400 text-sm max-w-md mx-auto">{active.desc}</p>
-                  <Link href={active.href} className="inline-flex items-center gap-1.5 text-violet-400 text-sm font-medium mt-2 hover:text-violet-300 transition-colors">
+                  <Link href={getToolHref(active.href, isSignedIn)} className="inline-flex items-center gap-1.5 text-violet-400 text-sm font-medium mt-2 hover:text-violet-300 transition-colors">
                     Try it now <ArrowRight size={14} />
                   </Link>
                 </m.div>
@@ -289,7 +356,7 @@ function OrbitFeaturesSection() {
           {orbitFeatures.map((f, i) => {
             const Icon = f.icon
             return (
-              <Link key={f.title} href={f.href}>
+              <Link key={f.title} href={getToolHref(f.href, isSignedIn)}>
                 <m.div
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -457,6 +524,14 @@ export default function LandingSections() {
       </section>
 
       {/* Footer */}
+      <FooterSection />
+    </LazyMotion>
+  )
+}
+
+function FooterSection() {
+  const isSignedIn = useIsSignedIn()
+  return (
       <footer className="border-t border-white/5 py-12 px-6">
         <div className="max-w-5xl mx-auto">
           <div className="flex justify-center mb-8">
@@ -466,10 +541,10 @@ export default function LandingSections() {
             <div>
               <h4 className="font-semibold text-white mb-3">Tools</h4>
               <div className="flex flex-col gap-2 text-gray-400">
-                <Link href="/ats-score-checker" className="hover:text-white transition-colors">ATS Score Checker</Link>
-                <Link href="/resume-job-description-match" className="hover:text-white transition-colors">Resume vs JD Match</Link>
-                <Link href="/ai-resume-optimizer" className="hover:text-white transition-colors">AI Resume Optimizer</Link>
-                <Link href="/cover-letter-generator" className="hover:text-white transition-colors">Cover Letter Generator</Link>
+                <Link href={getToolHref("/ats-score-checker", isSignedIn)} className="hover:text-white transition-colors">ATS Score Checker</Link>
+                <Link href={getToolHref("/resume-job-description-match", isSignedIn)} className="hover:text-white transition-colors">Resume vs JD Match</Link>
+                <Link href={getToolHref("/ai-resume-optimizer", isSignedIn)} className="hover:text-white transition-colors">AI Resume Optimizer</Link>
+                <Link href={getToolHref("/cover-letter-generator", isSignedIn)} className="hover:text-white transition-colors">Cover Letter Generator</Link>
               </div>
             </div>
             <div>
@@ -492,6 +567,5 @@ export default function LandingSections() {
           <p className="text-gray-500 text-sm text-center">&copy; 2026 MatchMyResumes. All rights reserved.</p>
         </div>
       </footer>
-    </LazyMotion>
   )
 }

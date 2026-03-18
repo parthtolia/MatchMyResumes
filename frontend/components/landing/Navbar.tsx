@@ -3,6 +3,7 @@ import Link from "next/link"
 import { UserButton, useUser as useClerkUser } from "@clerk/nextjs"
 import { Logo } from "@/components/ui/Logo"
 import { ChevronDown } from "lucide-react"
+import { getToolHref } from "@/lib/tool-routes"
 
 const HAS_REAL_CLERK =
   (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "").startsWith("pk_") &&
@@ -43,7 +44,7 @@ export default function Navbar() {
               {tools.map(tool => (
                 <Link
                   key={tool.href}
-                  href={tool.href}
+                  href={getToolHref(tool.href, !!isSignedIn)}
                   className="block px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
                 >
                   {tool.label}

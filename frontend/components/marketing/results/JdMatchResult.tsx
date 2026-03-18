@@ -108,7 +108,7 @@ export default function JdMatchResult({ total_score, breakdown, matched_keywords
       <div className="text-center pt-4">
         <p className="text-gray-500 text-sm mb-3">Want to automatically fix those missing keywords?</p>
         <Link
-          href="/ai-resume-optimizer#tool"
+          href="/ai-resume-optimizer"
           className="inline-flex items-center gap-2 text-violet-400 hover:text-violet-300 font-medium text-sm transition-colors"
         >
           Optimize your resume with AI <ArrowRight size={16} />

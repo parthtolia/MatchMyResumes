@@ -3,6 +3,19 @@ import Link from "next/link"
 import { LazyMotion, domAnimation, m } from "framer-motion"
 import { CheckCircle, ArrowRight, type LucideIcon, ScanSearch, GitCompareArrows, Sparkles, FileText, LogIn } from "lucide-react"
 import Navbar from "@/components/landing/Navbar"
+import { getToolHref } from "@/lib/tool-routes"
+import { useUser as useClerkUser } from "@clerk/nextjs"
+
+const HAS_REAL_CLERK =
+  (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "").startsWith("pk_") &&
+  !(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "").includes("_...")
+
+function useIsSignedIn() {
+  if (!HAS_REAL_CLERK) return false
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { isSignedIn } = useClerkUser()
+  return !!isSignedIn
+}
 
 /* ------------------------------------------------------------------ */
 /*  Animated wrapper                                                   */
@@ -54,8 +67,9 @@ const tools = [
 ]
 
 export function FeatureStrip({ active }: { active: string }) {
+  const isSignedIn = useIsSignedIn()
   return (
-    <div className="border-b border-white/5 bg-white/[0.02]">
+    <div className="border-b border-white/5 bg-white/[0.02] mt-2">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
           {tools.map((t) => {
@@ -64,7 +78,7 @@ export function FeatureStrip({ active }: { active: string }) {
             return (
               <Link
                 key={t.href}
-                href={t.href}
+                href={getToolHref(t.href, isSignedIn)}
                 className={`flex items-center gap-2 px-4 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
                   isActive
                     ? "border-violet-500 text-violet-300"
@@ -533,6 +547,7 @@ const crossSellTools = [
 ]
 
 export function CrossSellSection({ exclude }: { exclude?: string }) {
+  const isSignedIn = useIsSignedIn()
   const filtered = crossSellTools.filter((t) => t.href !== exclude).slice(0, 3)
 
   return (
@@ -549,7 +564,7 @@ export function CrossSellSection({ exclude }: { exclude?: string }) {
             const Icon = tool.icon
             return (
               <AnimatedSection key={tool.href} delay={i * 0.1}>
-                <Link href={tool.href} className="block group">
+                <Link href={getToolHref(tool.href, isSignedIn)} className="block group">
                   <div className="glass p-6 h-full hover:border-violet-500/40 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-violet-500/5">
                     <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-4 group-hover:bg-violet-500/20 group-hover:scale-110 transition-all duration-300">
                       <Icon size={20} className="text-violet-400" />

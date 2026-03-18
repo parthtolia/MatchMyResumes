@@ -146,7 +146,7 @@ export default function AtsScoreResult(props: AtsScoreResultProps) {
       <div className="text-center pt-4">
         <p className="text-gray-500 text-sm mb-3">Want to match your resume against a specific job description?</p>
         <Link
-          href="/resume-job-description-match#tool"
+          href="/resume-job-description-match"
           className="inline-flex items-center gap-2 text-violet-400 hover:text-violet-300 font-medium text-sm transition-colors"
         >
           Try Resume vs JD Match <ArrowRight size={16} />
