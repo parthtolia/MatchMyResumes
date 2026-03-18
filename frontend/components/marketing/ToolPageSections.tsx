@@ -64,7 +64,7 @@ export function FeatureStrip({ active }: { active: string }) {
             return (
               <Link
                 key={t.href}
-                href={`${t.href}#tool`}
+                href={t.href}
                 className={`flex items-center gap-2 px-4 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
                   isActive
                     ? "border-violet-500 text-violet-300"
@@ -549,7 +549,7 @@ export function CrossSellSection({ exclude }: { exclude?: string }) {
             const Icon = tool.icon
             return (
               <AnimatedSection key={tool.href} delay={i * 0.1}>
-                <Link href={`${tool.href}#tool`} className="block group">
+                <Link href={tool.href} className="block group">
                   <div className="glass p-6 h-full hover:border-violet-500/40 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-violet-500/5">
                     <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-4 group-hover:bg-violet-500/20 group-hover:scale-110 transition-all duration-300">
                       <Icon size={20} className="text-violet-400" />

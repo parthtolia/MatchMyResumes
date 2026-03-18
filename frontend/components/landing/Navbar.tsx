@@ -32,7 +32,7 @@ export default function Navbar() {
         <Logo />
       </Link>
       <div className="hidden md:flex items-center gap-8 text-sm text-gray-400">
-        <Link href="#features" className="hover:text-white transition-colors">Features</Link>
+        <Link href="/#features" className="hover:text-white transition-colors">Features</Link>
         {/* Tools dropdown */}
         <div className="relative group">
           <span className="flex items-center gap-1 hover:text-white transition-colors cursor-pointer">
@@ -52,8 +52,8 @@ export default function Navbar() {
             </div>
           </div>
         </div>
-        <Link href="#how-it-works" className="hover:text-white transition-colors">How it works</Link>
-        <Link href="#faq" className="hover:text-white transition-colors">FAQ</Link>
+        <Link href="/#how-it-works" className="hover:text-white transition-colors">How it works</Link>
+        <Link href="/#faq" className="hover:text-white transition-colors">FAQ</Link>
         <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
       </div>
       <div className="flex items-center gap-3">

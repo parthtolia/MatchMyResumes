@@ -80,6 +80,70 @@ const testimonials = [
 ]
 
 /* ------------------------------------------------------------------ */
+/*  Animated Center Illustration — person at laptop with rising score  */
+/* ------------------------------------------------------------------ */
+function CenterIllustration({ active }: { active: boolean }) {
+  return (
+    <m.div
+      animate={{ scale: active ? 0.92 : 1 }}
+      className="relative w-36 h-36 flex items-center justify-center"
+    >
+      {/* Outer pulse ring */}
+      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-500/15 to-emerald-500/15 animate-[pulse_3s_ease-in-out_infinite]" />
+      {/* Inner glow */}
+      <div className="absolute inset-3 rounded-full bg-gradient-to-br from-violet-500/10 to-emerald-500/10 border border-white/10 shadow-lg shadow-violet-500/20 backdrop-blur-sm" />
+
+      {/* Laptop + person illustration (CSS) */}
+      <div className="relative z-10 flex flex-col items-center">
+        {/* Person silhouette */}
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-400/60 to-purple-400/60 border border-violet-400/30 mb-1 flex items-center justify-center">
+          <div className="w-3 h-3 rounded-full bg-violet-300/50" />
+        </div>
+        {/* Body */}
+        <div className="w-10 h-3 rounded-t-lg bg-gradient-to-br from-violet-500/40 to-purple-500/40 -mt-0.5" />
+        {/* Laptop */}
+        <div className="relative -mt-0.5">
+          <div className="w-14 h-8 rounded-t-md bg-gradient-to-b from-[#1a1a2e] to-[#16162a] border border-white/10 flex items-center justify-center overflow-hidden">
+            {/* Screen content — animated score */}
+            <m.div
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="text-center"
+            >
+              <div className="text-[10px] font-black text-emerald-400">85</div>
+              <div className="w-8 h-0.5 rounded-full bg-gradient-to-r from-violet-500 to-emerald-500 mt-0.5" />
+            </m.div>
+            {/* Blinking cursor */}
+            <m.div
+              animate={{ opacity: [1, 0, 1] }}
+              transition={{ duration: 1, repeat: Infinity }}
+              className="absolute bottom-1 right-1.5 w-0.5 h-2 bg-violet-400/60"
+            />
+          </div>
+          <div className="w-16 h-1 rounded-b-md bg-gray-600/40 border-x border-b border-white/5 mx-auto" style={{ marginLeft: "-1px" }} />
+        </div>
+      </div>
+
+      {/* Floating checkmarks */}
+      <m.div
+        animate={{ y: [-2, 2, -2], opacity: [0.4, 0.8, 0.4] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center"
+      >
+        <span className="text-[8px] text-emerald-400">&#10003;</span>
+      </m.div>
+      <m.div
+        animate={{ y: [2, -2, 2], opacity: [0.3, 0.7, 0.3] }}
+        transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        className="absolute -bottom-0 -left-1 w-4 h-4 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center"
+      >
+        <span className="text-[7px] text-violet-400">&#10003;</span>
+      </m.div>
+    </m.div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
 /*  Orbit Features Section                                             */
 /* ------------------------------------------------------------------ */
 function OrbitFeaturesSection() {
@@ -87,7 +151,7 @@ function OrbitFeaturesSection() {
   const active = activeIdx !== null ? orbitFeatures[activeIdx] : null
 
   return (
-    <section id="features" className="py-20 relative overflow-hidden">
+    <section id="features" className="py-14 relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-600/5 rounded-full blur-[100px] pointer-events-none" />
 
@@ -96,7 +160,7 @@ function OrbitFeaturesSection() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-10"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             Everything you need to <span className="gradient-text">land the job</span>
@@ -106,22 +170,33 @@ function OrbitFeaturesSection() {
 
         {/* Desktop orbit layout */}
         <div className="hidden lg:block">
-          <div className="relative w-full max-w-[700px] mx-auto" style={{ aspectRatio: "1" }}>
-            {/* Orbit ring */}
-            <div className="absolute inset-8 rounded-full border border-white/[0.04]" />
-            <div className="absolute inset-16 rounded-full border border-white/[0.03]" />
+          <div className="relative w-full max-w-[600px] mx-auto" style={{ aspectRatio: "1" }}>
+            {/* SVG connector lines */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" viewBox="0 0 600 600">
+              {orbitFeatures.map((f, i) => {
+                const rad = (f.angle * Math.PI) / 180
+                const radius = 0.40 * 300
+                const x = 300 + radius * Math.cos(rad)
+                const y = 300 + radius * Math.sin(rad)
+                const isActive = activeIdx === i
+                return (
+                  <line
+                    key={f.title}
+                    x1="300" y1="300" x2={x} y2={y}
+                    stroke={isActive ? "rgba(139,92,246,0.4)" : "rgba(255,255,255,0.06)"}
+                    strokeWidth={isActive ? 2 : 1}
+                    strokeDasharray={isActive ? "none" : "4 4"}
+                    className="transition-all duration-300"
+                  />
+                )
+              })}
+              {/* Orbit ring */}
+              <circle cx="300" cy="300" r={0.40 * 300} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+            </svg>
 
             {/* Center element */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-              <m.div
-                animate={{ scale: active ? 0.9 : 1 }}
-                className="w-28 h-28 rounded-full bg-gradient-to-br from-violet-500/20 to-emerald-500/20 border border-white/10 flex items-center justify-center shadow-lg shadow-violet-500/10"
-              >
-                <div className="text-center">
-                  <div className="text-2xl font-black gradient-text">MMR</div>
-                  <div className="text-[10px] text-gray-500 mt-0.5">Your Suite</div>
-                </div>
-              </m.div>
+              <CenterIllustration active={activeIdx !== null} />
             </div>
 
             {/* Orbit items */}
@@ -129,7 +204,7 @@ function OrbitFeaturesSection() {
               const isActive = activeIdx === i
               const isFaded = activeIdx !== null && !isActive
               const rad = (f.angle * Math.PI) / 180
-              const radius = 42 // percentage from center
+              const radius = 40
               const x = 50 + radius * Math.cos(rad)
               const y = 50 + radius * Math.sin(rad)
               const Icon = f.icon
@@ -153,12 +228,17 @@ function OrbitFeaturesSection() {
                       animate={{
                         scale: isActive ? 1.15 : isFaded ? 0.9 : 1,
                         opacity: isFaded ? 0.4 : 1,
+                        y: isFaded ? 0 : [0, -3, 0],
                       }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      transition={
+                        isActive || isFaded
+                          ? { type: "spring", stiffness: 300, damping: 20 }
+                          : { y: { duration: 3 + i * 0.5, repeat: Infinity, ease: "easeInOut" } }
+                      }
                       className={`relative flex flex-col items-center gap-2 p-5 rounded-2xl border bg-gradient-to-br ${f.color} ${isActive ? f.borderColor : "border-white/10"} backdrop-blur-sm cursor-pointer group transition-shadow duration-300 ${isActive ? "shadow-lg shadow-violet-500/10" : ""}`}
-                      style={{ width: "140px" }}
+                      style={{ width: "130px" }}
                     >
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-black/30 group-hover:scale-110 transition-transform duration-300`}>
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-black/30 group-hover:scale-110 transition-transform duration-300">
                         <Icon size={20} className={f.iconColor} />
                       </div>
                       <span className="text-xs font-semibold text-white text-center leading-tight">{f.title}</span>
@@ -184,7 +264,7 @@ function OrbitFeaturesSection() {
           </div>
 
           {/* Active feature detail below orbit */}
-          <div className="h-16 mt-4">
+          <div className="h-16 mt-2">
             <AnimatePresence mode="wait">
               {active && (
                 <m.div
@@ -215,7 +295,7 @@ function OrbitFeaturesSection() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.08 }}
                   viewport={{ once: true }}
-                  className={`glass p-5 hover:border-violet-500/40 transition-all duration-300 group h-full hover:shadow-lg hover:shadow-violet-500/5`}
+                  className="glass p-5 hover:border-violet-500/40 transition-all duration-300 group h-full hover:shadow-lg hover:shadow-violet-500/5"
                 >
                   <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${f.color} border ${f.borderColor} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300`}>
                     <Icon size={20} className={f.iconColor} />
@@ -396,8 +476,8 @@ export default function LandingSections() {
               <h4 className="font-semibold text-white mb-3">Resources</h4>
               <div className="flex flex-col gap-2 text-gray-400">
                 <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
-                <Link href="#faq" className="hover:text-white transition-colors">FAQ</Link>
-                <Link href="#how-it-works" className="hover:text-white transition-colors">How It Works</Link>
+                <Link href="/#faq" className="hover:text-white transition-colors">FAQ</Link>
+                <Link href="/#how-it-works" className="hover:text-white transition-colors">How It Works</Link>
               </div>
             </div>
             <div>

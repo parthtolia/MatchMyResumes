@@ -1,8 +1,9 @@
 "use client"
 import { motion } from "framer-motion"
 import { useState } from "react"
-import { Copy, Download, Check, ArrowRight } from "lucide-react"
+import { Copy, Download, Check, ArrowRight, FileText as FileTextIcon, FileDown } from "lucide-react"
 import Link from "next/link"
+import { downloadTextAsPdf, downloadTextAsDocx } from "@/lib/download"
 
 interface CoverLetterResultProps {
   content: string
@@ -21,7 +22,7 @@ export default function CoverLetterResult({ content, tone, length, company_name,
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const handleDownload = () => {
+  const handleDownloadTxt = () => {
     const blob = new Blob([content], { type: "text/plain" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
@@ -30,6 +31,9 @@ export default function CoverLetterResult({ content, tone, length, company_name,
     a.click()
     URL.revokeObjectURL(url)
   }
+
+  const handleDownloadPdf = () => downloadTextAsPdf(content, "cover_letter.pdf")
+  const handleDownloadDocx = () => downloadTextAsDocx(content, "cover_letter.docx")
 
   const wordCount = content.split(/\s+/).filter(Boolean).length
 
@@ -75,11 +79,25 @@ export default function CoverLetterResult({ content, tone, length, company_name,
               {copied ? "Copied!" : "Copy"}
             </button>
             <button
-              onClick={handleDownload}
+              onClick={handleDownloadPdf}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/5 hover:bg-white/10 text-gray-300 transition-colors"
+            >
+              <FileDown size={14} />
+              PDF
+            </button>
+            <button
+              onClick={handleDownloadDocx}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/5 hover:bg-white/10 text-gray-300 transition-colors"
+            >
+              <FileTextIcon size={14} />
+              DOCX
+            </button>
+            <button
+              onClick={handleDownloadTxt}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/5 hover:bg-white/10 text-gray-300 transition-colors"
             >
               <Download size={14} />
-              Download TXT
+              TXT
             </button>
           </div>
         </div>
