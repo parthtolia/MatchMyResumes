@@ -6,6 +6,8 @@ import {
   HowItWorksSection,
   FaqSection,
   CtaSection,
+  LoginPrompt,
+  CrossSellSection,
 } from "@/components/marketing/ToolPageSections"
 import OptimizerToolSection from "@/components/marketing/tools/OptimizerToolSection"
 
@@ -142,6 +144,10 @@ export default function AiResumeOptimizerPage() {
       />
 
       <FaqSection faqs={faqs} />
+
+      <CrossSellSection exclude="/ai-resume-optimizer" />
+
+      <LoginPrompt />
 
       <CtaSection
         title="Transform Your Resume"

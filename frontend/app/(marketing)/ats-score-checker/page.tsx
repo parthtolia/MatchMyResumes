@@ -7,6 +7,8 @@ import {
   HowItWorksSection,
   FaqSection,
   CtaSection,
+  LoginPrompt,
+  CrossSellSection,
 } from "@/components/marketing/ToolPageSections"
 import AtsScoreToolSection from "@/components/marketing/tools/AtsScoreToolSection"
 
@@ -157,6 +159,10 @@ export default function AtsScoreCheckerPage() {
       />
 
       <FaqSection faqs={faqs} />
+
+      <CrossSellSection exclude="/ats-score-checker" />
+
+      <LoginPrompt />
 
       <CtaSection
         title="Ready to Beat the"

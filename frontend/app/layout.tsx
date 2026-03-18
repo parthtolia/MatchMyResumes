@@ -15,12 +15,12 @@ const HAS_REAL_CLERK =
   !(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "").includes("_...")
 
 export const metadata: Metadata = {
-  title: "MatchMyResumes – ATS Resume Optimization Suite",
-  description: "Optimize your resume for ATS, generate tailored cover letters, and track your job applications with AI-powered insights.",
-  keywords: ["ATS resume", "resume optimization", "cover letter", "job search", "AI resume"],
+  title: "MatchMyResumes – Match My Resume to Job Description | Free ATS Score Checker",
+  description: "Match my resume to any job description and get an instant ATS score. Free resume match tool with AI-powered optimization, keyword gap analysis, and tailored cover letter generation.",
+  keywords: ["match my resume", "match resume to job description", "resume job match tool", "ATS resume match", "ATS resume score", "resume optimization", "cover letter generator", "AI resume", "job search tools"],
   openGraph: {
-    title: "MatchMyResumes – ATS Resume Optimization Suite",
-    description: "Beat the ATS with AI-powered resume optimization. Score, optimize, and tailor your resume for any job description.",
+    title: "MatchMyResumes – Match My Resume to Any Job Description | Free ATS Tools",
+    description: "Match my resume to any job description with AI. Free ATS score checker, resume optimization, keyword gap analysis, and cover letter generator.",
     type: "website",
     siteName: "MatchMyResumes",
     url: "https://matchmyresumes.com",
@@ -35,8 +35,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "MatchMyResumes – ATS Resume Optimization Suite",
-    description: "Beat the ATS with AI-powered resume optimization.",
+    title: "MatchMyResumes – Match My Resume to Any Job | Free ATS Tools",
+    description: "Match my resume to any job description. Free ATS score checker, AI resume optimizer, and cover letter generator.",
     images: ["/og-image.png"],
   },
   metadataBase: new URL("https://matchmyresumes.com"),

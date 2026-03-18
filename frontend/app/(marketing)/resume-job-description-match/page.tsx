@@ -7,6 +7,8 @@ import {
   HowItWorksSection,
   FaqSection,
   CtaSection,
+  LoginPrompt,
+  CrossSellSection,
 } from "@/components/marketing/ToolPageSections"
 import JdMatchToolSection from "@/components/marketing/tools/JdMatchToolSection"
 
@@ -15,6 +17,8 @@ export const metadata: Metadata = {
   description:
     "See how well your resume matches any job description. Get a match score, keyword gap analysis, and semantic similarity breakdown. Free and unlimited.",
   keywords: [
+    "match my resume",
+    "match resume to job description",
     "resume job description match",
     "resume JD match score",
     "resume match checker",
@@ -22,6 +26,7 @@ export const metadata: Metadata = {
     "resume vs job description",
     "job description match score",
     "resume gap analysis",
+    "resume job match tool",
   ],
   alternates: { canonical: "https://matchmyresumes.com/resume-job-description-match" },
   openGraph: {
@@ -166,6 +171,10 @@ export default function ResumeJdMatchPage() {
       />
 
       <FaqSection faqs={faqs} />
+
+      <CrossSellSection exclude="/resume-job-description-match" />
+
+      <LoginPrompt />
 
       <CtaSection
         title="Stop Guessing, Start"

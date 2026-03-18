@@ -6,6 +6,8 @@ import {
   HowItWorksSection,
   FaqSection,
   CtaSection,
+  LoginPrompt,
+  CrossSellSection,
 } from "@/components/marketing/ToolPageSections"
 import CoverLetterToolSection from "@/components/marketing/tools/CoverLetterToolSection"
 
@@ -136,6 +138,10 @@ export default function CoverLetterGeneratorPage() {
       />
 
       <FaqSection faqs={faqs} />
+
+      <CrossSellSection exclude="/cover-letter-generator" />
+
+      <LoginPrompt />
 
       <CtaSection
         title="Write the Perfect Cover Letter"

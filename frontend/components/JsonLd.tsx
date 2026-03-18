@@ -5,7 +5,7 @@ export function OrganizationJsonLd() {
     name: "MatchMyResumes",
     url: "https://matchmyresumes.com",
     logo: "https://matchmyresumes.com/icon.png",
-    description: "AI-powered ATS resume optimization suite.",
+    description: "Match my resume to any job description. Free AI-powered ATS resume scoring, optimization, and cover letter generation.",
   }
 
   return (
@@ -24,7 +24,7 @@ export function WebAppJsonLd() {
     url: "https://matchmyresumes.com",
     applicationCategory: "BusinessApplication",
     operatingSystem: "Any",
-    description: "Optimize your resume for ATS, generate tailored cover letters, and track your job applications with AI-powered insights.",
+    description: "Match my resume to any job description. Free ATS scoring, AI resume optimization, cover letter generation, and keyword gap analysis.",
     offers: {
       "@type": "Offer",
       price: "0",
@@ -32,10 +32,12 @@ export function WebAppJsonLd() {
       description: "Completely free — all features, no limits",
     },
     featureList: [
+      "Match Resume to Job Description",
       "ATS Resume Scoring",
       "AI Resume Optimization",
       "Cover Letter Generation",
-      "Job Description Analysis",
+      "Keyword Gap Analysis",
+      "Application Tracking",
     ],
   }
 

@@ -20,14 +20,14 @@ export default function LandingHero() {
               <span>Trusted by 50,000+ job seekers</span>
             </div>
             <h1 className="text-5xl md:text-7xl font-extrabold leading-tight mb-6">
-              Beat the ATS with
+              Match My Resume to
               <br />
-              <span className="gradient-text">AI-Powered</span>
-              {" "}Resume Intelligence
+              <span className="gradient-text">Any Job Description</span>
+              {" "}with AI
             </h1>
             <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10">
-              Upload your resume, paste a job description, and get an instant ATS score,
-              keyword gap analysis, and AI-optimized resume in under 30 seconds.
+              Match your resume to any job description and get an instant ATS score,
+              keyword gap analysis, and AI-optimized resume — all free, in under 30 seconds.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/ats-score-checker#tool" className="btn-glow px-8 py-4 rounded-2xl text-white font-semibold text-lg flex items-center gap-2 justify-center">

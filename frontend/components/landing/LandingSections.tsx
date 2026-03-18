@@ -1,18 +1,69 @@
 "use client"
 import Link from "next/link"
-import { LazyMotion, domAnimation, m } from "framer-motion"
+import { useState } from "react"
+import { LazyMotion, domAnimation, m, AnimatePresence } from "framer-motion"
 import {
   Zap, Target, FileText, BarChart3,
   ArrowRight, Star, TrendingUp, ScanSearch
 } from "lucide-react"
 import { Logo } from "@/components/ui/Logo"
 
-const features = [
-  { icon: Target, title: "ATS Score Checker", desc: "Get a detailed 0–100 ATS compatibility score with breakdown across 5 dimensions.", href: "/ats-score-checker" },
-  { icon: ScanSearch, title: "Resume vs JD Match", desc: "Compare your resume against any job description and find keyword gaps instantly.", href: "/resume-job-description-match" },
-  { icon: Zap, title: "AI Resume Optimizer", desc: "AI rewrites your resume to naturally integrate missing keywords without fabrication.", href: "/ai-resume-optimizer" },
-  { icon: FileText, title: "Cover Letter Generator", desc: "Generate tailored, tone-perfect cover letters in seconds from your resume + JD.", href: "/cover-letter-generator" },
-  { icon: BarChart3, title: "Application Tracker", desc: "Track every application in a Kanban board with status, notes, and analytics.", href: "/sign-up" },
+const orbitFeatures = [
+  {
+    icon: Target,
+    title: "ATS Score Checker",
+    desc: "Get a detailed 0–100 ATS compatibility score with breakdown across 5 dimensions.",
+    micro: "Check your ATS score instantly",
+    href: "/ats-score-checker",
+    color: "from-emerald-500/20 to-emerald-500/5",
+    borderColor: "border-emerald-500/30",
+    iconColor: "text-emerald-400",
+    angle: 0,
+  },
+  {
+    icon: ScanSearch,
+    title: "Resume vs JD Match",
+    desc: "Match your resume to any job description and find keyword gaps instantly.",
+    micro: "Match your resume with job description",
+    href: "/resume-job-description-match",
+    color: "from-violet-500/20 to-violet-500/5",
+    borderColor: "border-violet-500/30",
+    iconColor: "text-violet-400",
+    angle: 72,
+  },
+  {
+    icon: Zap,
+    title: "AI Resume Optimizer",
+    desc: "AI rewrites your resume to naturally integrate missing keywords without fabrication.",
+    micro: "Optimize your resume with AI",
+    href: "/ai-resume-optimizer",
+    color: "from-amber-500/20 to-amber-500/5",
+    borderColor: "border-amber-500/30",
+    iconColor: "text-amber-400",
+    angle: 144,
+  },
+  {
+    icon: FileText,
+    title: "Cover Letter Generator",
+    desc: "Generate tailored, tone-perfect cover letters in seconds from your resume + JD.",
+    micro: "Generate a cover letter in seconds",
+    href: "/cover-letter-generator",
+    color: "from-blue-500/20 to-blue-500/5",
+    borderColor: "border-blue-500/30",
+    iconColor: "text-blue-400",
+    angle: 216,
+  },
+  {
+    icon: BarChart3,
+    title: "Application Tracker",
+    desc: "Track every application in a Kanban board with status, notes, and analytics.",
+    micro: "Track all your job applications",
+    href: "/sign-up",
+    color: "from-pink-500/20 to-pink-500/5",
+    borderColor: "border-pink-500/30",
+    iconColor: "text-pink-400",
+    angle: 288,
+  },
 ]
 
 const stats = [
@@ -28,11 +79,170 @@ const testimonials = [
   { quote: "The cover letter generator is incredible. It matched my tone perfectly and saved me hours every week.", author: "Elena R.", role: "Marketing Director" }
 ]
 
+/* ------------------------------------------------------------------ */
+/*  Orbit Features Section                                             */
+/* ------------------------------------------------------------------ */
+function OrbitFeaturesSection() {
+  const [activeIdx, setActiveIdx] = useState<number | null>(null)
+  const active = activeIdx !== null ? orbitFeatures[activeIdx] : null
+
+  return (
+    <section id="features" className="py-20 relative overflow-hidden">
+      {/* Background glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-600/5 rounded-full blur-[100px] pointer-events-none" />
+
+      <div className="max-w-6xl mx-auto px-6 relative z-10">
+        <m.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            Everything you need to <span className="gradient-text">land the job</span>
+          </h2>
+          <p className="text-gray-400 text-lg">One platform. Five powerful tools. Zero guesswork.</p>
+        </m.div>
+
+        {/* Desktop orbit layout */}
+        <div className="hidden lg:block">
+          <div className="relative w-full max-w-[700px] mx-auto" style={{ aspectRatio: "1" }}>
+            {/* Orbit ring */}
+            <div className="absolute inset-8 rounded-full border border-white/[0.04]" />
+            <div className="absolute inset-16 rounded-full border border-white/[0.03]" />
+
+            {/* Center element */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+              <m.div
+                animate={{ scale: active ? 0.9 : 1 }}
+                className="w-28 h-28 rounded-full bg-gradient-to-br from-violet-500/20 to-emerald-500/20 border border-white/10 flex items-center justify-center shadow-lg shadow-violet-500/10"
+              >
+                <div className="text-center">
+                  <div className="text-2xl font-black gradient-text">MMR</div>
+                  <div className="text-[10px] text-gray-500 mt-0.5">Your Suite</div>
+                </div>
+              </m.div>
+            </div>
+
+            {/* Orbit items */}
+            {orbitFeatures.map((f, i) => {
+              const isActive = activeIdx === i
+              const isFaded = activeIdx !== null && !isActive
+              const rad = (f.angle * Math.PI) / 180
+              const radius = 42 // percentage from center
+              const x = 50 + radius * Math.cos(rad)
+              const y = 50 + radius * Math.sin(rad)
+              const Icon = f.icon
+
+              return (
+                <m.div
+                  key={f.title}
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.1 + i * 0.1, type: "spring", stiffness: 200 }}
+                  viewport={{ once: true }}
+                  className="absolute -translate-x-1/2 -translate-y-1/2"
+                  style={{ left: `${x}%`, top: `${y}%` }}
+                >
+                  <Link
+                    href={f.href}
+                    onMouseEnter={() => setActiveIdx(i)}
+                    onMouseLeave={() => setActiveIdx(null)}
+                  >
+                    <m.div
+                      animate={{
+                        scale: isActive ? 1.15 : isFaded ? 0.9 : 1,
+                        opacity: isFaded ? 0.4 : 1,
+                      }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      className={`relative flex flex-col items-center gap-2 p-5 rounded-2xl border bg-gradient-to-br ${f.color} ${isActive ? f.borderColor : "border-white/10"} backdrop-blur-sm cursor-pointer group transition-shadow duration-300 ${isActive ? "shadow-lg shadow-violet-500/10" : ""}`}
+                      style={{ width: "140px" }}
+                    >
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-black/30 group-hover:scale-110 transition-transform duration-300`}>
+                        <Icon size={20} className={f.iconColor} />
+                      </div>
+                      <span className="text-xs font-semibold text-white text-center leading-tight">{f.title}</span>
+
+                      {/* Microcopy tooltip */}
+                      <AnimatePresence>
+                        {isActive && (
+                          <m.div
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 5 }}
+                            className="absolute -bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] text-violet-300 bg-black/80 px-3 py-1.5 rounded-lg border border-violet-500/20 pointer-events-none"
+                          >
+                            {f.micro}
+                          </m.div>
+                        )}
+                      </AnimatePresence>
+                    </m.div>
+                  </Link>
+                </m.div>
+              )
+            })}
+          </div>
+
+          {/* Active feature detail below orbit */}
+          <div className="h-16 mt-4">
+            <AnimatePresence mode="wait">
+              {active && (
+                <m.div
+                  key={active.title}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="text-center"
+                >
+                  <p className="text-gray-400 text-sm max-w-md mx-auto">{active.desc}</p>
+                  <Link href={active.href} className="inline-flex items-center gap-1.5 text-violet-400 text-sm font-medium mt-2 hover:text-violet-300 transition-colors">
+                    Try it now <ArrowRight size={14} />
+                  </Link>
+                </m.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Mobile/tablet card layout */}
+        <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {orbitFeatures.map((f, i) => {
+            const Icon = f.icon
+            return (
+              <Link key={f.title} href={f.href}>
+                <m.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.08 }}
+                  viewport={{ once: true }}
+                  className={`glass p-5 hover:border-violet-500/40 transition-all duration-300 group h-full hover:shadow-lg hover:shadow-violet-500/5`}
+                >
+                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${f.color} border ${f.borderColor} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300`}>
+                    <Icon size={20} className={f.iconColor} />
+                  </div>
+                  <h3 className="font-semibold text-white text-sm mb-1">{f.title}</h3>
+                  <p className="text-gray-400 text-xs leading-relaxed mb-2">{f.desc}</p>
+                  <span className="text-violet-400 text-xs font-medium group-hover:text-violet-300 transition-colors flex items-center gap-1">
+                    Try it <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+                  </span>
+                </m.div>
+              </Link>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export default function LandingSections() {
   return (
     <LazyMotion features={domAnimation}>
+      {/* Features — first scroll section */}
+      <OrbitFeaturesSection />
+
       {/* Stats */}
-      <section className="py-24 border-t border-white/5">
+      <section className="py-20 border-t border-white/5">
         <div className="max-w-5xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, i) => (
             <m.div
@@ -47,38 +257,6 @@ export default function LandingSections() {
               <div className="text-gray-400 text-sm">{stat.label}</div>
             </m.div>
           ))}
-        </div>
-      </section>
-
-      {/* Features */}
-      <section id="features" className="py-16">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">
-              Everything you need to <span className="gradient-text">land the job</span>
-            </h2>
-            <p className="text-gray-400 text-lg">Powered by state-of-the-art AI and cutting-edge ATS analysis algorithms</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature, i) => (
-              <Link key={feature.title} href={feature.href}>
-                <m.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  viewport={{ once: true }}
-                  className="glass p-6 hover:border-violet-500/40 transition-all group h-full"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-4 group-hover:bg-violet-500/20 transition-all">
-                    <feature.icon size={22} className="text-violet-400" />
-                  </div>
-                  <h3 className="font-semibold text-white mb-2">{feature.title}</h3>
-                  <p className="text-gray-400 text-sm leading-relaxed mb-3">{feature.desc}</p>
-                  <span className="text-violet-400 text-sm font-medium group-hover:text-violet-300 transition-colors">Learn more &rarr;</span>
-                </m.div>
-              </Link>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -129,7 +307,7 @@ export default function LandingSections() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="glass p-8 flex flex-col justify-between"
+                className="glass p-8 flex flex-col justify-between hover:border-violet-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-violet-500/5"
               >
                 <div className="mb-6">
                   <div className="flex gap-1 mb-4">
@@ -157,11 +335,11 @@ export default function LandingSections() {
           <div className="space-y-4">
             {[
               { q: "What is an ATS and why does it matter?", a: "Applicant Tracking Systems (ATS) are software tools used by 99% of Fortune 500 companies to automatically filter resumes before a human ever sees them. A low ATS score means your resume gets rejected automatically, regardless of your qualifications." },
-              { q: "How does the ATS Score work?", a: "We analyze your resume across 5 dimensions: Keyword Match, Semantic Match, Formatting, Quantification, and Section Completeness. Each is scored 0–100 and weighted to produce an overall compatibility score against your target job description." },
+              { q: "How does the ATS Score work?", a: "We analyze your resume across 5 dimensions: Section Completeness, ATS Formatting, Quantification, Content Density, and Contact Information. Each is scored 0–100 and weighted to produce an overall compatibility score." },
               { q: "Does the AI Optimizer fabricate experience?", a: "Never. Our AI only restructures and enhances existing content — it never invents skills, roles, or achievements you don't have. It integrates relevant keywords naturally while preserving 100% of your authentic experience." },
               { q: "What file formats are supported?", a: "We support PDF and DOCX resume uploads. For best results, use a standard single-column PDF without complex tables or graphics." },
               { q: "Is my data secure?", a: "Yes. Your resumes and job descriptions are stored securely in an encrypted database and are only accessible to you. We never share your data with third parties or use it to train AI models." },
-              { q: "Is MatchMyResumes really free?", a: "Yes! All features — ATS scoring, JD matching, AI resume optimization, cover letter generation, and job tracking — are completely free with no limits." },
+              { q: "Is MatchMyResumes really free?", a: "Yes! All features — ATS scoring, resume-to-JD matching, AI resume optimization, cover letter generation, and job tracking — are completely free with no limits." },
             ].map((item, i) => (
               <m.details
                 key={i}
@@ -185,7 +363,7 @@ export default function LandingSections() {
       {/* CTA */}
       <section className="py-24">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <div className="glass p-12">
+          <div className="glass p-12 hover:border-violet-500/30 transition-all duration-300">
             <TrendingUp size={48} className="text-violet-400 mx-auto mb-6" />
             <h2 className="text-4xl font-bold text-white mb-4">
               Ready to land your <span className="gradient-text">dream job?</span>

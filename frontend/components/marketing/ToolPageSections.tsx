@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
 import { LazyMotion, domAnimation, m } from "framer-motion"
-import { CheckCircle, ArrowRight, type LucideIcon, ScanSearch, GitCompareArrows, Sparkles, FileText } from "lucide-react"
+import { CheckCircle, ArrowRight, type LucideIcon, ScanSearch, GitCompareArrows, Sparkles, FileText, LogIn } from "lucide-react"
 import Navbar from "@/components/landing/Navbar"
 
 /* ------------------------------------------------------------------ */
@@ -57,7 +57,7 @@ export function FeatureStrip({ active }: { active: string }) {
   return (
     <div className="border-b border-white/5 bg-white/[0.02]">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
           {tools.map((t) => {
             const Icon = t.icon
             const isActive = t.href === active
@@ -65,13 +65,13 @@ export function FeatureStrip({ active }: { active: string }) {
               <Link
                 key={t.href}
                 href={`${t.href}#tool`}
-                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                className={`flex items-center gap-2 px-4 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
                   isActive
                     ? "border-violet-500 text-violet-300"
                     : "border-transparent text-gray-500 hover:text-gray-300 hover:border-white/10"
                 }`}
               >
-                <Icon size={16} />
+                <Icon size={16} className="shrink-0" />
                 {t.label}
               </Link>
             )
@@ -100,7 +100,7 @@ export function ToolHero({
     <div className="pt-6 pb-4 md:pt-8 md:pb-6">
       <div className="max-w-7xl mx-auto px-6">
         {hook && (
-          <p className="text-sm font-medium text-red-400/90 mb-2">{hook}</p>
+          <p className="text-sm font-medium text-violet-400/90 mb-2">{hook}</p>
         )}
         <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight">
           {headline} <span className="gradient-text">{headlineAccent}</span>
@@ -471,5 +471,101 @@ export function ProgressBar({
         />
       </div>
     </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Login Prompt — non-intrusive banner for tool pages                 */
+/* ------------------------------------------------------------------ */
+export function LoginPrompt() {
+  return (
+    <div className="border-t border-white/5">
+      <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3 text-sm text-gray-400">
+            <LogIn size={16} className="text-violet-400 shrink-0" />
+            <span>Log in to save resume versions, track job applications, and access your history.</span>
+          </div>
+          <Link
+            href="/sign-up"
+            className="shrink-0 text-sm font-medium text-violet-400 hover:text-violet-300 transition-colors flex items-center gap-1.5"
+          >
+            Create free account <ArrowRight size={14} />
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Cross-Sell — "Boost Your Chances" section with related tools       */
+/* ------------------------------------------------------------------ */
+const crossSellTools = [
+  {
+    href: "/ats-score-checker",
+    icon: ScanSearch,
+    title: "ATS Score Checker",
+    desc: "Get a 5-dimension ATS compatibility score with actionable tips.",
+    cta: "Check Your Score",
+  },
+  {
+    href: "/resume-job-description-match",
+    icon: GitCompareArrows,
+    title: "Resume vs JD Match",
+    desc: "See keyword gaps and semantic fit against any job description.",
+    cta: "Match Your Resume",
+  },
+  {
+    href: "/ai-resume-optimizer",
+    icon: Sparkles,
+    title: "AI Resume Optimizer",
+    desc: "AI rewrites your resume to integrate missing keywords naturally.",
+    cta: "Optimize Now",
+  },
+  {
+    href: "/cover-letter-generator",
+    icon: FileText,
+    title: "Cover Letter Generator",
+    desc: "Generate tailored, tone-perfect cover letters in seconds.",
+    cta: "Generate Letter",
+  },
+]
+
+export function CrossSellSection({ exclude }: { exclude?: string }) {
+  const filtered = crossSellTools.filter((t) => t.href !== exclude).slice(0, 3)
+
+  return (
+    <section className="py-16 border-t border-white/5">
+      <div className="max-w-5xl mx-auto px-6">
+        <AnimatedSection>
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-3">
+            Boost Your Chances <span className="gradient-text">Further</span>
+          </h2>
+          <p className="text-gray-500 text-center text-sm mb-10">Try these tools to maximize your job search success.</p>
+        </AnimatedSection>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {filtered.map((tool, i) => {
+            const Icon = tool.icon
+            return (
+              <AnimatedSection key={tool.href} delay={i * 0.1}>
+                <Link href={`${tool.href}#tool`} className="block group">
+                  <div className="glass p-6 h-full hover:border-violet-500/40 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-violet-500/5">
+                    <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-4 group-hover:bg-violet-500/20 group-hover:scale-110 transition-all duration-300">
+                      <Icon size={20} className="text-violet-400" />
+                    </div>
+                    <h3 className="font-semibold text-white mb-1.5">{tool.title}</h3>
+                    <p className="text-gray-400 text-sm leading-relaxed mb-4">{tool.desc}</p>
+                    <span className="text-violet-400 text-sm font-medium group-hover:text-violet-300 transition-colors flex items-center gap-1.5">
+                      {tool.cta} <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                    </span>
+                  </div>
+                </Link>
+              </AnimatedSection>
+            )
+          })}
+        </div>
+      </div>
+    </section>
   )
 }
