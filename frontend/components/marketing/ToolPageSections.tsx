@@ -69,9 +69,9 @@ const tools = [
 export function FeatureStrip({ active }: { active: string }) {
   const isSignedIn = useIsSignedIn()
   return (
-    <div className="border-b border-white/5 bg-white/[0.02] mt-2">
+    <div className="border-b border-white/5 bg-white/[0.02] mt-6">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
           {tools.map((t) => {
             const Icon = t.icon
             const isActive = t.href === active
@@ -79,13 +79,13 @@ export function FeatureStrip({ active }: { active: string }) {
               <Link
                 key={t.href}
                 href={getToolHref(t.href, isSignedIn)}
-                className={`flex items-center gap-2 px-4 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                className={`flex items-center gap-2.5 px-5 py-4 text-base font-medium whitespace-nowrap border-b-2 transition-colors ${
                   isActive
                     ? "border-violet-500 text-violet-300"
                     : "border-transparent text-gray-500 hover:text-gray-300 hover:border-white/10"
                 }`}
               >
-                <Icon size={16} className="shrink-0" />
+                <Icon size={18} className="shrink-0" />
                 {t.label}
               </Link>
             )
