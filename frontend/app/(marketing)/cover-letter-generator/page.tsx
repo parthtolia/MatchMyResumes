@@ -1,11 +1,9 @@
 import type { Metadata } from "next"
 import {
   ToolPageShell,
-  HeroSection,
-  ExplainerSection,
+  FeatureStrip,
+  ToolHero,
   HowItWorksSection,
-  MockPreviewCard,
-  BenefitsSection,
   FaqSection,
   CtaSection,
 } from "@/components/marketing/ToolPageSections"
@@ -40,7 +38,7 @@ const faqs = [
   },
   {
     q: "Can I choose the tone of my cover letter?",
-    a: "Yes! Choose from Professional (formal and polished), Casual (friendly and approachable), or Enthusiastic (energetic and passionate). Each tone is calibrated for different company cultures and industries.",
+    a: "Yes! Choose from Professional (formal and polished), Enthusiastic (energetic and passionate), Confident, or Creative. Each tone is calibrated for different company cultures and industries.",
   },
   {
     q: "Can I edit the generated cover letter?",
@@ -56,27 +54,65 @@ const faqs = [
   },
 ]
 
+function CoverLetterPreviewDemo() {
+  return (
+    <div className="space-y-6">
+      {/* Tone selector demo */}
+      <div className="glass p-5 rounded-2xl border border-white/10">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-xs text-gray-400">Tone:</span>
+          <span className="px-2.5 py-1 text-[11px] rounded-full bg-violet-500/20 text-violet-400 border border-violet-500/30 font-medium">Professional</span>
+          <span className="px-2.5 py-1 text-[11px] rounded-full bg-white/5 text-gray-400 border border-white/10">Enthusiastic</span>
+          <span className="px-2.5 py-1 text-[11px] rounded-full bg-white/5 text-gray-400 border border-white/10">Confident</span>
+        </div>
+
+        <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 font-mono text-xs text-gray-300 leading-relaxed space-y-3">
+          <p>Dear Hiring Manager,</p>
+          <p>
+            I am writing to express my interest in the <span className="text-violet-400">Senior Frontend Engineer</span> position at <span className="text-violet-400">Acme Corp</span>. With 5+ years building scalable <span className="text-emerald-400">React</span> applications and a track record of improving performance by <span className="text-emerald-400">40%</span>...
+          </p>
+          <p className="text-gray-600">[... tailored to your resume + JD ...]</p>
+        </div>
+      </div>
+
+      {/* Key benefit */}
+      <div className="glass p-4 rounded-xl border border-violet-500/10 bg-violet-500/[0.03]">
+        <p className="text-sm text-gray-300">
+          <span className="text-violet-400 font-semibold">Unique for every job.</span> Not a template — the AI writes a fresh, tailored letter using your real experience for each application.
+        </p>
+      </div>
+
+      {/* Quick benefits */}
+      <div className="space-y-2">
+        {[
+          "4 tone options for any company culture",
+          "Personalized with company name & role",
+          "Copy, edit, or download instantly",
+        ].map((text, i) => (
+          <div key={i} className="flex items-center gap-2 text-sm text-gray-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+            {text}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function CoverLetterGeneratorPage() {
   return (
     <ToolPageShell>
-      <HeroSection
-        badge="Free AI Cover Letter Writer"
-        title="Generate Tailored Cover Letters"
-        titleAccent="in Seconds"
-        subtitle="Upload your resume, paste the job description, choose your tone — and get a personalized, professional cover letter instantly."
-        compact
+      <FeatureStrip active="/cover-letter-generator" />
+
+      <ToolHero
+        headline="Generate Tailored Cover Letters"
+        headlineAccent="in Seconds"
+        hook="Recruiters spot copy-paste letters instantly. Get a unique, tailored letter for every application."
+        trustItems={["No signup required", "Completely free", "4 tone options", "Personalized per JD"]}
       />
 
-      <CoverLetterToolSection />
-
-      <ExplainerSection
-        title="Why a Tailored Cover Letter"
-        titleAccent="Wins Interviews"
-        paragraphs={[
-          "A strong cover letter is your chance to make a personal connection that a resume alone can't deliver. It shows the hiring manager you've done your research, you understand the role, and you can articulate why you're the right fit — in your own voice.",
-          "But writing a unique cover letter for every application is exhausting. Most job seekers either skip it entirely or send a generic template, which is worse than no letter at all. Recruiters can spot a copy-paste letter from a mile away.",
-          "Our AI Cover Letter Generator solves this by creating a unique, tailored letter for each application in seconds. It pulls from your actual resume and the specific job description to highlight the most relevant qualifications — with the tone you choose.",
-        ]}
+      <CoverLetterToolSection
+        preview={<CoverLetterPreviewDemo />}
       />
 
       <HowItWorksSection
@@ -84,65 +120,18 @@ export default function CoverLetterGeneratorPage() {
           {
             num: "01",
             title: "Select Resume + JD",
-            desc: "Upload your resume and paste the job description you're applying for. Optionally add the company name and job title for extra personalization.",
+            desc: "Upload your resume and paste the job description. Optionally add company name and job title for extra personalization.",
           },
           {
             num: "02",
             title: "Choose Tone & Length",
-            desc: "Pick your preferred tone — Professional, Casual, or Enthusiastic. Select length: short (150 words), medium (250 words), or long (400 words).",
+            desc: "Pick Professional, Enthusiastic, Confident, or Creative. Select short, medium, or long length.",
           },
           {
             num: "03",
             title: "Generate & Download",
-            desc: "Get your personalized cover letter instantly. Review, edit if needed, copy or download. Generate as many versions as you want.",
+            desc: "Get your personalized cover letter instantly. Review, edit, copy or download. Generate as many as you want.",
           },
-        ]}
-      />
-
-      <MockPreviewCard>
-        <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-gray-400">Tone:</span>
-            <span className="px-3 py-1 text-xs rounded-full bg-violet-500/20 text-violet-400 border border-violet-500/30 font-medium">Professional</span>
-            <span className="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-400 border border-white/10">Casual</span>
-            <span className="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-400 border border-white/10">Enthusiastic</span>
-          </div>
-
-          <div className="p-6 rounded-xl bg-white/[0.02] border border-white/5 font-mono text-sm text-gray-300 leading-relaxed space-y-4">
-            <p>Dear Hiring Manager,</p>
-            <p>
-              I am writing to express my strong interest in the <span className="text-violet-400">Senior Frontend Engineer</span> position at <span className="text-violet-400">Acme Corp</span>. With over 5 years of experience building scalable React applications and a proven track record of improving web performance, I am confident in my ability to contribute to your engineering team.
-            </p>
-            <p>
-              In my current role at TechStart Inc., I led the migration of a legacy jQuery codebase to a modern <span className="text-emerald-400">React/TypeScript</span> stack, resulting in a <span className="text-emerald-400">40% improvement in page load times</span> and a <span className="text-emerald-400">25% reduction in customer support tickets</span>. I also implemented a component library used by 3 product teams, establishing consistent design patterns across the platform.
-            </p>
-            <p className="text-gray-500">
-              [... continues with tailored details from your resume ...]
-            </p>
-            <p>
-              I would welcome the opportunity to discuss how my experience aligns with your team&apos;s goals. Thank you for your consideration.
-            </p>
-            <p>Best regards,<br />Alex Johnson</p>
-          </div>
-
-          <div className="flex items-center justify-between text-xs text-gray-500 pt-2">
-            <span>Word count: 287</span>
-            <span>Tone: Professional</span>
-            <span>Personalized for: Acme Corp</span>
-          </div>
-        </div>
-      </MockPreviewCard>
-
-      <BenefitsSection
-        title="Why Use AI Cover"
-        titleAccent="Letter Generation?"
-        benefits={[
-          { text: "Unique, tailored letter for every application — not a template" },
-          { text: "Choose from 3 tones to match any company culture" },
-          { text: "Pulls directly from your resume — always accurate and honest" },
-          { text: "Personalized with company name, job title, and role requirements" },
-          { text: "Generate in seconds — save hours of writing per week" },
-          { text: "Completely free — unlimited cover letters, no restrictions" },
         ]}
       />
 
@@ -151,7 +140,7 @@ export default function CoverLetterGeneratorPage() {
       <CtaSection
         title="Write the Perfect Cover Letter"
         titleAccent="Every Time"
-        subtitle="Stop stressing over cover letters. Let AI craft tailored, professional letters that highlight your best qualifications for every role."
+        subtitle="Stop stressing over cover letters. Let AI craft tailored, professional letters that highlight your best qualifications."
         ctaText="Generate Your Cover Letter"
         ctaHref="#tool"
       />

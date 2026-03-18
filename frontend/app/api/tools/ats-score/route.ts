@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, publicAiLimiter } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
 import { parseResume } from "@/lib/services/resume-parser";
-import { computeAtsScoreResumeOnly } from "@/lib/scoring/ats-scorer";
+import { computeCvScore } from "@/lib/scoring/cv-scorer";
 
 export const maxDuration = 60;
 
@@ -61,23 +61,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const scoreData = await computeAtsScoreResumeOnly(
+    const scoreData = computeCvScore(
       parsed.raw_text,
-      parsed.structured_json,
-      fileType
+      parsed.structured_json
     );
 
-    return NextResponse.json({
-      total_score: scoreData.total_score,
-      breakdown: {
-        formatting_score: scoreData.formatting_score,
-        section_score: scoreData.section_score,
-        quantification_score: scoreData.quantification_score,
-        keyword_richness_score: scoreData.keyword_richness_score,
-        details: scoreData.breakdown,
-      },
-      resume_keywords: scoreData.resume_keywords || [],
-    });
+    return NextResponse.json(scoreData);
   } catch (error) {
     console.error("Public ATS score error:", error);
     return NextResponse.json(

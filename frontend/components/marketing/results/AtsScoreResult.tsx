@@ -2,20 +2,19 @@
 import { motion } from "framer-motion"
 import ScoreCircle from "@/components/ScoreCircle"
 import Link from "next/link"
-import { ArrowRight, Lightbulb, Tag } from "lucide-react"
-
-interface ATSBreakdown {
-  formatting_score: number
-  section_score: number
-  quantification_score: number
-  keyword_richness_score: number
-  details: Record<string, unknown>
-}
+import { ArrowRight, Lightbulb, CheckCircle, XCircle, AlertCircle } from "lucide-react"
 
 interface AtsScoreResultProps {
   total_score: number
-  breakdown: ATSBreakdown
-  resume_keywords: string[]
+  section_score: number
+  formatting_score: number
+  quantification_score: number
+  content_density_score: number
+  contact_score: number
+  skills_detected: string[]
+  missing_sections: string[]
+  suggestions: Record<string, string[]>
+  breakdown: Record<string, unknown>
 }
 
 function ScoreBar({ label, score, weight, delay = 0 }: { label: string; score: number; weight: string; delay?: number }) {
@@ -39,28 +38,23 @@ function ScoreBar({ label, score, weight, delay = 0 }: { label: string; score: n
 }
 
 const breakdownItems = [
-  { key: "formatting_score", label: "ATS Formatting", weight: "30%" },
-  { key: "section_score", label: "Section Completeness", weight: "25%" },
-  { key: "keyword_richness_score", label: "Keyword Richness", weight: "25%" },
+  { key: "section_score", label: "Section Completeness", weight: "30%" },
+  { key: "formatting_score", label: "ATS Formatting", weight: "25%" },
   { key: "quantification_score", label: "Quantification", weight: "20%" },
+  { key: "content_density_score", label: "Content Density", weight: "15%" },
+  { key: "contact_score", label: "Contact Information", weight: "10%" },
 ]
 
-export default function AtsScoreResult({ total_score, breakdown, resume_keywords }: AtsScoreResultProps) {
-  const details = (breakdown.details || {}) as Record<string, unknown>
-  const tips: string[] = []
+export default function AtsScoreResult(props: AtsScoreResultProps) {
+  const {
+    total_score,
+    skills_detected,
+    missing_sections,
+    suggestions,
+  } = props
 
-  if (details.formatting_tips && Array.isArray(details.formatting_tips)) {
-    tips.push(...(details.formatting_tips as string[]))
-  }
-  if (details.section_tips && Array.isArray(details.section_tips)) {
-    tips.push(...(details.section_tips as string[]))
-  }
-  if (details.quantification_tips && Array.isArray(details.quantification_tips)) {
-    tips.push(...(details.quantification_tips as string[]))
-  }
-  if (details.keyword_tips && Array.isArray(details.keyword_tips)) {
-    tips.push(...(details.keyword_tips as string[]))
-  }
+  const hasSuggestions = suggestions && typeof suggestions === "object" &&
+    Object.values(suggestions).some((tips) => Array.isArray(tips) && tips.length > 0)
 
   return (
     <motion.div
@@ -68,65 +62,83 @@ export default function AtsScoreResult({ total_score, breakdown, resume_keywords
       animate={{ opacity: 1, y: 0 }}
       className="space-y-8"
     >
-      {/* Score circle */}
-      <div className="flex justify-center">
-        <ScoreCircle score={Math.round(total_score)} size={180} />
-      </div>
-
-      {/* Breakdown bars */}
-      <div className="glass p-6 rounded-2xl space-y-4">
-        <h3 className="text-lg font-semibold text-white mb-4">Score Breakdown</h3>
-        {breakdownItems.map((item, i) => (
-          <ScoreBar
-            key={item.key}
-            label={item.label}
-            score={breakdown[item.key as keyof ATSBreakdown] as number}
-            weight={item.weight}
-            delay={i * 0.15}
-          />
-        ))}
-      </div>
-
-      {/* Keywords detected */}
-      {resume_keywords.length > 0 && (
-        <div className="glass p-6 rounded-2xl">
-          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <Tag size={18} className="text-violet-400" />
-            Keywords Detected in Your Resume
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {resume_keywords.map((kw, i) => (
-              <span
-                key={i}
-                className="px-3 py-1 rounded-full text-xs font-medium bg-violet-500/15 text-violet-300 border border-violet-500/20"
-              >
-                {kw}
-              </span>
+      {/* Score + breakdown */}
+      <div className="glass p-8 rounded-2xl">
+        <div className="flex flex-col md:flex-row items-center gap-8">
+          <ScoreCircle score={Math.round(total_score)} size={180} />
+          <div className="flex-1 space-y-4 w-full">
+            <h2 className="text-xl font-bold text-white">CV Readiness Score</h2>
+            {breakdownItems.map((item, i) => (
+              <ScoreBar
+                key={item.key}
+                label={item.label}
+                score={props[item.key as keyof AtsScoreResultProps] as number}
+                weight={item.weight}
+                delay={0.2 + i * 0.1}
+              />
             ))}
           </div>
-          {resume_keywords.length < 15 && (
-            <p className="text-gray-500 text-xs mt-3">
-              We found {resume_keywords.length} distinct keywords. Adding more specific skills, tools, and technologies can improve your ATS score.
-            </p>
-          )}
         </div>
-      )}
+      </div>
 
-      {/* Tips */}
-      {tips.length > 0 && (
+      <div className="grid md:grid-cols-2 gap-5">
+        {/* Skills detected */}
+        {skills_detected.length > 0 && (
+          <div className="glass p-6 rounded-2xl">
+            <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
+              <CheckCircle size={15} className="text-emerald-400" /> Skills Detected
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {skills_detected.map(skill => (
+                <span key={skill} className="px-3 py-1 text-xs rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 capitalize">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Missing sections */}
+        {missing_sections.length > 0 && (
+          <div className="glass p-6 rounded-2xl">
+            <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
+              <XCircle size={15} className="text-red-400" /> Missing Sections
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {missing_sections.map(s => (
+                <span key={s} className="px-3 py-1 text-xs rounded-full bg-red-500/10 border border-red-500/20 text-red-300">
+                  {s}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Categorized improvement tips */}
+      {hasSuggestions && (
         <div className="glass p-6 rounded-2xl">
-          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <Lightbulb size={18} className="text-yellow-400" />
-            Improvement Tips
+          <h3 className="font-semibold text-white mb-5 flex items-center gap-2">
+            <Lightbulb size={16} className="text-yellow-400" /> Actionable Improvement Tips
           </h3>
-          <ul className="space-y-2">
-            {tips.map((tip, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-gray-400">
-                <span className="text-violet-400 mt-0.5 shrink-0">&bull;</span>
-                {tip}
-              </li>
-            ))}
-          </ul>
+          <div className="space-y-6">
+            {Object.entries(suggestions).map(([category, tips]) => {
+              if (!Array.isArray(tips) || tips.length === 0) return null
+              return (
+                <div key={category} className="space-y-2">
+                  <h4 className="text-sm font-semibold text-gray-200 uppercase tracking-wider">{category}</h4>
+                  <ul className="space-y-2">
+                    {tips.map((tip: string, i: number) => (
+                      <li key={i} className="flex items-start gap-3 text-sm text-gray-300">
+                        <AlertCircle size={14} className="text-yellow-400 mt-0.5 shrink-0" />
+                        {tip}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
 

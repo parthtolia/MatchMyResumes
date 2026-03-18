@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
 import { LazyMotion, domAnimation, m } from "framer-motion"
-import { CheckCircle, ArrowRight, type LucideIcon } from "lucide-react"
+import { CheckCircle, ArrowRight, type LucideIcon, ScanSearch, GitCompareArrows, Sparkles, FileText } from "lucide-react"
 import Navbar from "@/components/landing/Navbar"
 
 /* ------------------------------------------------------------------ */
@@ -44,7 +44,84 @@ export function ToolPageShell({ children }: { children: React.ReactNode }) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Hero                                                               */
+/*  Feature Strip — horizontal nav across 4 tools                      */
+/* ------------------------------------------------------------------ */
+const tools = [
+  { href: "/ats-score-checker", label: "ATS Score", icon: ScanSearch },
+  { href: "/resume-job-description-match", label: "JD Match", icon: GitCompareArrows },
+  { href: "/ai-resume-optimizer", label: "Optimizer", icon: Sparkles },
+  { href: "/cover-letter-generator", label: "Cover Letter", icon: FileText },
+]
+
+export function FeatureStrip({ active }: { active: string }) {
+  return (
+    <div className="border-b border-white/5 bg-white/[0.02]">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+          {tools.map((t) => {
+            const Icon = t.icon
+            const isActive = t.href === active
+            return (
+              <Link
+                key={t.href}
+                href={`${t.href}#tool`}
+                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                  isActive
+                    ? "border-violet-500 text-violet-300"
+                    : "border-transparent text-gray-500 hover:text-gray-300 hover:border-white/10"
+                }`}
+              >
+                <Icon size={16} />
+                {t.label}
+              </Link>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Tool Hero — compact above-the-fold headline with trust signals     */
+/* ------------------------------------------------------------------ */
+export function ToolHero({
+  headline,
+  headlineAccent,
+  hook,
+  trustItems,
+}: {
+  headline: string
+  headlineAccent: string
+  hook?: string
+  trustItems?: string[]
+}) {
+  return (
+    <div className="pt-6 pb-4 md:pt-8 md:pb-6">
+      <div className="max-w-7xl mx-auto px-6">
+        {hook && (
+          <p className="text-sm font-medium text-red-400/90 mb-2">{hook}</p>
+        )}
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight">
+          {headline} <span className="gradient-text">{headlineAccent}</span>
+        </h1>
+        {trustItems && trustItems.length > 0 && (
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 mt-3">
+            {trustItems.map((item, i) => (
+              <span key={i} className="flex items-center gap-1.5 text-xs text-gray-500">
+                <CheckCircle size={12} className="text-emerald-500" />
+                {item}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Hero (legacy — kept for backwards compat)                          */
 /* ------------------------------------------------------------------ */
 export function HeroSection({
   badge,

@@ -1,11 +1,9 @@
 import type { Metadata } from "next"
 import {
   ToolPageShell,
-  HeroSection,
-  ExplainerSection,
+  FeatureStrip,
+  ToolHero,
   HowItWorksSection,
-  MockPreviewCard,
-  BenefitsSection,
   FaqSection,
   CtaSection,
 } from "@/components/marketing/ToolPageSections"
@@ -56,27 +54,71 @@ const faqs = [
   },
 ]
 
+function OptimizerPreviewDemo() {
+  return (
+    <div className="space-y-6">
+      {/* Before / After demo */}
+      <div className="glass p-5 rounded-2xl border border-white/10 space-y-4">
+        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Before &amp; After</h4>
+
+        <div className="p-3 rounded-xl bg-red-500/5 border border-red-500/10">
+          <span className="text-[10px] font-medium text-red-400 mb-1 block">Before</span>
+          <p className="text-xs text-gray-300 leading-relaxed">
+            &quot;Worked on building web applications and managed a team to deliver features.&quot;
+          </p>
+        </div>
+        <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+          <span className="text-[10px] font-medium text-emerald-400 mb-1 block">After</span>
+          <p className="text-xs text-gray-300 leading-relaxed">
+            &quot;Led a team of 5 engineers to architect <span className="text-emerald-400 font-medium">scalable React/TypeScript</span> apps, delivering 12 features with <span className="text-emerald-400 font-medium">98% on-time delivery</span>.&quot;
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {["React", "TypeScript", "Agile", "CI/CD"].map(k => (
+            <span key={k} className="px-2 py-0.5 text-[11px] rounded-lg bg-violet-500/10 text-violet-400 border border-violet-500/20">+ {k}</span>
+          ))}
+        </div>
+      </div>
+
+      {/* Key rule */}
+      <div className="glass p-4 rounded-xl border border-violet-500/10 bg-violet-500/[0.03]">
+        <p className="text-sm text-gray-300">
+          <span className="text-violet-400 font-semibold">Zero fabrication.</span> The AI only enhances your real experience — it never invents skills, roles, or achievements.
+        </p>
+      </div>
+
+      {/* Quick benefits */}
+      <div className="space-y-2">
+        {[
+          "Optimize for any job in under 30 seconds",
+          "Before/after preview for full control",
+          "Natural language, not robotic template text",
+        ].map((text, i) => (
+          <div key={i} className="flex items-center gap-2 text-sm text-gray-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+            {text}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function AiResumeOptimizerPage() {
   return (
     <ToolPageShell>
-      <HeroSection
-        badge="Free AI-Powered Optimization"
-        title="Optimize Your Resume"
-        titleAccent="with AI in Seconds"
-        subtitle="Upload your resume and paste a job description. Our AI rewrites and enhances it to naturally integrate missing keywords — without fabricating a single thing."
-        compact
+      <FeatureStrip active="/ai-resume-optimizer" />
+
+      <ToolHero
+        headline="Optimize Your Resume"
+        headlineAccent="with AI in Seconds"
+        hook="Tailoring your resume manually for every job is slow. Let AI do it in 30 seconds."
+        trustItems={["No signup required", "Completely free", "Never fabricates experience"]}
       />
 
-      <OptimizerToolSection />
-
-      <ExplainerSection
-        title="How AI Resume"
-        titleAccent="Optimization Works"
-        paragraphs={[
-          "Tailoring your resume for every job application is time-consuming and error-prone. You might miss critical keywords, over-stuff terms unnaturally, or spend hours wordsmithing bullet points. AI optimization solves all of these problems instantly.",
-          "Our AI reads both your resume and the target job description, identifies the keyword and semantic gaps, then rewrites your bullet points to naturally incorporate the missing terms. It preserves your authentic experience while making it speak the language of the role you're targeting.",
-          "The result is a resume that reads naturally to humans while scoring significantly higher with ATS systems. Think of it as having a professional career coach who can rewrite your resume in 30 seconds — for every single job you apply to.",
-        ]}
+      <OptimizerToolSection
+        preview={<OptimizerPreviewDemo />}
       />
 
       <HowItWorksSection
@@ -84,7 +126,7 @@ export default function AiResumeOptimizerPage() {
           {
             num: "01",
             title: "Upload Your Resume",
-            desc: "Upload your existing resume in PDF or DOCX format. We extract and understand all your experience, skills, and accomplishments.",
+            desc: "Upload your existing resume in PDF or DOCX format. We extract all your experience, skills, and accomplishments.",
           },
           {
             num: "02",
@@ -94,66 +136,8 @@ export default function AiResumeOptimizerPage() {
           {
             num: "03",
             title: "AI Rewrites & Enhances",
-            desc: "Our AI restructures your bullet points, integrates missing keywords, and enhances language — all while preserving 100% of your real experience.",
+            desc: "Our AI restructures your bullet points, integrates missing keywords, and enhances language — preserving 100% of your real experience.",
           },
-        ]}
-      />
-
-      <MockPreviewCard>
-        <div className="space-y-6">
-          <h4 className="text-sm font-semibold text-white mb-4">Before &amp; After Comparison</h4>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl bg-red-500/5 border border-red-500/10">
-              <span className="text-xs font-medium text-red-400 mb-2 block">Before</span>
-              <p className="text-sm text-gray-300 leading-relaxed">
-                &quot;Worked on building web applications and managed a team of developers to deliver features on time.&quot;
-              </p>
-            </div>
-            <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
-              <span className="text-xs font-medium text-emerald-400 mb-2 block">After</span>
-              <p className="text-sm text-gray-300 leading-relaxed">
-                &quot;Led a cross-functional team of 5 engineers to architect and ship <span className="text-emerald-400 font-medium">scalable React/TypeScript</span> web applications, delivering 12 features across 3 <span className="text-emerald-400 font-medium">Agile sprints</span> with <span className="text-emerald-400 font-medium">98% on-time delivery</span>.&quot;
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl bg-red-500/5 border border-red-500/10">
-              <span className="text-xs font-medium text-red-400 mb-2 block">Before</span>
-              <p className="text-sm text-gray-300 leading-relaxed">
-                &quot;Responsible for improving application performance and reducing bugs.&quot;
-              </p>
-            </div>
-            <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
-              <span className="text-xs font-medium text-emerald-400 mb-2 block">After</span>
-              <p className="text-sm text-gray-300 leading-relaxed">
-                &quot;Optimized <span className="text-emerald-400 font-medium">API response times by 40%</span> through database query optimization and <span className="text-emerald-400 font-medium">Redis caching</span>, reducing production bugs by 60% via <span className="text-emerald-400 font-medium">CI/CD pipeline improvements</span> and automated testing.&quot;
-              </p>
-            </div>
-          </div>
-
-          <div className="pt-4 border-t border-white/5">
-            <h5 className="text-xs font-medium text-violet-400 mb-2">Keywords Added</h5>
-            <div className="flex flex-wrap gap-2">
-              {["React", "TypeScript", "Agile", "Redis", "CI/CD", "API optimization"].map(k => (
-                <span key={k} className="px-2 py-1 text-xs rounded-lg bg-violet-500/10 text-violet-400 border border-violet-500/20">+ {k}</span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </MockPreviewCard>
-
-      <BenefitsSection
-        title="Why Use AI"
-        titleAccent="Optimization?"
-        benefits={[
-          { text: "Saves hours — optimize for any job in under 30 seconds" },
-          { text: "Never fabricates — only enhances your real experience" },
-          { text: "Naturally integrates keywords ATS systems look for" },
-          { text: "Before/after preview so you stay in control of every change" },
-          { text: "Trained on thousands of successful resumes across industries" },
-          { text: "Completely free — unlimited optimizations, no restrictions" },
         ]}
       />
 

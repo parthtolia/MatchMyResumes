@@ -8,7 +8,7 @@ interface OptimizeResult {
   changes_summary: string[]
 }
 
-export default function OptimizerToolSection() {
+export default function OptimizerToolSection({ preview }: { preview?: React.ReactNode }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [result, setResult] = useState<OptimizeResult | null>(null)
@@ -39,10 +39,10 @@ export default function OptimizerToolSection() {
     }
   }
 
-  return (
-    <section id="tool" className="py-10 md:py-14">
-      <div className="max-w-4xl mx-auto px-6">
-        {result ? (
+  if (result) {
+    return (
+      <section id="tool" className="py-8 md:py-10">
+        <div className="max-w-5xl mx-auto px-6">
           <div className="space-y-6">
             <OptimizerResult {...result} />
             <div className="text-center">
@@ -54,8 +54,16 @@ export default function OptimizerToolSection() {
               </button>
             </div>
           </div>
-        ) : (
-          <div className="glass p-8 md:p-10 rounded-2xl border border-white/10">
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <section id="tool" className="py-6 md:py-8">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className={preview ? "grid grid-cols-1 lg:grid-cols-2 gap-8 items-start" : ""}>
+          <div className="glass p-6 md:p-8 rounded-2xl border border-white/10">
             <PublicToolForm
               onSubmit={handleSubmit}
               loading={loading}
@@ -63,7 +71,10 @@ export default function OptimizerToolSection() {
               submitLabel="Optimize My Resume"
             />
           </div>
-        )}
+          {preview && (
+            <div className="hidden lg:block">{preview}</div>
+          )}
+        </div>
       </div>
     </section>
   )
