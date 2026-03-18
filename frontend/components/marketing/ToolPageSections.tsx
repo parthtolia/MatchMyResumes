@@ -79,7 +79,7 @@ export function FeatureStrip({ active }: { active: string }) {
               <Link
                 key={t.href}
                 href={getToolHref(t.href, isSignedIn)}
-                className={`flex items-center gap-2.5 px-5 pt-6 pb-4 text-base font-medium whitespace-nowrap border-b-2 transition-colors ${
+                className={`flex items-center gap-2.5 px-5 pt-8 pb-4 text-base font-medium whitespace-nowrap border-b-2 transition-colors ${
                   isActive
                     ? "border-violet-500 text-violet-300"
                     : "border-transparent text-gray-500 hover:text-gray-300 hover:border-white/10"
