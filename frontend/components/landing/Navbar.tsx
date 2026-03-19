@@ -24,6 +24,11 @@ const tools = [
   { href: "/cover-letter-generator", label: "Cover Letter Generator" },
 ]
 
+const examples = [
+  { href: "/resume-examples", label: "Resume Examples" },
+  { href: "/cover-letter-examples", label: "Cover Letter Examples" },
+]
+
 export default function Navbar() {
   const { isLoaded, isSignedIn } = useUserSafe()
 
@@ -48,6 +53,25 @@ export default function Navbar() {
                   className="block px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
                 >
                   {tool.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+        {/* Examples dropdown */}
+        <div className="relative group">
+          <span className="flex items-center gap-1 hover:text-white transition-colors cursor-pointer">
+            Examples <ChevronDown size={14} className="group-hover:text-white transition-colors" />
+          </span>
+          <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+            <div className="bg-[#111118] border border-white/10 rounded-xl p-2 min-w-[220px] shadow-xl shadow-black/40">
+              {examples.map(ex => (
+                <Link
+                  key={ex.href}
+                  href={ex.href}
+                  className="block px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                >
+                  {ex.label}
                 </Link>
               ))}
             </div>

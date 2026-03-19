@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { Logo } from "@/components/ui/Logo"
+import Navbar from "@/components/landing/Navbar"
 import { resumeExamples, getExampleBySlug } from "../data"
 import type { Metadata } from "next"
 
@@ -107,19 +107,9 @@ export default async function ResumeExamplePage({
       />
 
       {/* Nav */}
-      <nav className="flex items-center justify-between px-8 py-4 border-b border-white/5">
-        <Link href="/">
-          <Logo />
-        </Link>
-        <Link
-          href="/resume-examples"
-          className="text-sm text-gray-400 hover:text-white transition-colors"
-        >
-          &larr; All Resume Examples
-        </Link>
-      </nav>
+      <Navbar />
 
-      <article className="max-w-3xl mx-auto px-6 py-16">
+      <article className="max-w-3xl mx-auto px-6 pt-32 pb-16">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">
           <Link href="/" className="hover:text-white transition-colors">

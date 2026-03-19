@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Logo } from "@/components/ui/Logo"
+import Navbar from "@/components/landing/Navbar"
 import { resumeExamples } from "./data"
 import { ResumeExamplesGrid } from "./ResumeExamplesGrid"
 import type { Metadata } from "next"
@@ -23,19 +23,9 @@ export const metadata: Metadata = {
 export default function ResumeExamplesPage() {
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white">
-      <nav className="flex items-center justify-between px-8 py-4 border-b border-white/5">
-        <Link href="/">
-          <Logo />
-        </Link>
-        <Link
-          href="/"
-          className="text-sm text-gray-400 hover:text-white transition-colors"
-        >
-          &larr; Back to Home
-        </Link>
-      </nav>
+      <Navbar />
 
-      <div className="max-w-6xl mx-auto px-6 py-16">
+      <div className="max-w-6xl mx-auto px-6 pt-32 pb-16">
         <h1 className="text-4xl font-bold text-white mb-4">
           Resume Examples by Job Title
         </h1>

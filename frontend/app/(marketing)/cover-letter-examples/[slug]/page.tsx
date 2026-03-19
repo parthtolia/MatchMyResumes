@@ -85,7 +85,7 @@ export default async function CoverLetterExamplePage({
       />
       <Navbar />
 
-      <article className="max-w-3xl mx-auto px-6 py-16">
+      <article className="max-w-3xl mx-auto px-6 pt-24 pb-16">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">
           <Link

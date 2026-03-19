@@ -288,8 +288,8 @@ function OrbitFeaturesSection() {
                 const rad = (f.angle * Math.PI) / 180
                 const orbitR = 40
                 // Convert percentage position to SVG coords (600x600 viewBox)
-                const x = (50 + orbitR * Math.cos(rad)) * 6
-                const y = (50 + orbitR * Math.sin(rad)) * 6
+                const x = Math.round((50 + orbitR * Math.cos(rad)) * 6 * 10000) / 10000
+                const y = Math.round((50 + orbitR * Math.sin(rad)) * 6 * 10000) / 10000
                 const isActive = activeIdx === i
                 const cfg = bulbConfigs[i] ?? defaultBulb
                 return (
@@ -321,8 +321,8 @@ function OrbitFeaturesSection() {
               const isFaded = activeIdx !== null && !isActive
               const rad = (f.angle * Math.PI) / 180
               const radius = 40
-              const x = 50 + radius * Math.cos(rad)
-              const y = 50 + radius * Math.sin(rad)
+              const x = Math.round((50 + radius * Math.cos(rad)) * 10000) / 10000
+              const y = Math.round((50 + radius * Math.sin(rad)) * 10000) / 10000
               const Icon = f.icon
 
               return (
@@ -521,6 +521,70 @@ export default function LandingSections() {
         </div>
       </section>
 
+      {/* Explore Examples Section */}
+      <section className="py-24 border-t border-white/5 relative">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-violet-600/5 rounded-full blur-[80px] pointer-events-none" />
+        <div className="max-w-5xl mx-auto px-6 relative z-10">
+          <m.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-4xl font-bold mb-4">
+              Explore Examples <span className="gradient-text">Before You Build</span>
+            </h2>
+            <p className="text-gray-400 text-lg">Get inspired by real-world examples crafted for every industry and role.</p>
+          </m.div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Resume Examples card */}
+            <m.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+              viewport={{ once: true }}
+              className="glass p-8 flex flex-col justify-between hover:border-violet-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-violet-500/5 group"
+            >
+              <div className="mb-6">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500/20 to-violet-500/5 border border-violet-500/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <FileText size={22} className="text-violet-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Resume Examples</h3>
+                <p className="text-gray-400 text-sm leading-relaxed">Browse 25 real-world resume examples across industries — from software engineering to marketing and finance.</p>
+              </div>
+              <Link
+                href="/resume-examples"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl btn-glow text-white text-sm font-semibold self-start"
+              >
+                View Resume Examples <ArrowRight size={15} />
+              </Link>
+            </m.div>
+            {/* Cover Letter Examples card */}
+            <m.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.12 }}
+              viewport={{ once: true }}
+              className="glass p-8 flex flex-col justify-between hover:border-violet-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-violet-500/5 group"
+            >
+              <div className="mb-6">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500/20 to-violet-500/5 border border-violet-500/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <FileText size={22} className="text-violet-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Cover Letter Examples</h3>
+                <p className="text-gray-400 text-sm leading-relaxed">Explore 15 proven cover letter templates tailored to different roles, tones, and experience levels.</p>
+              </div>
+              <Link
+                href="/cover-letter-examples"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl btn-glow text-white text-sm font-semibold self-start"
+              >
+                View Cover Letter Examples <ArrowRight size={15} />
+              </Link>
+            </m.div>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ */}
       <section id="faq" className="py-24 border-t border-white/5">
         <div className="max-w-3xl mx-auto px-6">
@@ -602,6 +666,8 @@ function FooterSection() {
                 <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
                 <Link href="/#faq" className="hover:text-white transition-colors">FAQ</Link>
                 <Link href="/#how-it-works" className="hover:text-white transition-colors">How It Works</Link>
+                <Link href="/resume-examples" className="hover:text-white transition-colors">Resume Examples</Link>
+                <Link href="/cover-letter-examples" className="hover:text-white transition-colors">Cover Letter Examples</Link>
               </div>
             </div>
             <div>

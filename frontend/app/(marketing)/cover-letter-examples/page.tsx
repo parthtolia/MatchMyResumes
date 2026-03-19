@@ -24,7 +24,7 @@ export default function CoverLetterExamplesPage() {
     <div className="min-h-screen bg-[#0a0a0f] text-white">
       <Navbar />
 
-      <div className="max-w-6xl mx-auto px-6 py-16">
+      <div className="max-w-6xl mx-auto px-6 pt-32 pb-16">
         <div className="text-center mb-14">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
             Cover Letter Examples by Job Title
