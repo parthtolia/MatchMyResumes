@@ -35,6 +35,24 @@ export async function downloadElementAsPdf(element: HTMLElement, filename: strin
             useCORS: true,
             backgroundColor: "#ffffff",
             logging: false,
+            onclone: (clonedDoc) => {
+                // Fix for Tailwind 4 / modern CSS using lab() or oklch() which html2canvas 1.4.1 doesn't support
+                const allElements = clonedDoc.getElementsByTagName("*")
+                for (let i = 0; i < allElements.length; i++) {
+                    const el = allElements[i] as HTMLElement
+                    const style = window.getComputedStyle(el)
+                    // If the color contains lab or oklch, replace it with a safe fallback
+                    if (style.color.includes("lab") || style.color.includes("oklch")) {
+                        el.style.color = "#000000"
+                    }
+                    if (style.backgroundColor.includes("lab") || style.backgroundColor.includes("oklch")) {
+                        el.style.backgroundColor = "transparent"
+                    }
+                    if (style.borderColor.includes("lab") || style.borderColor.includes("oklch")) {
+                        el.style.borderColor = "#999999"
+                    }
+                }
+            }
         }
     })
 }
