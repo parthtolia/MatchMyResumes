@@ -2,19 +2,19 @@ import { Document, Paragraph, TextRun, Packer, AlignmentType, BorderStyle } from
 
 /**
  * Download a DOM element as a PDF using html2canvas & jsPDF (WYSIWYG).
- * Redesigned for perfect spacing and margin consistency.
+ * Supports multi-page resumes and ensures professional margins.
  */
 export async function downloadElementAsPdf(element: HTMLElement, filename: string) {
     const { default: html2canvas } = await import("html2canvas")
     const { jsPDF } = await import("jspdf")
 
-    // Optimize: capture with a "Safe Zone" to prevent border clipping
+    // Optimize: capture with a fixed width to ensure predictable layout
     const canvas = await html2canvas(element, {
-        scale: 2, // 2x is usually enough for 300dpi feel without huge files
+        scale: 2, 
         useCORS: true,
         backgroundColor: "#ffffff",
         logging: false,
-        onclone: (clonedDoc, clonedElement) => {
+        onclone: (clonedDoc) => {
             // Fix for Tailwind 4 / modern CSS using lab() or oklch()
             const allElements = clonedDoc.getElementsByTagName("*")
             for (let i = 0; i < allElements.length; i++) {
@@ -30,35 +30,49 @@ export async function downloadElementAsPdf(element: HTMLElement, filename: strin
                     el.style.borderColor = "#999999"
                 }
             }
-
-            // ENHANCEMENT: Force a white border around the cloned element to act as a "Buffer"
-            clonedElement.style.margin = "40px" 
-            clonedElement.style.padding = "0"
-            clonedElement.style.boxShadow = "none"
-            clonedElement.style.border = "1px solid #eeeeee"
         }
     })
 
     const imgData = canvas.toDataURL("image/png")
     
-    // Letter format: 612 x 792 points (8.5 x 11 inches)
+    // Letter format dimensions in points (pt)
+    const PAGE_WIDTH = 612
+    const PAGE_HEIGHT = 792
+    
+    // Define printable area with 0.5 inch margins (36pt)
+    const MARGIN = 36
+    const PRINTABLE_WIDTH = PAGE_WIDTH - (MARGIN * 2)
+    const MAX_IMG_HEIGHT_PER_PAGE = PAGE_HEIGHT - (MARGIN * 2)
+
+    // Calculate total height needed in PDF units
+    const imgWidth = canvas.width
+    const imgHeight = canvas.height
+    const ratio = PRINTABLE_WIDTH / imgWidth
+    const totalPdfHeight = imgHeight * ratio
+
     const pdf = new jsPDF({
         orientation: "portrait",
         unit: "pt",
         format: "letter",
     })
 
-    const PAGE_WIDTH = 612
-    const PAGE_HEIGHT = 792
-    
-    // Dynamic scaling to fit the page horizontally while respecting margins
-    const MARGIN = 40 // ~0.55 inch
-    const PDF_CONTENT_WIDTH = PAGE_WIDTH - (MARGIN * 2)
-    const PDF_CONTENT_HEIGHT = (canvas.height * PDF_CONTENT_WIDTH) / canvas.width
+    let heightLeft = totalPdfHeight
+    let position = MARGIN
 
-    // If it's a very long resume, it might need multi-page logic, 
-    // but for now we fit it to the width and place it at the top.
-    pdf.addImage(imgData, "PNG", MARGIN, MARGIN, PDF_CONTENT_WIDTH, PDF_CONTENT_HEIGHT)
+    // Page 1
+    pdf.addImage(imgData, "PNG", MARGIN, position, PRINTABLE_WIDTH, totalPdfHeight)
+    heightLeft -= MAX_IMG_HEIGHT_PER_PAGE
+
+    // Additional pages if needed
+    while (heightLeft > 0) {
+        position = heightLeft - totalPdfHeight + MARGIN - (MAX_IMG_HEIGHT_PER_PAGE * Math.floor((totalPdfHeight - heightLeft) / MAX_IMG_HEIGHT_PER_PAGE))
+        pdf.addPage()
+        
+        // Offset logic for multi-page tiling
+        const currentPosition = MARGIN - (totalPdfHeight - heightLeft)
+        pdf.addImage(imgData, "PNG", MARGIN, currentPosition, PRINTABLE_WIDTH, totalPdfHeight)
+        heightLeft -= MAX_IMG_HEIGHT_PER_PAGE
+    }
     
     pdf.save(filename.endsWith(".pdf") ? filename : `${filename}.pdf`)
 }
