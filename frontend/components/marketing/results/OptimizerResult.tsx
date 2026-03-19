@@ -1,6 +1,6 @@
 "use client"
 import { motion } from "framer-motion"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Copy, Download, Check, ArrowRight, FileText, FileDown } from "lucide-react"
 import Link from "next/link"
 import { downloadTextAsPdf, downloadTextAsDocx } from "@/lib/download"
@@ -16,17 +16,27 @@ interface OptimizerResultProps {
 export default function OptimizerResult({ optimized_text, changes_summary, structured_json }: OptimizerResultProps) {
   const [copied, setCopied] = useState(false)
   const [selectedTemplateId, setSelectedTemplateId] = useState("executive-senior-manager")
+  const resumeRef = useRef<HTMLDivElement>(null)
 
   const currentTemplate = templates.find((t) => t.id === selectedTemplateId) || templates[0]
 
+  const getLatestText = () => {
+    if (resumeRef.current) {
+      return resumeRef.current.innerText || optimized_text
+    }
+    return optimized_text
+  }
+
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(optimized_text)
+    const text = getLatestText()
+    await navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
   const handleDownloadTxt = () => {
-    const blob = new Blob([optimized_text], { type: "text/plain" })
+    const text = getLatestText()
+    const blob = new Blob([text], { type: "text/plain" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
@@ -35,8 +45,8 @@ export default function OptimizerResult({ optimized_text, changes_summary, struc
     URL.revokeObjectURL(url)
   }
 
-  const handleDownloadPdf = () => downloadTextAsPdf(optimized_text, `${currentTemplate.slug}.pdf`)
-  const handleDownloadDocx = () => downloadTextAsDocx(optimized_text, currentTemplate.fileName)
+  const handleDownloadPdf = () => downloadTextAsPdf(getLatestText(), `${currentTemplate.slug}.pdf`)
+  const handleDownloadDocx = () => downloadTextAsDocx(getLatestText(), currentTemplate.fileName)
 
   return (
     <motion.div
@@ -67,11 +77,11 @@ export default function OptimizerResult({ optimized_text, changes_summary, struc
             <select
               value={selectedTemplateId}
               onChange={(e) => setSelectedTemplateId(e.target.value)}
-              className="bg-black/50 border border-white/10 text-white text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-violet-500"
+              className="bg-[#1a1a24] border border-white/10 text-white text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-violet-500 cursor-pointer"
             >
-              <optgroup label="Choose Template">
+              <optgroup label="Choose Template" className="bg-[#1a1a24] text-white">
                 {templates.map((t) => (
-                  <option key={t.id} value={t.id}>
+                  <option key={t.id} value={t.id} className="bg-[#1a1a24] text-white py-2">
                     {t.name}
                   </option>
                 ))}
@@ -109,22 +119,24 @@ export default function OptimizerResult({ optimized_text, changes_summary, struc
             </button>
           </div>
         </div>
-        <div className="max-h-[700px] overflow-y-auto rounded-xl bg-gray-100 p-2 sm:p-6 lg:p-8 border border-white/5">
-          {structured_json ? (
-            <ResumePreview structuredData={structured_json} templateId={selectedTemplateId} />
-          ) : (
-             <div 
-               className="bg-white mx-auto shadow-sm p-6 sm:p-10 min-h-[1056px] w-full max-w-[816px] text-gray-900"
-               style={{
-                 borderTop: `12px solid ${currentTemplate.color}`,
-                 fontFamily: currentTemplate.category === 'modern' || currentTemplate.category === 'tech' ? '"Inter", sans-serif' : 'Georgia, serif'
-               }}
-             >
-               <pre className="whitespace-pre-wrap font-inherit text-sm leading-relaxed">
-                 {optimized_text}
-               </pre>
-             </div>
-          )}
+        <div className="max-h-[750px] overflow-y-auto rounded-xl bg-[#0f0f15] p-4 sm:p-8 lg:p-12 border border-white/10 ring-1 ring-white/5">
+          <div ref={resumeRef} className="w-full">
+            {structured_json ? (
+              <ResumePreview structuredData={structured_json} templateId={selectedTemplateId} />
+            ) : (
+               <div 
+                 className="bg-white mx-auto shadow-2xl p-6 sm:p-10 min-h-[1056px] w-full max-w-[816px] text-gray-900 border-t-[16px]"
+                 style={{
+                   borderColor: currentTemplate.color,
+                   fontFamily: currentTemplate.category === 'modern' || currentTemplate.category === 'tech' ? '"Inter", sans-serif' : 'Georgia, serif'
+                 }}
+               >
+                 <pre className="whitespace-pre-wrap font-inherit text-sm leading-relaxed outline-none" contentEditable suppressContentEditableWarning>
+                   {optimized_text}
+                 </pre>
+               </div>
+            )}
+          </div>
         </div>
       </div>
 

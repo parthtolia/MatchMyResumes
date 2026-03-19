@@ -94,25 +94,33 @@ export default function ResumesPage() {
     const [copied, setCopied] = useState(false)
     // Alert modal
     const [alertMsg, setAlertMsg] = useState("")
+    const resumeRef = useRef<HTMLDivElement>(null)
 
     const currentTemplate = templates.find((t) => t.id === selectedTemplateId) || templates[0]
 
+    const getLatestText = () => {
+        if (resumeRef.current) {
+            return resumeRef.current.innerText || selected?.raw_text || ""
+        }
+        return selected?.raw_text || ""
+    }
+
     const copyText = () => {
         if (!selected?.raw_text) return
-        navigator.clipboard.writeText(selected.raw_text)
+        navigator.clipboard.writeText(getLatestText())
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
     }
 
     const downloadPdf = async () => {
         if (!selected?.raw_text) return
-        try { await downloadTextAsPdf(selected.raw_text, `${currentTemplate.slug}.pdf`) }
+        try { await downloadTextAsPdf(getLatestText(), `${currentTemplate.slug}.pdf`) }
         catch { setAlertMsg("Failed to generate PDF. Please try again.") }
     }
 
     const downloadDocx = async () => {
         if (!selected?.raw_text) return
-        try { await downloadTextAsDocx(selected.raw_text, currentTemplate.fileName) }
+        try { await downloadTextAsDocx(getLatestText(), currentTemplate.fileName) }
         catch { setAlertMsg("Failed to generate DOCX. Please try again.") }
     }
 
@@ -410,11 +418,11 @@ export default function ResumesPage() {
                                     <select
                                         value={selectedTemplateId}
                                         onChange={(e) => setSelectedTemplateId(e.target.value)}
-                                        className="bg-black/50 border border-white/10 text-white text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-violet-500"
+                                        className="bg-[#1a1a24] border border-white/10 text-white text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-violet-500 cursor-pointer"
                                     >
-                                        <optgroup label="Choose Template">
+                                        <optgroup label="Choose Template" className="bg-[#1a1a24] text-white">
                                             {templates.map((t) => (
-                                                <option key={t.id} value={t.id}>
+                                                <option key={t.id} value={t.id} className="bg-[#1a1a24] text-white py-1">
                                                     {t.name}
                                                 </option>
                                             ))}
@@ -436,17 +444,24 @@ export default function ResumesPage() {
                                 </div>
                             </div>
                             
-                            <div className="bg-gray-100 rounded-xl max-h-[700px] overflow-y-auto p-4 sm:p-6 lg:p-8 border border-white/5">
-                                {selected.structured_json ? (
-                                    <ResumePreview
-                                        structuredData={selected.structured_json as Record<string, string>}
-                                        templateId={selectedTemplateId}
-                                    />
-                                ) : (
-                                    <div className="bg-white p-8 sm:p-12 min-h-[1056px] shadow-sm max-w-[816px] mx-auto text-gray-900 border-t-[12px] border-gray-400">
-                                        <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">{selected.raw_text}</pre>
-                                    </div>
-                                )}
+                            <div className="bg-[#0f0f15] rounded-xl max-h-[750px] overflow-y-auto p-4 sm:p-8 lg:p-12 border border-white/10 ring-1 ring-white/5">
+                                <div ref={resumeRef} className="w-full">
+                                    {selected.structured_json ? (
+                                        <ResumePreview
+                                            structuredData={selected.structured_json as Record<string, string>}
+                                            templateId={selectedTemplateId}
+                                        />
+                                    ) : (
+                                        <div 
+                                          className="bg-white p-8 sm:p-12 min-h-[1056px] shadow-2xl max-w-[816px] mx-auto text-gray-900 border-t-[16px] outline-none" 
+                                          style={{ borderColor: currentTemplate.color }}
+                                          contentEditable
+                                          suppressContentEditableWarning
+                                        >
+                                            <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">{selected.raw_text}</pre>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ) : (

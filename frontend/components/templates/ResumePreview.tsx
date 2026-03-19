@@ -34,10 +34,11 @@ export default function ResumePreview({
 
     const flushList = () => {
       if (currentList.length > 0) {
+        const listKey = `ul-${elements.length}`;
         elements.push(
-          <ul className="list-disc pl-5 mb-4 space-y-1 text-sm text-gray-700">
+          <ul key={listKey} className="list-disc pl-5 mb-4 space-y-1 text-sm text-gray-700 outline-none" contentEditable suppressContentEditableWarning>
             {currentList.map((li, idx) => (
-              <li key={`li-${elements.length}-${idx}`}>{li}</li>
+              <li key={`${listKey}-${idx}`}>{li}</li>
             ))}
           </ul>
         );
@@ -56,13 +57,13 @@ export default function ResumePreview({
           line.toUpperCase() === line || line.match(/\d{4}\s*[-–]/);
         if (isHeader) {
           elements.push(
-            <h3 key={`h-${idx}`} className="font-semibold text-gray-900 mt-4 mb-1 text-sm">
+            <h3 key={`h-${idx}`} className="font-semibold text-gray-900 mt-4 mb-1 text-sm outline-none" contentEditable suppressContentEditableWarning>
               {line}
             </h3>
           );
         } else {
           elements.push(
-            <p key={`p-${idx}`} className="text-sm text-gray-700 leading-relaxed mb-2">
+            <p key={`p-${idx}`} className="text-sm text-gray-700 leading-relaxed mb-2 outline-none" contentEditable suppressContentEditableWarning>
               {line}
             </p>
           );
@@ -84,23 +85,24 @@ export default function ResumePreview({
 
   return (
     <div
-      className="bg-white mx-auto shadow-sm min-h-[1056px] w-[816px] max-w-full text-left"
+      className="bg-white mx-auto shadow-2xl min-h-[1056px] w-[816px] max-w-full text-left relative overflow-hidden"
       style={{
         borderTop: `16px solid ${color}`,
         fontFamily: isSerif ? 'Georgia, serif' : '"Inter", "Helvetica", sans-serif',
+        color: '#111827', // Explicit text-gray-900
       }}
     >
       <div className="px-10 py-10">
         {/* Header Section */}
         <div className="pb-6 mb-8 border-b-[3px]" style={{ borderColor: color }}>
-          <h1 className="text-4xl font-black uppercase tracking-widest text-gray-900 mb-2">
-            {header[0] || "Professional"}
+          <h1 className="text-4xl font-black uppercase tracking-widest text-gray-900 mb-2 outline-none" contentEditable suppressContentEditableWarning>
+            {header[0] || "Professional Name"}
           </h1>
           {header.length > 1 && (
-            <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-gray-500">
+            <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-gray-600">
               {header.slice(1).map((h, i) => (
-                <span key={i} className="flex items-center gap-2">
-                  {i > 0 && <span style={{ color }}>•</span>}
+                <span key={i} className="flex items-center gap-2 outline-none" contentEditable suppressContentEditableWarning>
+                  {i > 0 && <span style={{ color }} contentEditable={false}>•</span>}
                   {h}
                 </span>
               ))}
@@ -133,12 +135,16 @@ export default function ResumePreview({
               return (
                 <section key={sectionKey}>
                   <h2 
-                    className="text-lg font-bold uppercase tracking-wider mb-4 pb-1 border-b"
+                    className="text-lg font-bold uppercase tracking-wider mb-4 pb-1 border-b outline-none"
                     style={{ color, borderColor: `${color}40` }}
+                    contentEditable
+                    suppressContentEditableWarning
                   >
                     {sectionKey}
                   </h2>
-                  <div>{renderSectionContent(content)}</div>
+                  <div className="outline-none">
+                    {renderSectionContent(content)}
+                  </div>
                 </section>
               );
             })}
