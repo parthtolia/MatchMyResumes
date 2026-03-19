@@ -2,6 +2,7 @@ import { Document, Paragraph, TextRun, Packer, AlignmentType, BorderStyle } from
 
 /**
  * Download a DOM element as a PDF using html2canvas & jsPDF (WYSIWYG).
+ * Improved to handle standard letter sizing and margins.
  */
 export async function downloadElementAsPdf(element: HTMLElement, filename: string) {
     const { default: html2canvas } = await import("html2canvas")
@@ -9,12 +10,10 @@ export async function downloadElementAsPdf(element: HTMLElement, filename: strin
 
     // Optimize: handle scroll and scale
     const canvas = await html2canvas(element, {
-        scale: 2,
+        scale: 3, // Higher scale for text clarity
         useCORS: true,
         backgroundColor: "#ffffff",
         logging: false,
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight,
         onclone: (clonedDoc) => {
             // Fix for Tailwind 4 / modern CSS using lab() or oklch()
             const allElements = clonedDoc.getElementsByTagName("*")
@@ -35,17 +34,30 @@ export async function downloadElementAsPdf(element: HTMLElement, filename: strin
     })
 
     const imgData = canvas.toDataURL("image/png")
+    
+    // Letter format: 612 x 792 points (8.5 x 11 inches)
     const pdf = new jsPDF({
         orientation: "portrait",
         unit: "pt",
         format: "letter",
     })
 
-    const pdfWidth = pdf.internal.pageSize.getWidth()
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+    const PAGE_WIDTH = 612
+    const PAGE_HEIGHT = 792
+    
+    // Safety margins (0.5 inch = 36pt)
+    const MARGIN = 36
+    const CONTENT_WIDTH = PAGE_WIDTH - (MARGIN * 2)
+    
+    // Calculate content height based on original aspect ratio
+    const contentHeight = (canvas.height * CONTENT_WIDTH) / canvas.width
 
-    // Add with slight margin for safety
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight)
+    // If content exceeds one page (standard for a4/letter), we can just let it fit or handle multi-page.
+    // Most resumes are 1 page here, so we'll center it.
+    const xPos = MARGIN
+    const yPos = MARGIN
+
+    pdf.addImage(imgData, "PNG", xPos, yPos, CONTENT_WIDTH, contentHeight)
     pdf.save(filename.endsWith(".pdf") ? filename : `${filename}.pdf`)
 }
 
