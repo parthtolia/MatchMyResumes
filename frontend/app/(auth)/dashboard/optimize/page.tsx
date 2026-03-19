@@ -6,7 +6,10 @@ import { Zap, Loader2, Copy, Check, ArrowRight, Download } from "lucide-react"
 import AlertModal from "@/components/ui/AlertModal"
 import api from "@/lib/api"
 import { useGlobalData } from "@/components/dashboard/GlobalDataProvider"
-import { downloadTextAsPdf, downloadTextAsDocx } from "@/lib/download"
+import { downloadElementAsPdf, downloadTextAsDocx } from "@/lib/download"
+import { ResumeEditor } from "@/components/editor/ResumeEditor"
+import { ResumeData, ResumeTemplateId, ResumeTheme } from "@/lib/types/resume"
+import { parseRawTextToResumeData, resumeDataToRawText } from "@/lib/resume-utils"
 
 import { UserButton, useUser as useClerkUser } from "@clerk/nextjs"
 
@@ -35,6 +38,15 @@ function OptimizeContent() {
 
     const [originalText, setOriginalText] = useState("")
     const [result, setResult] = useState<any>(null)
+    const [resumeData, setResumeData] = useState<ResumeData | null>(null)
+    const [templateId, setTemplateId] = useState<ResumeTemplateId>("classic")
+    const [theme, setTheme] = useState<ResumeTheme>({
+        primaryColor: "#7c3aed",
+        headingColor: "#1a1a1a",
+        textColor: "#333333",
+        fontFamily: "Inter, sans-serif"
+    })
+
     const [loading, setLoading] = useState(false)
     const [copied, setCopied] = useState(false)
     const [error, setError] = useState("")
@@ -69,6 +81,12 @@ function OptimizeContent() {
             const res = await api.post("/api/resumes/optimize", payload)
             refreshData()
             setResult(res.data)
+            
+            // Parse optimized text into structured data
+            if (res.data.optimized_text) {
+                const parsed = parseRawTextToResumeData(res.data.optimized_text)
+                setResumeData(parsed)
+            }
         } catch (e: any) {
             setError(e.response?.data?.detail || e.message)
         } finally {
@@ -77,25 +95,41 @@ function OptimizeContent() {
     }
 
     const copy = () => {
-        navigator.clipboard.writeText(result?.optimized_text || "")
+        const textToCopy = resumeData ? resumeDataToRawText(resumeData) : (result?.optimized_text || "")
+        navigator.clipboard.writeText(textToCopy)
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
     }
 
     const downloadOptimizedPdf = async () => {
-        if (!result?.optimized_text) return
+        const element = document.getElementById("resume-canvas-content")
+        if (!element) {
+            setAlertMsg("Could not find resume content to export.")
+            return
+        }
+        
         const selectedResume = resumes.find(r => r.id === resumeId)
         const name = selectedResume?.filename?.replace(/\.[^.]+$/, "") || "resume"
-        try { await downloadTextAsPdf(result.optimized_text, `${name}_optimized.pdf`) }
-        catch { setAlertMsg("Failed to generate PDF. Please try again.") }
+        
+        try { 
+            await downloadElementAsPdf(element, `${name}_optimized.pdf`) 
+        } catch (err) { 
+            console.error("PDF Export Error:", err)
+            setAlertMsg("Failed to generate PDF. Please try again.") 
+        }
     }
 
     const downloadOptimizedDocx = async () => {
-        if (!result?.optimized_text) return
+        const textToExport = resumeData ? resumeDataToRawText(resumeData) : (result?.optimized_text || "")
+        if (!textToExport) return
+        
         const selectedResume = resumes.find(r => r.id === resumeId)
         const name = selectedResume?.filename?.replace(/\.[^.]+$/, "") || "resume"
-        try { await downloadTextAsDocx(result.optimized_text, `${name}_optimized.docx`) }
-        catch { setAlertMsg("Failed to generate DOCX. Please try again.") }
+        try { 
+            await downloadTextAsDocx(textToExport, `${name}_optimized.docx`, theme.headingColor) 
+        } catch { 
+            setAlertMsg("Failed to generate DOCX. Please try again.") 
+        }
     }
 
     // Auto-optimize if navigating from JD Match
@@ -118,7 +152,7 @@ function OptimizeContent() {
                         <label className="block text-xs font-medium text-gray-400 mb-1.5">Select Resume</label>
                         <select className="input-styled py-1.5 text-sm" value={resumeId} onChange={e => setResumeId(e.target.value)}>
                             <option value="">Choose resume...</option>
-                            {resumes.map(r => <option key={r.id} value={r.id}>{r.filename}</option>)}
+                            {resumes.map((r: any) => <option key={r.id} value={r.id}>{r.filename}</option>)}
                         </select>
                     </div>
                     <div>
@@ -134,7 +168,7 @@ function OptimizeContent() {
                                         <div className="pl-7 mt-2">
                                             <select className="input-styled w-full py-1.5 text-sm" value={jdId} onChange={e => setJdId(e.target.value)}>
                                                 <option value="">Select a job description...</option>
-                                                {jobs.map(j => <option key={j.id} value={j.id}>{j.title || j.id.slice(0, 8)}</option>)}
+                                                {jobs.map((j: any) => <option key={j.id} value={j.id}>{j.title || j.id.slice(0, 8)}</option>)}
                                             </select>
                                         </div>
                                     )}
@@ -218,42 +252,20 @@ function OptimizeContent() {
                         </div>
                     )}
 
-                    {/* Side-by-Side Diff View */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        <div className="glass p-6 flex flex-col h-full">
-                            <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
-                                Original Resume
-                            </h3>
-                            <textarea
-                                className="input-styled resize-none font-mono text-xs leading-relaxed opacity-60 flex-1 min-h-[500px]"
-                                value={originalText}
-                                readOnly
-                            />
-                        </div>
-
-                        <div className="glass p-6 flex flex-col h-full ring-1 ring-violet-500/20">
-                            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                                <h3 className="font-semibold text-violet-300">Optimized Resume</h3>
-                                <div className="flex items-center gap-2">
-                                    <button onClick={copy} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs transition-colors">
-                                        {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
-                                        {copied ? "Copied!" : "Copy"}
-                                    </button>
-                                    <button onClick={downloadOptimizedPdf} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs transition-colors" title="Download as PDF">
-                                        <Download size={14} /> PDF
-                                    </button>
-                                    <button onClick={downloadOptimizedDocx} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs transition-colors" title="Download as DOCX">
-                                        <Download size={14} /> DOCX
-                                    </button>
-                                </div>
-                            </div>
-                            <textarea
-                                className="input-styled resize-none font-mono text-xs leading-relaxed flex-1 min-h-[500px]"
-                                value={result.optimized_text}
-                                onChange={e => setResult({ ...result, optimized_text: e.target.value })}
-                            />
-                        </div>
-                    </div>
+                    {/* AI Editor / Preview */}
+                    {resumeData && (
+                        <ResumeEditor 
+                            initialData={resumeData}
+                            onDataChange={(newData) => setResumeData(newData)}
+                            templateId={templateId}
+                            onTemplateChange={(id) => setTemplateId(id)}
+                            theme={theme}
+                            onThemeChange={(newTheme) => setTheme({ ...theme, ...newTheme })}
+                            onDownloadPdf={downloadOptimizedPdf}
+                            onDownloadDocx={downloadOptimizedDocx}
+                            onCopyText={copy}
+                        />
+                    )}
                     {result.new_resume_id && (
                         <div className="mt-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
                             <p className="text-sm text-emerald-300 font-medium mb-1">
