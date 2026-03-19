@@ -92,7 +92,7 @@ export default function ResumePreview({
         color: '#111827', // Explicit text-gray-900
       }}
     >
-      <div className="px-10 py-10">
+      <div className="px-12 py-16">
         {/* Header Section */}
         <div className="pb-6 mb-8 border-b-[3px]" style={{ borderColor: color }}>
           <h1 className="text-4xl font-black uppercase tracking-widest text-gray-900 mb-2 outline-none" contentEditable suppressContentEditableWarning>

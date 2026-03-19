@@ -39,15 +39,10 @@ export async function downloadElementAsPdf(element: HTMLElement, filename: strin
     const PAGE_WIDTH = 612
     const PAGE_HEIGHT = 792
     
-    // Define printable area with 0.5 inch margins (36pt)
-    const MARGIN = 36
-    const PRINTABLE_WIDTH = PAGE_WIDTH - (MARGIN * 2)
-    const MAX_IMG_HEIGHT_PER_PAGE = PAGE_HEIGHT - (MARGIN * 2)
-
-    // Calculate total height needed in PDF units
+    // Scale content to fit full width of the Letter page
     const imgWidth = canvas.width
     const imgHeight = canvas.height
-    const ratio = PRINTABLE_WIDTH / imgWidth
+    const ratio = PAGE_WIDTH / imgWidth
     const totalPdfHeight = imgHeight * ratio
 
     const pdf = new jsPDF({
@@ -57,21 +52,18 @@ export async function downloadElementAsPdf(element: HTMLElement, filename: strin
     })
 
     let heightLeft = totalPdfHeight
-    let position = MARGIN
+    let position = 0
 
     // Page 1
-    pdf.addImage(imgData, "PNG", MARGIN, position, PRINTABLE_WIDTH, totalPdfHeight)
-    heightLeft -= MAX_IMG_HEIGHT_PER_PAGE
+    pdf.addImage(imgData, "PNG", 0, position, PAGE_WIDTH, totalPdfHeight)
+    heightLeft -= PAGE_HEIGHT
 
     // Additional pages if needed
     while (heightLeft > 0) {
-        position = heightLeft - totalPdfHeight + MARGIN - (MAX_IMG_HEIGHT_PER_PAGE * Math.floor((totalPdfHeight - heightLeft) / MAX_IMG_HEIGHT_PER_PAGE))
         pdf.addPage()
-        
-        // Offset logic for multi-page tiling
-        const currentPosition = MARGIN - (totalPdfHeight - heightLeft)
-        pdf.addImage(imgData, "PNG", MARGIN, currentPosition, PRINTABLE_WIDTH, totalPdfHeight)
-        heightLeft -= MAX_IMG_HEIGHT_PER_PAGE
+        const currentPosition = -(totalPdfHeight - heightLeft)
+        pdf.addImage(imgData, "PNG", 0, currentPosition, PAGE_WIDTH, totalPdfHeight)
+        heightLeft -= PAGE_HEIGHT
     }
     
     pdf.save(filename.endsWith(".pdf") ? filename : `${filename}.pdf`)
