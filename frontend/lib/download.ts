@@ -1,4 +1,4 @@
-import { Document, Paragraph, TextRun, Packer, AlignmentType } from "docx"
+import { Document, Paragraph, TextRun, Packer, AlignmentType, BorderStyle } from "docx"
 
 /**
  * Download a DOM element as a PDF using html2canvas & jsPDF (WYSIWYG).
@@ -7,19 +7,20 @@ export async function downloadElementAsPdf(element: HTMLElement, filename: strin
     const { default: html2canvas } = await import("html2canvas")
     const { jsPDF } = await import("jspdf")
 
-    // Optimization: scale up for higher quality and handle modern CSS color issues
+    // Optimize: handle scroll and scale
     const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         backgroundColor: "#ffffff",
         logging: false,
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
         onclone: (clonedDoc) => {
-            // Fix for Tailwind 4 / modern CSS using lab() or oklch() which html2canvas 1.4.1 doesn't support
+            // Fix for Tailwind 4 / modern CSS using lab() or oklch()
             const allElements = clonedDoc.getElementsByTagName("*")
             for (let i = 0; i < allElements.length; i++) {
                 const el = allElements[i] as HTMLElement
                 const style = window.getComputedStyle(el)
-                // If the color contains lab or oklch, replace it with a safe fallback
                 if (style.color.includes("lab") || style.color.includes("oklch")) {
                     el.style.color = "#000000"
                 }
@@ -27,7 +28,7 @@ export async function downloadElementAsPdf(element: HTMLElement, filename: strin
                     el.style.backgroundColor = "transparent"
                 }
                 if (style.borderColor.includes("lab") || style.borderColor.includes("oklch")) {
-                    el.style.borderColor = "#dddddd"
+                    el.style.borderColor = "#999999"
                 }
             }
         }
@@ -40,23 +41,23 @@ export async function downloadElementAsPdf(element: HTMLElement, filename: strin
         format: "letter",
     })
 
-    const imgProps = pdf.getImageProperties(imgData)
     const pdfWidth = pdf.internal.pageSize.getWidth()
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width
 
+    // Add with slight margin for safety
     pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight)
     pdf.save(filename.endsWith(".pdf") ? filename : `${filename}.pdf`)
 }
 
 /**
- * Improved DOCX download with basic formatting (bolding sections and adding accent colors).
+ * Improved DOCX download with signature top bar and better formatting.
  */
 export async function downloadTextAsDocx(text: string, filename: string, accentColor: string = "#000000") {
     const lines = text.split("\n")
-    const paragraphs = lines.map(line => {
+    const hex = accentColor.startsWith("#") ? accentColor.slice(1) : accentColor
+
+    const paragraphs = lines.map((line, idx) => {
         const trimmed = line.trim()
-        
-        // Detect section headers (all caps, shortish, not a bullet)
         const isHeader = 
             trimmed.toUpperCase() === trimmed && 
             trimmed.length > 2 && 
@@ -64,17 +65,23 @@ export async function downloadTextAsDocx(text: string, filename: string, accentC
             !trimmed.startsWith("•") &&
             !trimmed.startsWith("-")
 
-        // Clean hex for docx (remove #)
-        const hex = accentColor.startsWith("#") ? accentColor.slice(1) : accentColor
-
         return new Paragraph({
             alignment: AlignmentType.LEFT,
-            spacing: { before: isHeader ? 240 : 80, after: 120 },
+            spacing: { before: isHeader ? 280 : 120, after: 120 },
+            // Add blue top bar to the FIRST line
+            border: idx === 0 ? {
+                top: {
+                    color: hex,
+                    space: 20,
+                    style: BorderStyle.SINGLE,
+                    size: 40, // thick bar
+                }
+            } : undefined,
             children: [
                 new TextRun({
                     text: line,
                     font: "Arial",
-                    size: isHeader ? 26 : 20, // 13pt vs 10pt
+                    size: isHeader ? 28 : 22, // 14pt vs 11pt
                     bold: isHeader,
                     color: isHeader ? hex : "333333",
                 }),
@@ -86,7 +93,7 @@ export async function downloadTextAsDocx(text: string, filename: string, accentC
         sections: [{
             properties: {
                 page: {
-                    margin: { top: 720, right: 720, bottom: 720, left: 720 }, // 0.5 inch margins
+                    margin: { top: 720, right: 900, bottom: 720, left: 900 }, // Generous margins
                 }
             },
             children: paragraphs,
