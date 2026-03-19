@@ -3,7 +3,7 @@ import { motion } from "framer-motion"
 import { useState, useRef } from "react"
 import { Copy, Download, Check, ArrowRight, FileText, FileDown } from "lucide-react"
 import Link from "next/link"
-import { downloadTextAsPdf, downloadTextAsDocx } from "@/lib/download"
+import { downloadTextAsPdf, downloadTextAsDocx, downloadElementAsPdf } from "@/lib/download"
 import ResumePreview from "@/components/templates/ResumePreview"
 import { templates } from "@/lib/templates"
 
@@ -45,7 +45,13 @@ export default function OptimizerResult({ optimized_text, changes_summary, struc
     URL.revokeObjectURL(url)
   }
 
-  const handleDownloadPdf = () => downloadTextAsPdf(getLatestText(), `${currentTemplate.slug}.pdf`)
+  const handleDownloadPdf = () => {
+    if (resumeRef.current) {
+      downloadElementAsPdf(resumeRef.current, `${currentTemplate.slug}.pdf`)
+    } else {
+      downloadTextAsPdf(getLatestText(), `${currentTemplate.slug}.pdf`)
+    }
+  }
   const handleDownloadDocx = () => downloadTextAsDocx(getLatestText(), currentTemplate.fileName)
 
   return (

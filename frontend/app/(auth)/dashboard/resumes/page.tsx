@@ -7,7 +7,7 @@ import { useDropzone } from "react-dropzone"
 import api from "@/lib/api"
 import { formatDate } from "@/lib/utils"
 import { useGlobalData } from "@/components/dashboard/GlobalDataProvider"
-import { downloadTextAsPdf, downloadTextAsDocx } from "@/lib/download"
+import { downloadTextAsPdf, downloadTextAsDocx, downloadElementAsPdf } from "@/lib/download"
 import ResumePreview from "@/components/templates/ResumePreview"
 import { templates } from "@/lib/templates"
 
@@ -114,7 +114,13 @@ export default function ResumesPage() {
 
     const downloadPdf = async () => {
         if (!selected?.raw_text) return
-        try { await downloadTextAsPdf(getLatestText(), `${currentTemplate.slug}.pdf`) }
+        try { 
+            if (resumeRef.current) {
+                await downloadElementAsPdf(resumeRef.current, `${currentTemplate.slug}.pdf`)
+            } else {
+                await downloadTextAsPdf(getLatestText(), `${currentTemplate.slug}.pdf`) 
+            }
+        }
         catch { setAlertMsg("Failed to generate PDF. Please try again.") }
     }
 
