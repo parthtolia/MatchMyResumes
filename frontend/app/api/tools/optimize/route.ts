@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, publicAiLimiter } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
-import { parseResume } from "@/lib/services/resume-parser";
+import { parseResume, parseSections } from "@/lib/services/resume-parser";
 import { optimizeResume } from "@/lib/services/ai-service";
 import { computeKeywordScore } from "@/lib/scoring/ats-scorer";
 
@@ -98,6 +98,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       optimized_text: result.optimized_text || "",
       changes_summary: result.changes_summary || [],
+      structured_json: parseSections(result.optimized_text || ""),
     });
   } catch (error) {
     console.error("Public optimize error:", error);

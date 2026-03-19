@@ -8,6 +8,8 @@ import api from "@/lib/api"
 import { formatDate } from "@/lib/utils"
 import { useGlobalData } from "@/components/dashboard/GlobalDataProvider"
 import { downloadTextAsPdf, downloadTextAsDocx } from "@/lib/download"
+import ResumePreview from "@/components/templates/ResumePreview"
+import { templates } from "@/lib/templates"
 
 // ── Custom delete confirmation modal ─────────────────────────────────────────
 function DeleteModal({ count, onConfirm, onCancel }: {
@@ -85,10 +87,15 @@ export default function ResumesPage() {
     // Delete modal
     const [deleteModal, setDeleteModal] = useState<string[] | null>(null)
 
+    // Template selector
+    const [selectedTemplateId, setSelectedTemplateId] = useState("executive-senior-manager")
+
     // Copy state
     const [copied, setCopied] = useState(false)
     // Alert modal
     const [alertMsg, setAlertMsg] = useState("")
+
+    const currentTemplate = templates.find((t) => t.id === selectedTemplateId) || templates[0]
 
     const copyText = () => {
         if (!selected?.raw_text) return
@@ -99,15 +106,13 @@ export default function ResumesPage() {
 
     const downloadPdf = async () => {
         if (!selected?.raw_text) return
-        const name = selected.filename?.replace(/\.[^.]+$/, "") || "resume"
-        try { await downloadTextAsPdf(selected.raw_text, `${name}.pdf`) }
+        try { await downloadTextAsPdf(selected.raw_text, `${currentTemplate.slug}.pdf`) }
         catch { setAlertMsg("Failed to generate PDF. Please try again.") }
     }
 
     const downloadDocx = async () => {
         if (!selected?.raw_text) return
-        const name = selected.filename?.replace(/\.[^.]+$/, "") || "resume"
-        try { await downloadTextAsDocx(selected.raw_text, `${name}.docx`) }
+        try { await downloadTextAsDocx(selected.raw_text, currentTemplate.fileName) }
         catch { setAlertMsg("Failed to generate DOCX. Please try again.") }
     }
 
@@ -396,35 +401,53 @@ export default function ResumesPage() {
                         </div>
                     ) : selected && !selectMode ? (
                         <div className="glass p-6">
-                            <div className="flex items-start justify-between gap-3 mb-1">
+                            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
                                 <div>
                                     <h3 className="font-semibold text-white">{selected.filename}</h3>
                                     <p className="text-xs text-gray-500 mt-1">{formatDate(selected.created_at)}</p>
                                 </div>
-                                <div className="flex items-center gap-2 shrink-0">
-                                    <button onClick={copyText} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs transition-colors" title="Copy text">
-                                        {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
-                                        {copied ? "Copied!" : "Copy"}
-                                    </button>
-                                    <button onClick={downloadPdf} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs transition-colors" title="Download as PDF">
-                                        <Download size={14} /> PDF
-                                    </button>
-                                    <button onClick={downloadDocx} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs transition-colors" title="Download as DOCX">
-                                        <Download size={14} /> DOCX
-                                    </button>
+                                <div className="flex items-center gap-3 flex-wrap">
+                                    <select
+                                        value={selectedTemplateId}
+                                        onChange={(e) => setSelectedTemplateId(e.target.value)}
+                                        className="bg-black/50 border border-white/10 text-white text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-violet-500"
+                                    >
+                                        <optgroup label="Choose Template">
+                                            {templates.map((t) => (
+                                                <option key={t.id} value={t.id}>
+                                                    {t.name}
+                                                </option>
+                                            ))}
+                                        </optgroup>
+                                    </select>
+                                    
+                                    <div className="flex items-center gap-1.5 shrink-0 border-l border-white/10 pl-3">
+                                        <button onClick={copyText} className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs transition-colors" title="Copy text">
+                                            {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                                            <span className="hidden sm:inline">{copied ? "Copied!" : "Copy"}</span>
+                                        </button>
+                                        <button onClick={downloadPdf} className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs transition-colors" title="Download as PDF">
+                                            <Download size={14} /> <span className="hidden sm:inline">PDF</span>
+                                        </button>
+                                        <button onClick={downloadDocx} className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs transition-colors" title="Download as DOCX">
+                                            <Download size={14} /> <span className="hidden sm:inline">DOCX</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                            {selected.structured_json && (
-                                <div className="space-y-3 mb-4 mt-4">
-                                    {Object.entries(selected.structured_json).filter(([, v]) => v).map(([k, v]) => (
-                                        <div key={k}>
-                                            <span className="text-xs font-semibold text-violet-400 uppercase tracking-wider">{k}</span>
-                                            <p className="text-xs text-gray-400 mt-0.5 line-clamp-3">{v as string}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                            <textarea className="input-styled resize-none text-xs font-mono" rows={30} readOnly value={selected.raw_text} />
+                            
+                            <div className="bg-gray-100 rounded-xl max-h-[700px] overflow-y-auto p-4 sm:p-6 lg:p-8 border border-white/5">
+                                {selected.structured_json ? (
+                                    <ResumePreview
+                                        structuredData={selected.structured_json as Record<string, string>}
+                                        templateId={selectedTemplateId}
+                                    />
+                                ) : (
+                                    <div className="bg-white p-8 sm:p-12 min-h-[1056px] shadow-sm max-w-[816px] mx-auto text-gray-900 border-t-[12px] border-gray-400">
+                                        <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">{selected.raw_text}</pre>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     ) : (
                         <div className="glass p-12 h-full flex flex-col items-center justify-center text-center">

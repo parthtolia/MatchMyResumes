@@ -6,6 +6,7 @@ import OptimizerResult from "@/components/marketing/results/OptimizerResult"
 interface OptimizeResult {
   optimized_text: string
   changes_summary: string[]
+  structured_json: Record<string, string>
 }
 
 export default function OptimizerToolSection({ preview }: { preview?: React.ReactNode }) {

@@ -4,14 +4,20 @@ import { useState } from "react"
 import { Copy, Download, Check, ArrowRight, FileText, FileDown } from "lucide-react"
 import Link from "next/link"
 import { downloadTextAsPdf, downloadTextAsDocx } from "@/lib/download"
+import ResumePreview from "@/components/templates/ResumePreview"
+import { templates } from "@/lib/templates"
 
 interface OptimizerResultProps {
   optimized_text: string
   changes_summary: string[]
+  structured_json?: Record<string, string>
 }
 
-export default function OptimizerResult({ optimized_text, changes_summary }: OptimizerResultProps) {
+export default function OptimizerResult({ optimized_text, changes_summary, structured_json }: OptimizerResultProps) {
   const [copied, setCopied] = useState(false)
+  const [selectedTemplateId, setSelectedTemplateId] = useState("executive-senior-manager")
+
+  const currentTemplate = templates.find((t) => t.id === selectedTemplateId) || templates[0]
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(optimized_text)
@@ -24,13 +30,13 @@ export default function OptimizerResult({ optimized_text, changes_summary }: Opt
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = "optimized_resume.txt"
+    a.download = `${currentTemplate.slug}.txt`
     a.click()
     URL.revokeObjectURL(url)
   }
 
-  const handleDownloadPdf = () => downloadTextAsPdf(optimized_text, "optimized_resume.pdf")
-  const handleDownloadDocx = () => downloadTextAsDocx(optimized_text, "optimized_resume.docx")
+  const handleDownloadPdf = () => downloadTextAsPdf(optimized_text, `${currentTemplate.slug}.pdf`)
+  const handleDownloadDocx = () => downloadTextAsDocx(optimized_text, currentTemplate.fileName)
 
   return (
     <motion.div
@@ -55,9 +61,24 @@ export default function OptimizerResult({ optimized_text, changes_summary }: Opt
 
       {/* Optimized text */}
       <div className="glass p-6 rounded-2xl">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-white">Optimized Resume</h3>
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-4">
+          <div className="flex items-center gap-3">
+            <h3 className="text-lg font-semibold text-white">Optimized Resume</h3>
+            <select
+              value={selectedTemplateId}
+              onChange={(e) => setSelectedTemplateId(e.target.value)}
+              className="bg-black/50 border border-white/10 text-white text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-violet-500"
+            >
+              <optgroup label="Choose Template">
+                {templates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+          </div>
+          <div className="flex items-center flex-wrap gap-2">
             <button
               onClick={handleCopy}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/5 hover:bg-white/10 text-gray-300 transition-colors"
@@ -88,10 +109,22 @@ export default function OptimizerResult({ optimized_text, changes_summary }: Opt
             </button>
           </div>
         </div>
-        <div className="max-h-[500px] overflow-y-auto rounded-xl bg-black/30 p-4 border border-white/5">
-          <pre className="text-sm text-gray-300 whitespace-pre-wrap font-sans leading-relaxed">
-            {optimized_text}
-          </pre>
+        <div className="max-h-[700px] overflow-y-auto rounded-xl bg-gray-100 p-2 sm:p-6 lg:p-8 border border-white/5">
+          {structured_json ? (
+            <ResumePreview structuredData={structured_json} templateId={selectedTemplateId} />
+          ) : (
+             <div 
+               className="bg-white mx-auto shadow-sm p-6 sm:p-10 min-h-[1056px] w-full max-w-[816px] text-gray-900"
+               style={{
+                 borderTop: `12px solid ${currentTemplate.color}`,
+                 fontFamily: currentTemplate.category === 'modern' || currentTemplate.category === 'tech' ? '"Inter", sans-serif' : 'Georgia, serif'
+               }}
+             >
+               <pre className="whitespace-pre-wrap font-inherit text-sm leading-relaxed">
+                 {optimized_text}
+               </pre>
+             </div>
+          )}
         </div>
       </div>
 

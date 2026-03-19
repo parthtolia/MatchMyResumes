@@ -7,6 +7,7 @@ import { checkRateLimit, aiLimiter } from "@/lib/rate-limit";
 import { optimizeResume } from "@/lib/services/ai-service";
 import { generateEmbedding } from "@/lib/services/embedding-service";
 import { computeKeywordScore } from "@/lib/scoring/ats-scorer";
+import { parseSections } from "@/lib/services/resume-parser";
 
 export const maxDuration = 60;
 
@@ -163,6 +164,8 @@ export async function POST(request: NextRequest) {
         result.optimized_text || ""
       );
 
+      const parsedStructure = parseSections(result.optimized_text || "");
+
       newResumeId = crypto.randomUUID();
       await db.insert(resumes).values({
         id: newResumeId,
@@ -170,7 +173,7 @@ export async function POST(request: NextRequest) {
         filename: newFilename,
         fileType: resume.fileType,
         rawText: result.optimized_text || resume.rawText,
-        structuredJson: resume.structuredJson,
+        structuredJson: parsedStructure,
         embedding: newEmbedding,
         versionTag: tag,
         isOptimized: true,

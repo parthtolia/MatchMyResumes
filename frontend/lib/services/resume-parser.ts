@@ -51,7 +51,7 @@ function detectSection(line: string): string | null {
   return null;
 }
 
-function parseSections(text: string): Record<string, string> {
+export function parseSections(text: string): Record<string, string> {
   const sections: Record<string, string[]> = {};
   for (const key of Object.keys(SECTION_HEADERS)) {
     sections[key] = [];
