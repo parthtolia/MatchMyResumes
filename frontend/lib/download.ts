@@ -1,79 +1,42 @@
 import { Document, Paragraph, TextRun, Packer, AlignmentType, BorderStyle } from "docx"
 
 /**
- * Download a DOM element as a PDF using html2canvas & jsPDF (WYSIWYG).
- * Supports multi-page resumes and ensures professional margins.
+ * Download a DOM element as a PDF using the high-level jsPDF 'html' method.
+ * This provides superior multi-page support and margin preservation.
  */
 export async function downloadElementAsPdf(element: HTMLElement, filename: string) {
-    const { default: html2canvas } = await import("html2canvas")
     const { jsPDF } = await import("jspdf")
+    const { default: html2canvas } = await import("html2canvas")
 
-    // Optimize: capture with a fixed width to ensure predictable layout
-    const canvas = await html2canvas(element, {
-        scale: 2, 
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        logging: false,
-        onclone: (clonedDoc) => {
-            // Fix for Tailwind 4 / modern CSS using lab() or oklch()
-            const allElements = clonedDoc.getElementsByTagName("*")
-            for (let i = 0; i < allElements.length; i++) {
-                const el = allElements[i] as HTMLElement
-                const style = window.getComputedStyle(el)
-                if (style.color.includes("lab") || style.color.includes("oklch")) {
-                    el.style.color = "#000000"
-                }
-                if (style.backgroundColor.includes("lab") || style.backgroundColor.includes("oklch")) {
-                    el.style.backgroundColor = "transparent"
-                }
-                if (style.borderColor.includes("lab") || style.borderColor.includes("oklch")) {
-                    el.style.borderColor = "#999999"
-                }
-            }
-        }
-    })
-
-    const imgData = canvas.toDataURL("image/png")
-    
-    // Letter format dimensions in points (pt)
-    const PAGE_WIDTH = 612
-    const PAGE_HEIGHT = 792
-    
-    // Define printable area with consistent margins (36pt = 0.5 inch)
-    const MARGIN = 36
-    const PRINTABLE_WIDTH = PAGE_WIDTH - (MARGIN * 2)
-    const PRINTABLE_HEIGHT = PAGE_HEIGHT - (MARGIN * 2)
-
-    // Calculate scaling ratio
-    const imgWidth = canvas.width
-    const imgHeight = canvas.height
-    const ratio = PRINTABLE_WIDTH / imgWidth
-    const totalPdfHeight = imgHeight * ratio
-
+    // Letter format dimensions (8.5 x 11 inches)
     const pdf = new jsPDF({
         orientation: "portrait",
         unit: "pt",
         format: "letter",
     })
 
-    let heightLeft = totalPdfHeight
-    let pageCount = 0
+    const PAGE_WIDTH = 612
+    const PAGE_HEIGHT = 792
+    const MARGIN = 36 // 0.5 inch
 
-    // Multi-page Tiling logic with margins
-    while (heightLeft > 0) {
-        if (pageCount > 0) pdf.addPage()
-        
-        // Calculate the slice of the image to show on the current page
-        // We Use the MARGIN as the starting Y position for every page 
-        const currentYShift = -(pageCount * PRINTABLE_HEIGHT)
-        
-        pdf.addImage(imgData, "PNG", MARGIN, MARGIN + currentYShift, PRINTABLE_WIDTH, totalPdfHeight)
-        
-        heightLeft -= PRINTABLE_HEIGHT
-        pageCount++
-    }
-    
-    pdf.save(filename.endsWith(".pdf") ? filename : `${filename}.pdf`)
+    // Higher-level 'html' helper handles tiling and margins much better
+    await pdf.html(element, {
+        callback: (doc) => {
+            doc.save(filename.endsWith(".pdf") ? filename : `${filename}.pdf`)
+        },
+        x: MARGIN,
+        y: MARGIN,
+        width: PAGE_WIDTH - (MARGIN * 2),
+        // Use auto paging for long resumes
+        autoPaging: "text",
+        windowWidth: 816, // match our standard resume div width for consistent layout
+        html2canvas: {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: "#ffffff",
+            logging: false,
+        }
+    })
 }
 
 /**
