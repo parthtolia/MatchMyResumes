@@ -126,7 +126,7 @@ export default function ResumesPage() {
 
     const downloadDocx = async () => {
         if (!selected?.raw_text) return
-        try { await downloadTextAsDocx(getLatestText(), currentTemplate.fileName) }
+        try { await downloadTextAsDocx(getLatestText(), currentTemplate.fileName, currentTemplate.color) }
         catch { setAlertMsg("Failed to generate DOCX. Please try again.") }
     }
 

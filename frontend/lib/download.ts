@@ -7,11 +7,30 @@ export async function downloadElementAsPdf(element: HTMLElement, filename: strin
     const { default: html2canvas } = await import("html2canvas")
     const { jsPDF } = await import("jspdf")
 
-    // Optimization: scale up for higher quality
+    // Optimization: scale up for higher quality and handle modern CSS color issues
     const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         backgroundColor: "#ffffff",
+        logging: false,
+        onclone: (clonedDoc) => {
+            // Fix for Tailwind 4 / modern CSS using lab() or oklch() which html2canvas 1.4.1 doesn't support
+            const allElements = clonedDoc.getElementsByTagName("*")
+            for (let i = 0; i < allElements.length; i++) {
+                const el = allElements[i] as HTMLElement
+                const style = window.getComputedStyle(el)
+                // If the color contains lab or oklch, replace it with a safe fallback
+                if (style.color.includes("lab") || style.color.includes("oklch")) {
+                    el.style.color = "#000000"
+                }
+                if (style.backgroundColor.includes("lab") || style.backgroundColor.includes("oklch")) {
+                    el.style.backgroundColor = "transparent"
+                }
+                if (style.borderColor.includes("lab") || style.borderColor.includes("oklch")) {
+                    el.style.borderColor = "#dddddd"
+                }
+            }
+        }
     })
 
     const imgData = canvas.toDataURL("image/png")
@@ -30,12 +49,14 @@ export async function downloadElementAsPdf(element: HTMLElement, filename: strin
 }
 
 /**
- * Improved DOCX download with basic formatting (bolding sections).
+ * Improved DOCX download with basic formatting (bolding sections and adding accent colors).
  */
-export async function downloadTextAsDocx(text: string, filename: string) {
+export async function downloadTextAsDocx(text: string, filename: string, accentColor: string = "#000000") {
     const lines = text.split("\n")
     const paragraphs = lines.map(line => {
         const trimmed = line.trim()
+        
+        // Detect section headers (all caps, shortish, not a bullet)
         const isHeader = 
             trimmed.toUpperCase() === trimmed && 
             trimmed.length > 2 && 
@@ -43,15 +64,19 @@ export async function downloadTextAsDocx(text: string, filename: string) {
             !trimmed.startsWith("•") &&
             !trimmed.startsWith("-")
 
+        // Clean hex for docx (remove #)
+        const hex = accentColor.startsWith("#") ? accentColor.slice(1) : accentColor
+
         return new Paragraph({
             alignment: AlignmentType.LEFT,
-            spacing: { before: isHeader ? 200 : 0, after: 100 },
+            spacing: { before: isHeader ? 240 : 80, after: 120 },
             children: [
                 new TextRun({
                     text: line,
                     font: "Arial",
-                    size: isHeader ? 24 : 18, // 12pt vs 9pt
+                    size: isHeader ? 26 : 20, // 13pt vs 10pt
                     bold: isHeader,
+                    color: isHeader ? hex : "333333",
                 }),
             ],
         })
@@ -59,7 +84,11 @@ export async function downloadTextAsDocx(text: string, filename: string) {
 
     const doc = new Document({
         sections: [{
-            properties: {},
+            properties: {
+                page: {
+                    margin: { top: 720, right: 720, bottom: 720, left: 720 }, // 0.5 inch margins
+                }
+            },
             children: paragraphs,
         }],
     })

@@ -52,7 +52,7 @@ export default function OptimizerResult({ optimized_text, changes_summary, struc
       downloadTextAsPdf(getLatestText(), `${currentTemplate.slug}.pdf`)
     }
   }
-  const handleDownloadDocx = () => downloadTextAsDocx(getLatestText(), currentTemplate.fileName)
+  const handleDownloadDocx = () => downloadTextAsDocx(getLatestText(), currentTemplate.fileName, currentTemplate.color)
 
   return (
     <motion.div
