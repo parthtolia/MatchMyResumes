@@ -39,10 +39,15 @@ export async function downloadElementAsPdf(element: HTMLElement, filename: strin
     const PAGE_WIDTH = 612
     const PAGE_HEIGHT = 792
     
-    // Scale content to fit full width of the Letter page
+    // Define printable area with consistent margins (36pt = 0.5 inch)
+    const MARGIN = 36
+    const PRINTABLE_WIDTH = PAGE_WIDTH - (MARGIN * 2)
+    const PRINTABLE_HEIGHT = PAGE_HEIGHT - (MARGIN * 2)
+
+    // Calculate scaling ratio
     const imgWidth = canvas.width
     const imgHeight = canvas.height
-    const ratio = PAGE_WIDTH / imgWidth
+    const ratio = PRINTABLE_WIDTH / imgWidth
     const totalPdfHeight = imgHeight * ratio
 
     const pdf = new jsPDF({
@@ -52,18 +57,20 @@ export async function downloadElementAsPdf(element: HTMLElement, filename: strin
     })
 
     let heightLeft = totalPdfHeight
-    let position = 0
+    let pageCount = 0
 
-    // Page 1
-    pdf.addImage(imgData, "PNG", 0, position, PAGE_WIDTH, totalPdfHeight)
-    heightLeft -= PAGE_HEIGHT
-
-    // Additional pages if needed
+    // Multi-page Tiling logic with margins
     while (heightLeft > 0) {
-        pdf.addPage()
-        const currentPosition = -(totalPdfHeight - heightLeft)
-        pdf.addImage(imgData, "PNG", 0, currentPosition, PAGE_WIDTH, totalPdfHeight)
-        heightLeft -= PAGE_HEIGHT
+        if (pageCount > 0) pdf.addPage()
+        
+        // Calculate the slice of the image to show on the current page
+        // We Use the MARGIN as the starting Y position for every page 
+        const currentYShift = -(pageCount * PRINTABLE_HEIGHT)
+        
+        pdf.addImage(imgData, "PNG", MARGIN, MARGIN + currentYShift, PRINTABLE_WIDTH, totalPdfHeight)
+        
+        heightLeft -= PRINTABLE_HEIGHT
+        pageCount++
     }
     
     pdf.save(filename.endsWith(".pdf") ? filename : `${filename}.pdf`)
