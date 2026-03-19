@@ -26,14 +26,16 @@ export default function ResumeExamplesPage() {
       <Navbar />
 
       <div className="max-w-6xl mx-auto px-6 pt-32 pb-16">
-        <h1 className="text-4xl font-bold text-white mb-4">
-          Resume Examples by Job Title
-        </h1>
-        <p className="text-gray-400 mb-10 max-w-2xl">
-          Browse ATS-optimized resume examples for 25+ job titles. Each example
-          includes a professional summary, achievement-oriented bullet points,
-          key skills, and role-specific tips to help you land more interviews.
-        </p>
+        <div className="text-center mb-14">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Resume Examples by Job Title
+          </h1>
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            Browse ATS-optimized resume examples for 25+ job titles. Each example
+            includes a professional summary, achievement-oriented bullet points,
+            key skills, and role-specific tips to help you land more interviews.
+          </p>
+        </div>
 
         <ResumeExamplesGrid examples={resumeExamples} />
       </div>
