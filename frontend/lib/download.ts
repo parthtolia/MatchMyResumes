@@ -2,19 +2,19 @@ import { Document, Paragraph, TextRun, Packer, AlignmentType, BorderStyle } from
 
 /**
  * Download a DOM element as a PDF using html2canvas & jsPDF (WYSIWYG).
- * Improved to handle standard letter sizing and margins.
+ * Redesigned for perfect spacing and margin consistency.
  */
 export async function downloadElementAsPdf(element: HTMLElement, filename: string) {
     const { default: html2canvas } = await import("html2canvas")
     const { jsPDF } = await import("jspdf")
 
-    // Optimize: handle scroll and scale
+    // Optimize: capture with a "Safe Zone" to prevent border clipping
     const canvas = await html2canvas(element, {
-        scale: 3, // Higher scale for text clarity
+        scale: 2, // 2x is usually enough for 300dpi feel without huge files
         useCORS: true,
         backgroundColor: "#ffffff",
         logging: false,
-        onclone: (clonedDoc) => {
+        onclone: (clonedDoc, clonedElement) => {
             // Fix for Tailwind 4 / modern CSS using lab() or oklch()
             const allElements = clonedDoc.getElementsByTagName("*")
             for (let i = 0; i < allElements.length; i++) {
@@ -30,6 +30,12 @@ export async function downloadElementAsPdf(element: HTMLElement, filename: strin
                     el.style.borderColor = "#999999"
                 }
             }
+
+            // ENHANCEMENT: Force a white border around the cloned element to act as a "Buffer"
+            clonedElement.style.margin = "40px" 
+            clonedElement.style.padding = "0"
+            clonedElement.style.boxShadow = "none"
+            clonedElement.style.border = "1px solid #eeeeee"
         }
     })
 
@@ -45,19 +51,15 @@ export async function downloadElementAsPdf(element: HTMLElement, filename: strin
     const PAGE_WIDTH = 612
     const PAGE_HEIGHT = 792
     
-    // Safety margins (0.5 inch = 36pt)
-    const MARGIN = 36
-    const CONTENT_WIDTH = PAGE_WIDTH - (MARGIN * 2)
+    // Dynamic scaling to fit the page horizontally while respecting margins
+    const MARGIN = 40 // ~0.55 inch
+    const PDF_CONTENT_WIDTH = PAGE_WIDTH - (MARGIN * 2)
+    const PDF_CONTENT_HEIGHT = (canvas.height * PDF_CONTENT_WIDTH) / canvas.width
+
+    // If it's a very long resume, it might need multi-page logic, 
+    // but for now we fit it to the width and place it at the top.
+    pdf.addImage(imgData, "PNG", MARGIN, MARGIN, PDF_CONTENT_WIDTH, PDF_CONTENT_HEIGHT)
     
-    // Calculate content height based on original aspect ratio
-    const contentHeight = (canvas.height * CONTENT_WIDTH) / canvas.width
-
-    // If content exceeds one page (standard for a4/letter), we can just let it fit or handle multi-page.
-    // Most resumes are 1 page here, so we'll center it.
-    const xPos = MARGIN
-    const yPos = MARGIN
-
-    pdf.addImage(imgData, "PNG", xPos, yPos, CONTENT_WIDTH, contentHeight)
     pdf.save(filename.endsWith(".pdf") ? filename : `${filename}.pdf`)
 }
 
