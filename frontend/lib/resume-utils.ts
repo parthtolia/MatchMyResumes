@@ -196,15 +196,27 @@ export function resumeDataToRawText(data: ResumeData): string {
  * Directly map the AI's optimized_sections dict into ResumeData.
  * This avoids re-parsing optimized text through the regex heuristic parser
  * and ensures each editor panel field gets the correct, clean content.
+ *
+ * Accepts optional contactInfo from AI extraction for more accurate parsing.
  */
 export function resumeSectionsToResumeData(
   sections: Record<string, string>,
-  originalBasics?: ResumeBasics
+  originalBasics?: ResumeBasics,
+  contactInfo?: Record<string, string>
 ): ResumeData {
   // ─── 1. Build basics block ────────────────────────────────────────────────
   const basics: ResumeBasics = originalBasics ? { ...originalBasics } : { name: "" };
 
-  if (!originalBasics) {
+  // If we have AI-extracted contact info, use it directly (most accurate)
+  if (contactInfo && Object.keys(contactInfo).length > 0) {
+    basics.name = contactInfo.name || basics.name || "";
+    basics.label = contactInfo.title || basics.label;
+    basics.email = contactInfo.email || basics.email;
+    basics.phone = contactInfo.phone || basics.phone;
+    basics.location = contactInfo.location || basics.location;
+    basics.website = contactInfo.website || basics.website;
+  } else if (!originalBasics) {
+    // Fallback to regex-based extraction if no AI contact info
     const basicsText = sections.basics || "";
     const rawLines = basicsText.split("\n").map((l) => l.trim()).filter(Boolean);
 

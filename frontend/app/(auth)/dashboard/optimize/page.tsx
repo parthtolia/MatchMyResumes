@@ -81,11 +81,13 @@ function OptimizeContent() {
             const res = await api.post("/api/resumes/optimize", payload)
             refreshData()
             setResult(res.data)
-            
+
             // Parse optimized sections directly into structured data for the editor
             const sectionsMap: Record<string, string> | undefined = res.data.optimized_sections
+            const contactInfo: Record<string, string> | undefined = res.data.contact_info
             if (sectionsMap && Object.keys(sectionsMap).length > 0) {
-                setResumeData(resumeSectionsToResumeData(sectionsMap))
+                // Pass contact info extracted by AI for accurate basics section
+                setResumeData(resumeSectionsToResumeData(sectionsMap, undefined, contactInfo))
             } else if (res.data.optimized_text) {
                 setResumeData(parseRawTextToResumeData(res.data.optimized_text))
             }
