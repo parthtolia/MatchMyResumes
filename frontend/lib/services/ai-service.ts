@@ -1037,6 +1037,79 @@ function formatExperienceSection(text: string): string {
   return result.join("\n").trim();
 }
 
+// ── PHASE 5: Helper to categorize skills ──────────────────────────────────
+function categorizeSkills(skillsText: string): string {
+  // PHASE 5: Post-process skills section to organize by category
+  // Only if text looks like a flat list (comma or semicolon-separated)
+  // Skip if already formatted with categories
+
+  if (!skillsText?.trim()) return skillsText;
+
+  // Check if already categorized (has colons indicating categories)
+  if ((skillsText.match(/:/g) || []).length >= 2) {
+    return skillsText; // Already formatted
+  }
+
+  // Parse skills (comma, semicolon, or bullet-separated)
+  const skills = skillsText
+    .split(/[,;•\-\n]/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 1 && s.length < 50 && !/^\d+/.test(s));
+
+  if (skills.length < 5) {
+    return skillsText; // Too few skills, not worth categorizing
+  }
+
+  // Categorize each skill
+  const categories: Record<string, string[]> = {
+    "Programming Languages": [],
+    "Frameworks & Libraries": [],
+    "Databases & Data": [],
+    "Cloud & DevOps": [],
+    "Other": [],
+  };
+
+  const skillPatterns: Record<string, RegExp[]> = {
+    "Programming Languages": [
+      /^(python|java|c\+\+|c#|javascript|typescript|ruby|go|rust|php|kotlin|swift|scala|r|perl)$/i,
+    ],
+    "Frameworks & Libraries": [
+      /^(react|vue|angular|fastapi|django|flask|spring|springboot|rails|express|asp\.net|nextjs|nuxt|tensorflow|pytorch|torch)$/i,
+    ],
+    "Databases & Data": [
+      /^(postgresql|mysql|mongodb|redis|elasticsearch|dynamodb|cassandra|sql|snowflake|bigquery|datawarehouse)$/i,
+    ],
+    "Cloud & DevOps": [
+      /^(aws|azure|gcp|docker|kubernetes|jenkins|terraform|ci\/cd|gitlab|github|circleci)$/i,
+    ],
+  };
+
+  // Assign skills to categories
+  for (const skill of skills) {
+    let assigned = false;
+    for (const [category, patterns] of Object.entries(skillPatterns)) {
+      if (patterns.some((p) => p.test(skill))) {
+        categories[category].push(skill);
+        assigned = true;
+        break;
+      }
+    }
+    if (!assigned) {
+      categories["Other"].push(skill);
+    }
+  }
+
+  // Build categorized output
+  const output: string[] = [];
+  for (const [category, skillList] of Object.entries(categories)) {
+    if (skillList.length > 0) {
+      output.push(`${category}: ${skillList.join(", ")}`);
+    }
+  }
+
+  return output.length > 0 ? output.join("\n") : skillsText;
+}
+
 // ── Public: section-wise optimizer (new primary entry point) ───────────────
 export async function optimizeResumeSectional(
   resumeText: string,
@@ -1119,7 +1192,19 @@ export async function optimizeResumeSectional(
       const content = deduplicatedSections[sectionName];
       if (!content?.trim()) return;
       const res = await optimizeSingleSection(sectionName, content, jdText, kwList);
-      optimized[sectionName] = res.optimized_content;
+      let optimizedContent = res.optimized_content;
+
+      // PHASE 5: Categorize skills if applicable
+      if (sectionName === "skills") {
+        try {
+          optimizedContent = categorizeSkills(optimizedContent);
+        } catch (e) {
+          console.warn("Skill categorization failed, using original:", e);
+          // Fallback to non-categorized version
+        }
+      }
+
+      optimized[sectionName] = optimizedContent;
       allChanges.push(...res.changes);
     })
   );
