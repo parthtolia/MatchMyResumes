@@ -30,6 +30,29 @@ function useGroq(): boolean {
   return Boolean(config.groqApiKey);
 }
 
+// ── Contact Information Extraction (AI-based) ──────────────────────────────
+const CONTACT_EXTRACTION_PROMPT = `You are an expert at extracting structured contact information from resume headers.
+Given the "basics" section of a resume, extract the following fields:
+- name: Full name of the candidate
+- title: Job title / position label (e.g., "Software Engineer", "Data Scientist")
+- email: Email address
+- phone: Phone number (in any format)
+- location: City, Country or City, State
+- website: LinkedIn, GitHub, or personal website URL
+
+Return ONLY a JSON object with these exact keys. If a field is not found, omit it (but "name" is required).
+Parse the basics text carefully - information can be on separate lines or pipe/comma-separated on one line.
+
+Example:
+{
+  "name": "John Smith",
+  "title": "Senior Engineer",
+  "email": "john@email.com",
+  "phone": "+1-555-1234",
+  "location": "New York, USA",
+  "website": "linkedin.com/in/john"
+}`;
+
 // ── Section extraction ─────────────────────────────────────────────────────
 const SECTION_EXTRACTION_PROMPT = `You are a precise resume parser specializing in careful section extraction.
 Your task is to split the given resume text into its named sections, preserving all contact information.
@@ -84,14 +107,15 @@ FACTS THAT MUST NEVER CHANGE:
 - Email addresses, phone numbers, locations, LinkedIn/GitHub URLs
 - Any line with role headers: "Title | Company | Date" or "Company, Title (Year–Year)" or similar
 - School/degree headers like "B.S. Computer Science | University Name | 2020"
-- Marked lines with [HEADER - DO NOT MODIFY]
+- Marked lines with [ROLE_HEADER_START]...[ROLE_HEADER_END]
+- ALL existing certifications, licenses, and credentials (NEVER add fabricated ones)
 
 CONTENT YOU CAN IMPROVE:
 - Bullet point descriptions under roles (enhance, reword, add metrics)
 - Summary paragraphs and prose sections
 - Skills list items
 - Project descriptions
-- Certification descriptions
+- Certification descriptions (descriptions only, NEVER add new certs)
 
 ===== SECTION-SPECIFIC RULES =====
 
@@ -105,20 +129,18 @@ FOR EDUCATION SECTION:
 - You may reorder bullet points under each degree but NOT the degree headers themselves.
 
 FOR EXPERIENCE SECTION (MOST CRITICAL):
-- Each role consists of a HEADER LINE and optional BULLET POINTS below it.
-- HEADER LINE FORMAT: One of these patterns (preserve character-for-character):
-  * "Company Name | Job Title | Start Date – End Date"
-  * "Company Name | Job Title | Start Date – Present"
-  * "Job Title at Company Name (Date Range)"
-  * "Company Name, Job Title (Start Year – End Year)"
-  * Any similar format with company + title + dates on ONE line
-- BULLET LINES: Start with "-" or "•", describe achievements/responsibilities
-- CRITICAL: Do NOT reformat headers. If input shows "Senior Engineer | Google | Jan 2020 – Mar 2023", output EXACTLY that.
+- Preserve EVERY role header verbatim (marked with [ROLE_HEADER_START]...[ROLE_HEADER_END]).
+- Remove the markers [ROLE_HEADER_START] and [ROLE_HEADER_END] but keep the header text exactly.
+- Output structure for EACH ROLE:
+  * Role Header on its own line (character-for-character exact)
+  * One blank line after header
+  * Bullet points (3-5 bullets starting with "- ")
+  * One blank line before next role
 - ONLY modify bullet point lines (those starting with - or •)
-- Preserve header order exactly as they appear in input
-- DO NOT convert headers to prose. DO NOT merge multiple roles.
+- DO NOT convert headers to prose. DO NOT merge multiple roles. DO NOT reformat headers.
 - For each role's bullets: enhance/reword for clarity, add 1-2 new bullets if missing context, integrate JD keywords naturally.
-- Structure desired: Header on own line, then 3-5 bullets describing measurable achievements (quantify with numbers/metrics if available).
+- Each bullet should start with "- " and describe ONE measurable achievement or responsibility.
+- Quantify with metrics/numbers where available (e.g., "improved performance by 40%", "reduced time by 95%").
 
 FOR SUMMARY SECTION:
 - Rewrite to emphasize JD-aligned keywords while maintaining professional tone and similar length (±10%).
@@ -128,21 +150,30 @@ FOR SUMMARY SECTION:
 FOR SKILLS SECTION:
 - Expand to include ALL relevant keywords from the JD that the candidate plausibly possesses.
 - Keep ALL existing skills (never remove).
+- ORGANIZE BY CATEGORY like this format:
+  Programming Languages: Python, Java, TypeScript, Go
+  Frameworks & Libraries: React, FastAPI, Django, Spring Boot
+  Databases: PostgreSQL, MongoDB, Redis
+  Cloud & DevOps: AWS, Docker, Kubernetes
+  - Use comma-separated values within each category
+  - Put category name followed by colon, then comma-separated skills
+  - Leave a blank line between categories
 - Use EXACT keyword spelling (e.g., "CI/CD", not "continuous integration").
-- Organize as comma-separated list matching input format (if comma-separated, keep comma-separated; if bullets, keep bullets).
 
-FOR CERTIFICATIONS/PROJECTS SECTIONS:
-- Enhance descriptions (if present) with JD keywords where applicable.
-- NEVER remove, fabricate, or falsify any certifications/projects.
-- Preserve all facts; improve clarity/impact.
+FOR CERTIFICATIONS SECTION:
+- PRESERVE EVERY certification, license, credential EXACTLY as written.
+- NEVER fabricate, invent, or add new certifications that weren't in the original resume.
+- ONLY enhance the description text if present (e.g., "IQ Bot Developer → Specialized in AI-enhanced document processing...")
+- If resume has: "Automation Anywhere Certified Master RPA", keep it EXACTLY. Do NOT add related certs like "UiPath Certified" unless explicitly in the original.
+- For certifications with descriptions, you may reword descriptions for clarity but NEVER add new certifications.
 
 ===== GENERAL RULES =====
 
 1. KEYWORD INTEGRATION: Weave provided MISSING KEYWORDS naturally into existing content — ONLY where truthful.
 2. Output PLAIN TEXT ONLY — no markdown, no **, no HTML, no bold, no formatting.
-3. No excessive whitespace. Single blank line between roles (in experience) or list items.
-4. If a role/degree header appears multiple times, preserve EACH one verbatim.
-5. NEVER fabricate experience, dates, companies, degrees, or skills the person doesn't have.
+3. Preserve formatting: If input has "- bullet", keep "- bullet" format. If it has "• bullet", keep "•".
+4. Manage whitespace: Single blank line between items/roles, no excessive spacing.
+5. NEVER fabricate experience, dates, companies, degrees, skills, or certifications.
 6. When in doubt, preserve the original.
 
 Return a JSON object:
@@ -302,6 +333,47 @@ async function fetchGroqWithFallback(client: Groq, options: any): Promise<string
   throw lastError || new Error("All Groq models failed.");
 }
 
+// ── AI-based contact information extraction ────────────────────────────────
+export async function extractContactInfoFromBasics(
+  basicsText: string
+): Promise<{
+  name?: string;
+  title?: string;
+  email?: string;
+  phone?: string;
+  location?: string;
+  website?: string;
+}> {
+  if (!basicsText?.trim()) return { name: "" };
+
+  const prompt = `${CONTACT_EXTRACTION_PROMPT}\n\nBASICS SECTION:\n${basicsText}`;
+  try {
+    if (useGroq()) {
+      const client = getGroqClient();
+      const raw = await fetchGroqWithFallback(client, {
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.02,
+        max_tokens: 500,
+        response_format: { type: "json_object" },
+      });
+      const parsed = JSON.parse(cleanJsonString(raw));
+      return typeof parsed === "object" ? parsed : { name: "" };
+    } else {
+      const model = getGeminiModel();
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: "application/json" },
+      });
+      const raw = result.response.text();
+      const parsed = JSON.parse(cleanJsonString(raw));
+      return typeof parsed === "object" ? parsed : { name: "" };
+    }
+  } catch (e) {
+    console.warn("Contact info extraction failed:", e);
+    return { name: "" };
+  }
+}
+
 export async function extractKeywordsFromJdAi(
   jdText: string
 ): Promise<string[]> {
@@ -315,7 +387,7 @@ export async function extractKeywordsFromJdAi(
         max_tokens: 1024,
         response_format: { type: "json_object" },
       });
-      
+
       const parsed = JSON.parse(raw);
       let keywords: string[];
       if (Array.isArray(parsed)) {
@@ -695,19 +767,40 @@ Optimize only the bullet points (lines starting with - or •) below each role h
     const parsed = JSON.parse(cleanJsonString(raw));
     let optimizedContent = parsed.optimized_content || sectionContent;
 
-    // Clean up role header markers
+    // Clean up role header markers and instruction artifacts
     optimizedContent = optimizedContent
       .replace(/\[ROLE_HEADER_START\]/g, "")
       .replace(/\[ROLE_HEADER_END\]/g, "")
       .replace(/\[HEADER\s*[-–—]\s*DO\s+NOT\s+MODIFY\]:\s*/gi, "")
       .replace(/^=== ROLE HEADER.*/gm, "")
+      .replace(/^=== MISSING JD KEYWORDS.*/gm, "")
+      .replace(/^=== JOB DESCRIPTION.*/gm, "")
+      .replace(/^=== SECTION CONTENT.*/gm, "")
       .replace(/^These lines MUST appear.*/gm, "")
-      .replace(/^IMPORTANT:.*$/gm, "");
+      .replace(/^IMPORTANT:.*$/gm, "")
+      .replace(/^\- Do NOT|^Programming Languages:|^Frameworks|^Databases:|^Cloud|^Certifications:|^PRESERVE|^NEVER|^Only|^Use EXACT|^ORGANIZE/gm, "")
+      .replace(/^\s*For each role|^\s*Each bullet|^\s*Quantify with|^\s*Leave a blank/gm, "")
+      .trim();
 
     // Post-process: for experience section, ensure proper formatting
-    // (Header on own line, bullets indented or on following lines)
+    // (Header on own line, blank line, bullets)
     if (sectionName === "experience" && roleHeaders.size > 0) {
       optimizedContent = formatExperienceSection(optimizedContent);
+    }
+
+    // For certifications section, ensure we don't have instruction artifacts
+    if (sectionName === "certifications") {
+      const lines = optimizedContent.split("\n");
+      const cleanedLines = lines.filter(l => {
+        const trimmed = l.trim();
+        // Remove lines that look like instructions
+        return !(
+          /^(PRESERVE|NEVER|Only|For|When in doubt|If you|ALWAYS|DO NOT|CRITICAL|RULES|Do NOT add|new certs|ONLY enhance)/i.test(
+            trimmed
+          ) || trimmed.length > 200 // Remove overly long lines that might be copy-pasted prompts
+        );
+      });
+      optimizedContent = cleanedLines.join("\n").trim();
     }
 
     return {
@@ -723,41 +816,77 @@ Optimize only the bullet points (lines starting with - or •) below each role h
 // ── Helper: format experience section for proper display ──────────────────────
 function formatExperienceSection(text: string): string {
   const lines = text.split("\n");
-  const formatted: string[] = [];
-  let lastWasHeader = false;
+  const result: string[] = [];
+  let i = 0;
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const trimmed = line.trim();
+  while (i < lines.length) {
+    const line = lines[i].trim();
 
-    // Is this a role header? (has pipe, "at", or contains company/title/date patterns)
+    // Skip empty lines for now, we'll add them back strategically
+    if (!line) {
+      i++;
+      continue;
+    }
+
+    // Is this a role header? (has pipe, dates, or company@position patterns)
     const isRoleHeader =
-      trimmed.includes("|") ||
-      /\bat\b/i.test(trimmed) ||
-      /\bcompany\b|\btitle\b|(\d{4}\s*[-–—]\s*(\d{4}|present|current))/i.test(trimmed);
+      (line.includes("|") ||
+        /\bat\b/i.test(line) ||
+        /\bcompany\b|\btitle\b|(\d{4}\s*[-–—]\s*(\d{4}|present|current))/i.test(line)) &&
+      !line.startsWith("-") &&
+      !line.startsWith("•");
 
-    if (isRoleHeader && !trimmed.startsWith("-") && !trimmed.startsWith("•")) {
-      // This is a role header
-      if (formatted.length > 0 && formatted[formatted.length - 1] !== "") {
-        formatted.push(""); // Blank line before new role
+    if (isRoleHeader) {
+      // Add blank line before role header (except for first role)
+      if (result.length > 0 && result[result.length - 1] !== "") {
+        result.push("");
       }
-      formatted.push(trimmed);
-      lastWasHeader = true;
-    } else if (trimmed.startsWith("-") || trimmed.startsWith("•")) {
-      // This is a bullet point
-      formatted.push(trimmed);
-      lastWasHeader = false;
-    } else if (trimmed) {
-      // Other content - if it follows a header, treat as a bullet
-      if (lastWasHeader) {
-        formatted.push("- " + trimmed);
-      } else {
-        formatted.push(trimmed);
+      result.push(line);
+      i++;
+
+      // Collect bullets for this role
+      const bullets: string[] = [];
+      while (i < lines.length) {
+        const nextLine = lines[i].trim();
+        if (!nextLine) {
+          i++;
+          continue;
+        }
+
+        // Is this a bullet?
+        if (nextLine.startsWith("-") || nextLine.startsWith("•")) {
+          // Normalize to "- " format
+          const bulletText = nextLine.substring(1).trim();
+          bullets.push(`- ${bulletText}`);
+          i++;
+        } else if (isRoleHeader || (nextLine.includes("|") || /\d{4}/.test(nextLine))) {
+          // Next role header encountered
+          break;
+        } else {
+          // Treat as content under this role
+          bullets.push(`- ${nextLine}`);
+          i++;
+        }
       }
+
+      // Add bullets with a blank line after header
+      if (bullets.length > 0) {
+        result.push(""); // Blank line after header
+        result.push(...bullets);
+      }
+    } else {
+      // Not a role header, treat as content
+      result.push(line);
+      i++;
     }
   }
 
-  return formatted.join("\n").trim();
+  // Remove trailing empty lines
+  while (result.length > 0 && result[result.length - 1] === "") {
+    result.pop();
+  }
+
+  return result.join("\n").trim();
 }
 
 // ── Public: section-wise optimizer (new primary entry point) ───────────────
@@ -811,6 +940,16 @@ export async function optimizeResumeSectional(
     deduplicatedSections[key] = refinedLines.join("\n").trim();
   }
 
+  // Step 1.2 - Extract contact info from basics using AI for better accuracy
+  let contactInfo: any = {};
+  if (basicsContent) {
+    try {
+      contactInfo = await extractContactInfoFromBasics(basicsContent);
+    } catch (e) {
+      console.warn("Contact extraction failed, continuing with text-based extraction:", e);
+    }
+  }
+
   // Canonical section order for reassembly
   const SECTION_ORDER = ["basics", "summary", "experience", "skills", "education", "projects", "certifications", "other"];
 
@@ -857,11 +996,19 @@ export async function optimizeResumeSectional(
     }
   }
 
-  return {
+  // Step 4 - Return optimized data along with extracted contact info for UI consumption
+  const result = {
     optimized_text: fullText.trim(),
     optimized_sections: optimized,
     changes_summary: allChanges.length ? allChanges : ["Resume optimized for ATS keyword alignment."],
   };
+
+  // Attach contact info as metadata (if available)
+  if (contactInfo && Object.keys(contactInfo).length > 0) {
+    (result as any).contact_info = contactInfo;
+  }
+
+  return result;
 }
 
 // ── Legacy single-call optimizer (kept for backward compat) ────────────────
