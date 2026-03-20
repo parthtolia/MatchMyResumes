@@ -642,50 +642,64 @@ function restoreRoleHeaders(optimizedText: string, originalHeaders: Map<number, 
   return result.join("\n").trim();
 }
 
-// ── AI-based section extraction (primary method) ────────────────────────────
+// ── Section extraction (regex-primary, AI fallback) ─────────────────────────
 async function extractSectionsWithAI(
   resumeText: string
 ): Promise<Record<string, string>> {
-  // Use AI-based extraction as PRIMARY method
-  // It's more robust for handling contact info, section boundaries, and edge cases
-  const prompt = `${SECTION_EXTRACTION_PROMPT}\n\nRESUME TEXT:\n${String(resumeText).slice(0, 8000)}`;
+  // PHASE 1: Use REGEX-based extraction as PRIMARY (more reliable for boundaries)
+  // AI extraction available as optional fallback only
+  const sections = extractSectionsFromText(resumeText);
 
-  try {
-    if (useGroq()) {
-      const client = getGroqClient();
-      const raw = await fetchGroqWithFallback(client, {
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.02,  // Very low temperature for precise extraction
-        max_tokens: 5000,
-        response_format: { type: "json_object" },
-      });
-      const parsed = JSON.parse(cleanJsonString(raw));
-      if (typeof parsed === "object" && !Array.isArray(parsed)) {
-        // Validate we got at least basics or experience
-        if (parsed.basics || parsed.experience) {
+  // Validate extraction - if sections look incomplete, optionally try AI as fallback
+  const hasMinimalContent =
+    Object.keys(sections).length >= 2 &&
+    (sections.basics || sections.summary || sections.experience);
+
+  if (!hasMinimalContent) {
+    console.warn("Regex extraction returned minimal content, trying AI fallback...");
+    const prompt = `${SECTION_EXTRACTION_PROMPT}\n\nRESUME TEXT:\n${String(resumeText).slice(0, 8000)}`;
+
+    try {
+      if (useGroq()) {
+        const client = getGroqClient();
+        const raw = await fetchGroqWithFallback(client, {
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.02,
+          max_tokens: 5000,
+          response_format: { type: "json_object" },
+        });
+        const parsed = JSON.parse(cleanJsonString(raw));
+        if (
+          typeof parsed === "object" &&
+          !Array.isArray(parsed) &&
+          Object.keys(parsed).length >= 2
+        ) {
+          console.log("AI fallback extraction succeeded");
+          return parsed;
+        }
+      } else {
+        const model = getGeminiModel();
+        const result = await model.generateContent({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: { responseMimeType: "application/json" },
+        });
+        const raw = result.response.text();
+        const parsed = JSON.parse(cleanJsonString(raw));
+        if (
+          typeof parsed === "object" &&
+          !Array.isArray(parsed) &&
+          Object.keys(parsed).length >= 2
+        ) {
+          console.log("AI fallback extraction succeeded");
           return parsed;
         }
       }
-    } else {
-      const model = getGeminiModel();
-      const result = await model.generateContent({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json" },
-      });
-      const raw = result.response.text();
-      const parsed = JSON.parse(cleanJsonString(raw));
-      if (typeof parsed === "object" && !Array.isArray(parsed)) {
-        if (parsed.basics || parsed.experience) {
-          return parsed;
-        }
-      }
+    } catch (e) {
+      console.warn("AI fallback also failed, using regex result:", e);
     }
-  } catch (e) {
-    console.warn("AI section extraction failed, falling back to regex:", e);
   }
 
-  // Fallback to regex extraction if AI fails
-  const sections = extractSectionsFromText(resumeText);
+  // Return regex extraction (primary result or fallback)
   return sections;
 }
 
@@ -782,11 +796,10 @@ Optimize only the bullet points (lines starting with - or •) below each role h
       .replace(/^\s*For each role|^\s*Each bullet|^\s*Quantify with|^\s*Leave a blank/gm, "")
       .trim();
 
-    // Post-process: for experience section, ensure proper formatting
-    // (Header on own line, blank line, bullets)
-    if (sectionName === "experience" && roleHeaders.size > 0) {
-      optimizedContent = formatExperienceSection(optimizedContent);
-    }
+    // PHASE 1: Skip aggressive formatting for now
+    // Let text flow naturally - resume-utils handles HTML formatting
+    // formatExperienceSection() was too aggressive and breaking section boundaries
+    // Will address formatting in Phase 4 with simpler approach
 
     // For certifications section, ensure we don't have instruction artifacts
     if (sectionName === "certifications") {
@@ -940,14 +953,16 @@ export async function optimizeResumeSectional(
     deduplicatedSections[key] = refinedLines.join("\n").trim();
   }
 
-  // Step 1.2 - Extract contact info from basics using AI for better accuracy
-  let contactInfo: any = {};
+  // PHASE 2: Extract contact info in parallel (non-blocking)
+  // Start extraction but don't wait for it - optimization continues
+  let contactInfoPromise = Promise.resolve({});
   if (basicsContent) {
-    try {
-      contactInfo = await extractContactInfoFromBasics(basicsContent);
-    } catch (e) {
-      console.warn("Contact extraction failed, continuing with text-based extraction:", e);
-    }
+    // Fire-and-forget: extract in background
+    contactInfoPromise = extractContactInfoFromBasics(basicsContent)
+      .catch((e) => {
+        console.warn("Contact extraction failed (non-blocking):", e);
+        return {};
+      });
   }
 
   // Canonical section order for reassembly
@@ -996,7 +1011,10 @@ export async function optimizeResumeSectional(
     }
   }
 
-  // Step 4 - Return optimized data along with extracted contact info for UI consumption
+  // Step 4 - Resolve contact info promise (after optimization completes)
+  const contactInfo = await contactInfoPromise;
+
+  // Step 5 - Return optimized data along with extracted contact info for UI consumption
   const result = {
     optimized_text: fullText.trim(),
     optimized_sections: optimized,
