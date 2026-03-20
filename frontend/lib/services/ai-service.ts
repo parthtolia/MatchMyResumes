@@ -355,7 +355,7 @@ async function fetchGroqWithFallback(client: Groq, options: any): Promise<string
   throw lastError || new Error("All Groq models failed.");
 }
 
-// ── PHASE 2: Simple regex-based contact information extraction ──────────────
+// ── PHASE 2: Robust Contact Information Extraction ──────────────────────────
 export async function extractContactInfoFromBasics(
   basicsText: string
 ): Promise<{
@@ -366,126 +366,105 @@ export async function extractContactInfoFromBasics(
   location?: string;
   website?: string;
 }> {
-  if (!basicsText?.trim()) return { name: "" };
+  if (!basicsText?.trim()) return {};
 
   const result: any = {};
   const lines = basicsText.split("\n").map((l) => l.trim()).filter(Boolean);
 
-  console.log("🔍 DEBUG: Basics lines:", lines);
+  console.log("🔍 CONTACT: Parsing basics section with", lines.length, "lines");
 
-  // Extract all tokens (split on pipes, commas, bullets, tabs, etc.)
-  // FIX: Include bullet (•), dash (–), and other common separators
-  const tokens: string[] = [];
+  // STEP 1: Extract email directly from lines
   for (const line of lines) {
-    const parts = line
-      .split(/\s*[\|,•–\-\t]\s*/)  // ✅ FIXED: Added bullet (•) and dash (–)
-      .map((p) => p.trim())
-      .filter(Boolean);
-    console.log(`  Tokens from "${line}":`, parts);
-    tokens.push(...parts);
-  }
-
-  console.log("🔍 DEBUG: All tokens:", tokens);
-
-  const usedTokens = new Set<string>();
-
-  // STEP 1: Extract email (look for @ pattern)
-  for (const token of tokens) {
-    if (!result.email && token.includes("@")) {
-      const emailMatch = token.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i);
-      if (emailMatch) {
-        result.email = emailMatch[0];
-        usedTokens.add(token);
-        console.log("  ✅ Email found:", result.email);
+    if (!result.email && line.includes("@")) {
+      const match = line.match(/([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})/i);
+      if (match) {
+        result.email = match[1];
+        console.log("  ✅ Email:", result.email);
         break;
       }
     }
   }
 
-  // STEP 2: Extract phone (7-20 digits, with common separators)
-  for (const token of tokens) {
-    if (
-      !result.phone &&
-      !token.includes("@") &&
-      !token.startsWith("http") &&
-      !/linkedin|github/i.test(token)
-    ) {
-      const digitsOnly = token.replace(/\D/g, "");
-      // Indian phone: +91-XXXXXXXX (10 digits after +91)
-      // US phone: +1-XXX-XXX-XXXX (10 digits)
-      // International: 7-20 digits
-      if (digitsOnly.length >= 7 && digitsOnly.length <= 20) {
-        result.phone = token;
-        usedTokens.add(token);
-        console.log("  ✅ Phone found:", result.phone);
+  // STEP 2: Extract phone directly from lines (7+ consecutive digits)
+  for (const line of lines) {
+    if (!result.phone && /\d{7,}/.test(line)) {
+      // Match phone with optional country code and separators
+      const match = line.match(/(\+?\d{1,3}[-.\s]?)?[\d\s().-]{7,20}/);
+      if (match) {
+        result.phone = match[0].trim();
+        console.log("  ✅ Phone:", result.phone);
         break;
       }
     }
   }
 
   // STEP 3: Extract website/LinkedIn/GitHub
-  for (const token of tokens) {
-    if (
-      !result.website &&
-      (token.startsWith("http") || /linkedin\.com|github\.com/i.test(token))
-    ) {
-      result.website = token;
-      usedTokens.add(token);
-      break;
+  for (const line of lines) {
+    if (!result.website) {
+      const urlMatch = line.match(/(https?:\/\/[^\s]+|linkedin\.com\/in\/[\w\-]+|github\.com\/[\w\-]+)/i);
+      if (urlMatch) {
+        result.website = urlMatch[0];
+        console.log("  ✅ Website:", result.website);
+        break;
+      }
     }
   }
 
-  // STEP 4: Extract location (contains comma, no @, no http, no years)
-  for (const token of tokens) {
+  // STEP 4: Extract location (line with comma, no email, no urls, no years)
+  for (const line of lines) {
     if (
       !result.location &&
-      token.includes(",") &&
-      token.length < 50 &&
-      !token.includes("@") &&
-      !token.startsWith("http") &&
-      !/linkedin|github/i.test(token) &&
-      !/\d{4}/.test(token)
+      line.includes(",") &&
+      line.length < 50 &&
+      !line.includes("@") &&
+      !line.startsWith("http") &&
+      !/linkedin|github/i.test(line) &&
+      !/\d{4}/.test(line)
     ) {
-      result.location = token;
-      usedTokens.add(token);
+      result.location = line;
+      console.log("  ✅ Location:", result.location);
       break;
     }
   }
 
-  // STEP 5: Extract name (first unused, non-numeric, substantial token)
-  for (const token of tokens) {
-    if (usedTokens.has(token)) continue;
+  // STEP 5: Extract name (first substantial line that's not contact info)
+  for (const line of lines) {
     if (
       !result.name &&
-      token.length > 2 &&
-      !token.includes("@") &&
-      !token.startsWith("http") &&
-      !/\d{3,}/.test(token) &&
-      !token.includes(",")
+      line.length > 2 &&
+      line.length < 100 &&
+      !line.includes("@") &&
+      !line.startsWith("http") &&
+      !/linkedin|github/i.test(line) &&
+      !/\d{3,}/.test(line.substring(0, 20))
     ) {
-      result.name = token;
-      usedTokens.add(token);
+      result.name = line;
+      console.log("  ✅ Name:", result.name);
       break;
     }
   }
 
-  // STEP 6: Extract title (first remaining short token, likely job title)
-  for (const token of tokens) {
-    if (usedTokens.has(token)) continue;
+  // STEP 6: Extract title (short line, likely "Software Engineer", "Data Scientist", etc.)
+  // Look for lines that are NOT already extracted and are short
+  const extractedLines = new Set([result.name, result.email, result.phone, result.location, result.website]);
+  for (const line of lines) {
     if (
       !result.title &&
-      token.length > 2 &&
-      token.length < 60 &&
-      !token.includes("@") &&
-      !token.startsWith("http") &&
-      !/\d{4}|linkedin|github/i.test(token) &&
-      !token.includes(",")
+      !extractedLines.has(line) &&
+      line.length > 2 &&
+      line.length < 60 &&
+      !line.includes("@") &&
+      !line.startsWith("http") &&
+      !/\d{4}|linkedin|github/i.test(line) &&
+      !line.includes(",")
     ) {
-      result.title = token;
+      result.title = line;
+      console.log("  ✅ Title:", result.title);
       break;
     }
   }
 
+  console.log("🔍 CONTACT: Final result:", result);
   return result;
 }
 
@@ -739,31 +718,34 @@ function validateSectionContent(line: string, sectionName: string): boolean {
   }
 
   if (sectionName === "education") {
-    // Education: ONLY degree, school, date, bullets under degrees
-    // Accept: ONLY lines with degree keywords OR bullets
-    if (/bachelor|master|phd|b\.s\.|m\.s\.|degree|university|college|school|institute/i.test(trimmed)) {
-      console.log(`✅ VALIDATED: Education line (has degree keyword): "${trimmed.substring(0, 50)}..."`);
+    // Education: ONLY degree, school, date, bullets
+    // STRICT: must have positive indicators, reject all work/cert content
+
+    // ACCEPT patterns
+    if (/bachelor|master|phd|b\.s\.|m\.s\.|b\.tech|m\.tech|degree|university|college|school|institute|graduation/i.test(trimmed)) {
       return true;
     }
-    if (/\d{1,2}\s+years?|graduated|graduation|\d{4}|admitted|enrolled/i.test(trimmed)) {
-      console.log(`✅ VALIDATED: Education line (has school/date): "${trimmed.substring(0, 50)}..."`);
+    if (/\d{1,2}\s+years?|graduated|graduation|april|may|june|july|august|september|2012|2013|2014|2015|2016|2017|2018|2019|2020|2021|2022/i.test(trimmed)) {
       return true;
     }
     if (trimmed.startsWith("-") || trimmed.startsWith("•")) {
-      console.log(`✅ VALIDATED: Education bullet: "${trimmed.substring(0, 50)}..."`);
       return true;
     }
-    // Reject: work experience content
-    if (/engineer|developer|manager|designed|implemented|built|led\s+|developed|created|managed/i.test(trimmed)) {
-      console.log(`❌ REJECTED: Work experience line in education: "${trimmed.substring(0, 50)}..."`);
+
+    // STRICT REJECT: Any work experience action verbs
+    const workVerbs = /^(led|provided|designed|developed|implemented|built|created|managed|conducted|optimized|monitored|trained|supported|ensured|demonstrated|collaborated|resolved|improved|architected|engineered|programmed|tested)/i;
+    if (workVerbs.test(trimmed)) {
+      console.log(`❌ EDUCATION: Rejected work verb: "${trimmed.substring(0, 40)}..."`);
       return false;
     }
-    // Reject: certification content
-    if (/certified|certificate|license|credential/i.test(trimmed)) {
-      console.log(`❌ REJECTED: Certification line in education: "${trimmed.substring(0, 50)}..."`);
+
+    // STRICT REJECT: company names or job titles
+    if (/\b(solutions|technologies|pvt|ltd|llc|inc|corp|company|software|automation|services)\b/i.test(trimmed) && !/(university|college|school|institute)/.test(trimmed)) {
+      console.log(`❌ EDUCATION: Rejected company name: "${trimmed.substring(0, 40)}..."`);
       return false;
     }
-    console.log(`❌ REJECTED: Unknown education line: "${trimmed.substring(0, 50)}..."`);
+
+    console.log(`❌ EDUCATION: Rejected unknown: "${trimmed.substring(0, 40)}..."`);
     return false;
   }
 
@@ -798,22 +780,38 @@ function validateSectionContent(line: string, sectionName: string): boolean {
   }
 
   if (sectionName === "certifications") {
-    // Certifications: ONLY cert/license/award names and their descriptions
-    // STRICT: must mention certification keywords OR be a bullet under cert
-    if (/certified|certificate|license|credential|award|badge|certified\s+|certification|professional.*certificate/i.test(trimmed)) {
-      console.log(`✅ VALIDATED: Certification keyword: "${trimmed.substring(0, 50)}..."`);
+    // Certifications: ONLY actual certs/licenses/awards
+    // STRICT: reject all job titles, company names, work descriptions
+
+    // ACCEPT: has certification keywords
+    if (/certificate|certification|certified|license|licensed|credential|award|badge|training|course|professional\s+development|certified\s+professional/i.test(trimmed)) {
       return true;
     }
+    // ACCEPT: bullets under certs
     if (trimmed.startsWith("-") || trimmed.startsWith("•")) {
-      console.log(`✅ VALIDATED: Certification bullet: "${trimmed.substring(0, 50)}..."`);
       return true;
     }
-    // Reject: work experience
-    if (/engineer|developer|manager|company|ltd|inc\.|pvt\.|led|designed|implemented|built|developed/i.test(trimmed)) {
-      console.log(`❌ REJECTED: Work experience in certifications: "${trimmed.substring(0, 50)}..."`);
+
+    // STRICT REJECT: Job titles with companies
+    if (/^(senior|lead|junior|staff|principal)\s+(engineer|developer|architect|analyst|consultant|manager)/i.test(trimmed)) {
+      console.log(`❌ CERT: Rejected job title: "${trimmed.substring(0, 40)}..."`);
       return false;
     }
-    console.log(`❌ REJECTED: Unknown certification line: "${trimmed.substring(0, 50)}..."`);
+
+    // STRICT REJECT: Company names
+    if (/\b(solutions|technologies|pvt|ltd|llc|inc|corp|company|services|limited|private)\b/i.test(trimmed)) {
+      console.log(`❌ CERT: Rejected company: "${trimmed.substring(0, 40)}..."`);
+      return false;
+    }
+
+    // STRICT REJECT: Work action verbs
+    const workVerbs = /^(led|provided|designed|developed|implemented|built|created|managed|conducted|optimized|monitored|trained|collaborated|resolved|improved|architected|programmed|tested|deployed|engineered|founded)/i;
+    if (workVerbs.test(trimmed)) {
+      console.log(`❌ CERT: Rejected work verb: "${trimmed.substring(0, 40)}..."`);
+      return false;
+    }
+
+    console.log(`❌ CERT: Rejected unknown: "${trimmed.substring(0, 40)}..."`);
     return false;
   }
 
@@ -1107,78 +1105,79 @@ Optimize only the bullet points (lines starting with - or •) below each role h
   }
 }
 
-// ── PHASE 4: Work Experience Formatting with Reordering Detection ───────────
+// ── PHASE 4: Enforce Correct Work Experience Structure ────────────────────────
 function formatExperienceSection(text: string): string {
-  // PHASE 4: Ensure role headers stay BEFORE bullets
-  // This function REORDERS if needed to fix backwards content
+  // CRITICAL: Reorder content so role headers ALWAYS come BEFORE bullets
+  // If content appears before headers, this function moves headers first
 
   const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+
+  // ROLE HEADER DETECTION
+  const isRoleHeader = (line: string): boolean =>
+    line.includes("|") ||
+    /\d{4}\s*[-–—]\s*(\d{4}|present|current)/i.test(line);
+
+  // PHASE 1: Find all role headers and their positions
+  const headers: Array<{ index: number; text: string }> = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (isRoleHeader(lines[i])) {
+      headers.push({ index: i, text: lines[i] });
+    }
+  }
+
+  console.log(`🔄 EXPERIENCE: Found ${headers.length} role headers`);
+
+  if (headers.length === 0) {
+    // No headers detected - content is all mixed, can't restructure
+    return text;
+  }
+
+  // PHASE 2: Reorganize: For each header, collect content after it until next header
   const result: string[] = [];
-  let i = 0;
+  let lastProcessedIndex = -1;
 
-  while (i < lines.length) {
-    const line = lines[i];
+  for (let h = 0; h < headers.length; h++) {
+    const header = headers[h];
+    const nextHeaderIndex = h + 1 < headers.length ? headers[h + 1].index : lines.length;
 
-    // Detect role header (has pipe with dates OR date range)
-    const isRoleHeader =
-      line.includes("|") ||
-      /\d{4}\s*[-–—]\s*(\d{4}|present|current)/i.test(line);
+    // Add blank line before header (except first)
+    if (result.length > 0) {
+      result.push("");
+    }
 
-    if (isRoleHeader) {
-      // Add blank line before role (except first)
-      if (result.length > 0 && result[result.length - 1] !== "") {
-        result.push("");
+    // Add the header
+    result.push(header.text);
+    console.log(`  ➕ Header: "${header.text.substring(0, 50)}..."`);
+
+    // Collect ALL content between this header and next header
+    const contentLines: string[] = [];
+    for (let i = header.index + 1; i < nextHeaderIndex; i++) {
+      const line = lines[i];
+      // Skip if it's not a header
+      if (!isRoleHeader(line)) {
+        contentLines.push(line);
       }
+    }
 
-      result.push(line);
-      console.log(`✅ FORMATTED: Role header: "${line.substring(0, 60)}..."`);
-      i++;
+    // Add blank line after header if we have content
+    if (contentLines.length > 0) {
+      result.push("");
+      result.push(...contentLines);
+      console.log(`  ➕ Added ${contentLines.length} content lines`);
+    }
 
-      // Collect bullets for this role (skip content, grab bullets)
-      const bullets: string[] = [];
-      let foundNonBullet = false;
+    lastProcessedIndex = nextHeaderIndex - 1;
+  }
 
-      while (i < lines.length) {
-        const nextLine = lines[i];
-
-        if (nextLine.startsWith("-") || nextLine.startsWith("•")) {
-          bullets.push(nextLine);
-          i++;
-        } else if (nextLine.includes("|") || /\d{4}\s*[-–—]/.test(nextLine)) {
-          // Next role header - stop collecting bullets
-          console.log(`✅ FORMATTED: Found ${bullets.length} bullets for this role`);
-          break;
-        } else if (!foundNonBullet && nextLine.length < 200) {
-          // Non-bullet content under role header - skip it for now
-          // (will be re-added as content, not as bullet)
-          console.warn(
-            `⚠️ WARNING: Non-bullet content under role header: "${nextLine.substring(0, 60)}..."`
-          );
-          foundNonBullet = true;
-          i++;
-        } else {
-          i++;
-        }
-      }
-
-      // Add blank line after header if we have bullets
-      if (bullets.length > 0) {
-        result.push("");
-        result.push(...bullets);
-      }
-    } else if (line.startsWith("-") || line.startsWith("•")) {
-      // Bullet without header (shouldn't happen) - keep it
-      result.push(line);
-      i++;
-    } else {
-      // Regular content - keep as-is
-      result.push(line);
-      i++;
+  // Add any remaining content after last header
+  for (let i = lastProcessedIndex + 1; i < lines.length; i++) {
+    if (!isRoleHeader(lines[i])) {
+      result.push(lines[i]);
     }
   }
 
   const formatted = result.join("\n").trim();
-  console.log(`✅ FORMATTED: Experience section restructured`);
+  console.log(`✅ EXPERIENCE: Restructured ${headers.length} roles with proper ordering`);
   return formatted;
 }
 
