@@ -129,18 +129,40 @@ FOR EDUCATION SECTION:
 - You may reorder bullet points under each degree but NOT the degree headers themselves.
 
 FOR EXPERIENCE SECTION (MOST CRITICAL):
-- Preserve EVERY role header verbatim (marked with [ROLE_HEADER_START]...[ROLE_HEADER_END]).
-- Remove the markers [ROLE_HEADER_START] and [ROLE_HEADER_END] but keep the header text exactly.
-- Output structure for EACH ROLE:
-  * Role Header on its own line (character-for-character exact)
-  * One blank line after header
-  * Bullet points (3-5 bullets starting with "- ")
-  * One blank line before next role
-- ONLY modify bullet point lines (those starting with - or •)
-- DO NOT convert headers to prose. DO NOT merge multiple roles. DO NOT reformat headers.
-- For each role's bullets: enhance/reword for clarity, add 1-2 new bullets if missing context, integrate JD keywords naturally.
-- Each bullet should start with "- " and describe ONE measurable achievement or responsibility.
-- Quantify with metrics/numbers where available (e.g., "improved performance by 40%", "reduced time by 95%").
+- PRESERVE EXACT ORDER: Role headers MUST stay before their bullets. NEVER move headers around.
+- PRESERVE ROLE HEADERS VERBATIM (marked with [ROLE_HEADER_START]...[ROLE_HEADER_END]).
+- Remove the markers but keep the header text CHARACTER-FOR-CHARACTER exact.
+- STRICT OUTPUT STRUCTURE (one role example):
+  [ROLE_HEADER_START]Company | Title | Date[ROLE_HEADER_END]
+  - Bullet 1 (achievement with metrics)
+  - Bullet 2 (responsibility)
+  - Bullet 3 (impact)
+  [Next role header follows...]
+
+ABSOLUTE RULES FOR EXPERIENCE:
+1. ROLE HEADERS MUST ALWAYS COME BEFORE BULLETS - never after, never mixed
+2. Header line: Remove markers but keep text exactly as-is
+3. Blank line: one blank line after header
+4. Bullets: 3-5 bullets starting with "- "
+5. Role order: preserve exactly as they appear in input
+6. NEVER convert headers to prose
+7. NEVER move/reorder roles
+8. NEVER merge roles
+9. ONLY edit bullet points, not headers
+
+What you CAN change:
+- Reword bullet points for clarity
+- Add 1-2 new bullets for missing achievements
+- Integrate JD keywords naturally into bullets
+- Add metrics/quantification (e.g., "improved by 40%")
+- Enhance clarity and impact
+
+What you MUST NOT change:
+- Role header text (Company name, Title, Date)
+- Role header position (must stay before bullets)
+- Role header format/structure
+- Order of roles
+- Any factual information
 
 FOR SUMMARY SECTION:
 - Rewrite to emphasize JD-aligned keywords while maintaining professional tone and similar length (±10%).
@@ -349,15 +371,21 @@ export async function extractContactInfoFromBasics(
   const result: any = {};
   const lines = basicsText.split("\n").map((l) => l.trim()).filter(Boolean);
 
-  // Extract all tokens (split on pipes, commas, etc.)
+  console.log("🔍 DEBUG: Basics lines:", lines);
+
+  // Extract all tokens (split on pipes, commas, bullets, tabs, etc.)
+  // FIX: Include bullet (•), dash (–), and other common separators
   const tokens: string[] = [];
   for (const line of lines) {
     const parts = line
-      .split(/\s*[\|,\t]\s*/)
+      .split(/\s*[\|,•–\-\t]\s*/)  // ✅ FIXED: Added bullet (•) and dash (–)
       .map((p) => p.trim())
       .filter(Boolean);
+    console.log(`  Tokens from "${line}":`, parts);
     tokens.push(...parts);
   }
+
+  console.log("🔍 DEBUG: All tokens:", tokens);
 
   const usedTokens = new Set<string>();
 
@@ -703,30 +731,81 @@ function validateSectionContent(line: string, sectionName: string): boolean {
   }
 
   if (sectionName === "education") {
-    // Education: should have degree, school, date
-    // Accept: lines with years, degree keywords, school names
-    if (/bachelor|master|phd|b\.|m\.|degree|university|college|\d{4}/i.test(trimmed)) return true;
-    if (trimmed.startsWith("-") || trimmed.startsWith("•")) return true;
-    // Reject: work experience bullets
-    if (/engineer|developer|manager|designed|implemented|built|led\s+/i.test(trimmed)) return false;
-    return true;
+    // Education: ONLY degree, school, date, bullets under degrees
+    // Accept: ONLY lines with degree keywords OR bullets
+    if (/bachelor|master|phd|b\.s\.|m\.s\.|degree|university|college|school|institute/i.test(trimmed)) {
+      console.log(`✅ VALIDATED: Education line (has degree keyword): "${trimmed.substring(0, 50)}..."`);
+      return true;
+    }
+    if (/\d{1,2}\s+years?|graduated|graduation|\d{4}|admitted|enrolled/i.test(trimmed)) {
+      console.log(`✅ VALIDATED: Education line (has school/date): "${trimmed.substring(0, 50)}..."`);
+      return true;
+    }
+    if (trimmed.startsWith("-") || trimmed.startsWith("•")) {
+      console.log(`✅ VALIDATED: Education bullet: "${trimmed.substring(0, 50)}..."`);
+      return true;
+    }
+    // Reject: work experience content
+    if (/engineer|developer|manager|designed|implemented|built|led\s+|developed|created|managed/i.test(trimmed)) {
+      console.log(`❌ REJECTED: Work experience line in education: "${trimmed.substring(0, 50)}..."`);
+      return false;
+    }
+    // Reject: certification content
+    if (/certified|certificate|license|credential/i.test(trimmed)) {
+      console.log(`❌ REJECTED: Certification line in education: "${trimmed.substring(0, 50)}..."`);
+      return false;
+    }
+    console.log(`❌ REJECTED: Unknown education line: "${trimmed.substring(0, 50)}..."`);
+    return false;
   }
 
   if (sectionName === "skills") {
-    // Skills: should be comma-separated or bullets with skills
-    // Reject: lines with job titles, dates, company names
-    if (/\d{4}[-–—]\d{4}|present|current/.test(trimmed)) return false;
-    if (/at\s+[A-Z]|company|inc\.|ltd\.|llc/i.test(trimmed)) return false;
-    return true;
+    // Skills: ONLY skill names, no job titles, no dates, no companies
+    // Reject: anything with dates
+    if (/\d{4}[-–—]\d{4}|present|current/.test(trimmed)) {
+      console.log(`❌ REJECTED: Date range in skills: "${trimmed.substring(0, 50)}..."`);
+      return false;
+    }
+    // Reject: company/job patterns
+    if (/at\s+[A-Z]|company|inc\.|ltd\.|llc|pvt\.|corporation|engineer|developer|manager/i.test(trimmed)) {
+      console.log(`❌ REJECTED: Company/job in skills: "${trimmed.substring(0, 50)}..."`);
+      return false;
+    }
+    // Reject: action verbs (experience content)
+    if (/^(led|designed|developed|implemented|created|managed|built|architected)/i.test(trimmed)) {
+      console.log(`❌ REJECTED: Action verb in skills: "${trimmed.substring(0, 50)}..."`);
+      return false;
+    }
+    // Accept: skill names, bullets, comma-separated lists
+    if (trimmed.startsWith("-") || trimmed.startsWith("•")) {
+      console.log(`✅ VALIDATED: Skills bullet: "${trimmed.substring(0, 50)}..."`);
+      return true;
+    }
+    if (/,|programming|database|framework|language|tool|technology/i.test(trimmed)) {
+      console.log(`✅ VALIDATED: Skills line: "${trimmed.substring(0, 50)}..."`);
+      return true;
+    }
+    console.log(`❌ REJECTED: Unknown skills line: "${trimmed.substring(0, 50)}..."`);
+    return false;
   }
 
   if (sectionName === "certifications") {
-    // Certifications: should mention cert, license, award, credential
-    // Reject: pure job descriptions
-    if (/certificate|certified|license|credential|award|badge/i.test(trimmed)) return true;
-    if (trimmed.startsWith("-") || trimmed.startsWith("•")) return true;
-    // Single line might be cert name
-    if (trimmed.length < 100) return true;
+    // Certifications: ONLY cert/license/award names and their descriptions
+    // STRICT: must mention certification keywords OR be a bullet under cert
+    if (/certified|certificate|license|credential|award|badge|certified\s+|certification|professional.*certificate/i.test(trimmed)) {
+      console.log(`✅ VALIDATED: Certification keyword: "${trimmed.substring(0, 50)}..."`);
+      return true;
+    }
+    if (trimmed.startsWith("-") || trimmed.startsWith("•")) {
+      console.log(`✅ VALIDATED: Certification bullet: "${trimmed.substring(0, 50)}..."`);
+      return true;
+    }
+    // Reject: work experience
+    if (/engineer|developer|manager|company|ltd|inc\.|pvt\.|led|designed|implemented|built|developed/i.test(trimmed)) {
+      console.log(`❌ REJECTED: Work experience in certifications: "${trimmed.substring(0, 50)}..."`);
+      return false;
+    }
+    console.log(`❌ REJECTED: Unknown certification line: "${trimmed.substring(0, 50)}..."`);
     return false;
   }
 
@@ -1020,46 +1099,79 @@ Optimize only the bullet points (lines starting with - or •) below each role h
   }
 }
 
-// ── PHASE 4: Simple work experience formatting (minimal changes) ──────────────
+// ── PHASE 4: Work Experience Formatting with Reordering Detection ───────────
 function formatExperienceSection(text: string): string {
-  // PHASE 4: Minimal formatting - preserve text structure, just fix spacing
-  const lines = text.split("\n");
+  // PHASE 4: Ensure role headers stay BEFORE bullets
+  // This function REORDERS if needed to fix backwards content
+
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
   const result: string[] = [];
-  let lastLineWasHeader = false;
+  let i = 0;
 
-  for (const line of lines) {
-    const trimmed = line.trim();
+  while (i < lines.length) {
+    const line = lines[i];
 
-    // Skip empty lines
-    if (!trimmed) continue;
-
-    // Is this a role header? (has dates and company/title info)
+    // Detect role header (has pipe with dates OR date range)
     const isRoleHeader =
-      trimmed.includes("|") ||
-      /\d{4}\s*[-–—]\s*(\d{4}|present|current)/i.test(trimmed);
+      line.includes("|") ||
+      /\d{4}\s*[-–—]\s*(\d{4}|present|current)/i.test(line);
 
     if (isRoleHeader) {
-      // Add blank line before header (except first)
-      if (result.length > 0) {
+      // Add blank line before role (except first)
+      if (result.length > 0 && result[result.length - 1] !== "") {
         result.push("");
       }
-      result.push(trimmed);
-      lastLineWasHeader = true;
-    } else if (trimmed.startsWith("-") || trimmed.startsWith("•")) {
-      // Bullet point
-      result.push(trimmed);
-      lastLineWasHeader = false;
-    } else {
-      // Regular content - add blank line after header if needed
-      if (lastLineWasHeader && trimmed && !trimmed.startsWith("-")) {
-        result.push(""); // Blank line after header
+
+      result.push(line);
+      console.log(`✅ FORMATTED: Role header: "${line.substring(0, 60)}..."`);
+      i++;
+
+      // Collect bullets for this role (skip content, grab bullets)
+      const bullets: string[] = [];
+      let foundNonBullet = false;
+
+      while (i < lines.length) {
+        const nextLine = lines[i];
+
+        if (nextLine.startsWith("-") || nextLine.startsWith("•")) {
+          bullets.push(nextLine);
+          i++;
+        } else if (nextLine.includes("|") || /\d{4}\s*[-–—]/.test(nextLine)) {
+          // Next role header - stop collecting bullets
+          console.log(`✅ FORMATTED: Found ${bullets.length} bullets for this role`);
+          break;
+        } else if (!foundNonBullet && nextLine.length < 200) {
+          // Non-bullet content under role header - skip it for now
+          // (will be re-added as content, not as bullet)
+          console.warn(
+            `⚠️ WARNING: Non-bullet content under role header: "${nextLine.substring(0, 60)}..."`
+          );
+          foundNonBullet = true;
+          i++;
+        } else {
+          i++;
+        }
       }
-      result.push(trimmed);
-      lastLineWasHeader = false;
+
+      // Add blank line after header if we have bullets
+      if (bullets.length > 0) {
+        result.push("");
+        result.push(...bullets);
+      }
+    } else if (line.startsWith("-") || line.startsWith("•")) {
+      // Bullet without header (shouldn't happen) - keep it
+      result.push(line);
+      i++;
+    } else {
+      // Regular content - keep as-is
+      result.push(line);
+      i++;
     }
   }
 
-  return result.join("\n").trim();
+  const formatted = result.join("\n").trim();
+  console.log(`✅ FORMATTED: Experience section restructured`);
+  return formatted;
 }
 
 // ── PHASE 5: Helper to categorize skills ──────────────────────────────────
