@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, publicAiLimiter } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
 import { parseResume, parseSections } from "@/lib/services/resume-parser";
-import { optimizeResume } from "@/lib/services/ai-service";
+import { optimizeResumeSectional } from "@/lib/services/ai-service";
 import { computeKeywordScore } from "@/lib/scoring/ats-scorer";
 
 export const maxDuration = 60;
@@ -83,10 +83,10 @@ export async function POST(request: NextRequest) {
       jdText
     );
 
-    // Run AI optimization
+    // Run AI optimization (section-wise)
     let result;
     try {
-      result = await optimizeResume(parsed.raw_text, jdText, missingKeywords);
+      result = await optimizeResumeSectional(parsed.raw_text, jdText, missingKeywords);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Unknown error";
       return NextResponse.json(
@@ -98,6 +98,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       optimized_text: result.optimized_text || "",
       changes_summary: result.changes_summary || [],
+      optimized_sections: result.optimized_sections || {},
       structured_json: parseSections(result.optimized_text || ""),
     });
   } catch (error) {

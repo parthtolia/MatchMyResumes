@@ -1,119 +1,351 @@
-import { Document, Paragraph, TextRun, Packer, AlignmentType, BorderStyle } from "docx"
+import { Document, Paragraph, TextRun, Packer, AlignmentType, BorderStyle, Table, TableRow, TableCell, WidthType } from "docx"
+import { ResumeData } from "./types/resume"
 
 /**
  * Highly precise multi-page PDF export.
- * Tiles a high-resolution canvas onto Letter pages with explicit 0.5in margins.
  */
 export async function downloadElementAsPdf(element: HTMLElement, filename: string) {
-    const { default: html2canvas } = await import("html2canvas")
+    const { default: html2canvasPro } = await import("html2canvas-pro")
     const { jsPDF } = await import("jspdf")
 
-    const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        logging: false,
-        onclone: (clonedDoc) => {
-            const allElements = clonedDoc.getElementsByTagName("*")
-            for (let i = 0; i < allElements.length; i++) {
-                const el = allElements[i] as HTMLElement
-                const style = window.getComputedStyle(el)
-                if (style.color.includes("lab") || style.color.includes("oklch")) {
-                    el.style.color = "#000000"
-                }
-                if (style.backgroundColor.includes("lab") || style.backgroundColor.includes("oklch")) {
-                    el.style.backgroundColor = "transparent"
-                }
-                if (style.borderColor.includes("lab") || style.borderColor.includes("oklch")) {
-                    el.style.borderColor = "#999999"
-                }
-            }
-        }
-    })
+    // Temporarily inject html2canvasPro globally so jsPDF auto-detects it and avoids the lab() parser crash
+    // @ts-ignore
+    window.html2canvas = html2canvasPro
 
-    const imgData = canvas.toDataURL("image/png")
+    // Clone correctly
+    const clone = element.cloneNode(true) as HTMLElement
+    clone.style.transform = 'none'
+    clone.style.width = '816px' // standard letter width
+    clone.style.padding = '0 48px' // Horizontal padding only. Vertical margins are handled by jsPDF for true page breaks.
+    clone.style.margin = '0'
+    clone.style.color = '#000000'
+    clone.style.backgroundColor = '#ffffff'
+    clone.style.minHeight = '1056px'
     
-    // PDF Specs in points
-    const PAGE_WIDTH = 612
-    const PAGE_HEIGHT = 792
-    const MARGIN = 36 // 0.5 inch
-    const PRINT_WIDTH = PAGE_WIDTH - (MARGIN * 2)
-    const PRINT_HEIGHT = PAGE_HEIGHT - (MARGIN * 2)
+    // Create a hidden container
+    const container = document.createElement('div')
+    container.style.position = 'absolute'
+    container.style.left = '-9999px'
+    container.style.top = '-9999px'
+    container.appendChild(clone)
+    document.body.appendChild(container)
 
-    // Calculate how much the canvas needs to be scaled to fit exactly in PRINT_WIDTH
-    const ratio = PRINT_WIDTH / canvas.width
-    const scaledHeight = canvas.height * ratio
+    // Wait for any async styles/images
+    await new Promise(r => setTimeout(r, 100))
 
-    const pdf = new jsPDF("p", "pt", "letter")
-    
-    let heightLeft = scaledHeight
-    let page = 0
-
-    while (heightLeft > 0) {
-        if (page > 0) pdf.addPage()
-        
-        // Offset logic: 
-        // We add the image at MARGIN, MARGIN.
-        // But we shift it UP by (page * PRINT_HEIGHT) so the next slice shows up perfectly.
-        const yOffset = MARGIN - (page * PRINT_HEIGHT)
-        
-        pdf.addImage(imgData, "PNG", MARGIN, yOffset, PRINT_WIDTH, scaledHeight)
-        
-        heightLeft -= PRINT_HEIGHT
-        page++
+    try {
+        const pdf = new jsPDF("p", "pt", "letter")
+        await pdf.html(clone, {
+            callback: function (doc) {
+                doc.save(filename.endsWith(".pdf") ? filename : `${filename}.pdf`)
+            },
+            autoPaging: 'text',
+            margin: [48, 0, 48, 0], // [top, right, bottom, left] points
+            width: 612, // jsPDF page width in points
+            windowWidth: 816 // Virtual window width reflecting our clone
+        })
+    } catch (err) {
+        console.error("PDF generation failed:", err)
+    } finally {
+        document.body.removeChild(container)
+        // @ts-ignore
+        delete window.html2canvas
     }
-    
-    pdf.save(filename.endsWith(".pdf") ? filename : `${filename}.pdf`)
 }
 
 /**
- * Improved DOCX download with signature top bar and better formatting.
+ * Download plain text as simple Word document (.docx).
+ * For cover letters and other plain text content.
  */
-export async function downloadTextAsDocx(text: string, filename: string, accentColor: string = "#000000") {
-    const lines = text.split("\n")
+export async function downloadPlainTextAsDocx(text: string, filename: string) {
+    const { Document, Paragraph, Packer } = await import("docx");
+
+    const paragraphs = text.split("\n").map(line =>
+        new Paragraph({
+            text: line || "",
+            spacing: { after: 100 }
+        })
+    );
+
+    const doc = new Document({ sections: [{ children: paragraphs }] });
+    const blob = await Packer.toBlob(doc);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename.endsWith(".docx") ? filename : `${filename}.docx`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+/**
+ * Professional Word download using structured data.
+ */
+export async function downloadTextAsDocx(data: ResumeData, filename: string, templateId: string = "classic", accentColor: string = "#000000") {
     const hex = accentColor.startsWith("#") ? accentColor.slice(1) : accentColor
 
-    const paragraphs = lines.map((line, idx) => {
-        const trimmed = line.trim()
-        const isHeader = 
-            trimmed.toUpperCase() === trimmed && 
-            trimmed.length > 2 && 
-            trimmed.length < 50 &&
-            !trimmed.startsWith("•") &&
-            !trimmed.startsWith("-")
+    const children: any[] = []
 
-        return new Paragraph({
-            alignment: AlignmentType.LEFT,
-            spacing: { before: isHeader ? 280 : 120, after: 120 },
-            // Add blue top bar to the FIRST line
-            border: idx === 0 ? {
-                top: {
-                    color: hex,
-                    space: 20,
-                    style: BorderStyle.SINGLE,
-                    size: 40, // thick bar
-                }
-            } : undefined,
-            children: [
-                new TextRun({
-                    text: line,
-                    font: "Arial",
-                    size: isHeader ? 28 : 22, // 14pt vs 11pt
-                    bold: isHeader,
-                    color: isHeader ? hex : "333333",
-                }),
-            ],
+    // Header Layout based on template
+    let basicsText = "";
+    if (data.basics.email) basicsText += `${data.basics.email}`;
+    if (data.basics.phone) basicsText += (basicsText ? "   |   " : "") + data.basics.phone;
+    if (data.basics.location) basicsText += (basicsText ? "   |   " : "") + data.basics.location;
+
+    if (templateId === "modern") {
+        const leftChildren: any[] = [];
+        const rightChildren: any[] = [];
+
+        // Left Side: Name, Label, Contact, Skills
+        leftChildren.push(
+            new Paragraph({
+                spacing: { before: 100, after: 50 },
+                children: [new TextRun({ text: data.basics.name.toUpperCase(), bold: true, size: 40, font: "Arial", color: hex })]
+            })
+        );
+        if (data.basics.label) {
+            leftChildren.push(
+                new Paragraph({
+                    spacing: { after: 200 },
+                    children: [new TextRun({ text: data.basics.label, size: 20, font: "Arial", color: "666666" })]
+                })
+            );
+        }
+        
+        leftChildren.push(
+             new Paragraph({
+                 spacing: { after: 50 },
+                 children: [new TextRun({ text: "CONTACT", bold: true, size: 16, color: "999999", font: "Arial" })]
+             })
+        );
+        if (data.basics.email) leftChildren.push(new Paragraph({ children: [new TextRun({ text: data.basics.email, size: 16, font: "Arial" })] }));
+        if (data.basics.phone) leftChildren.push(new Paragraph({ children: [new TextRun({ text: data.basics.phone, size: 16, font: "Arial" })] }));
+        if (data.basics.location) leftChildren.push(new Paragraph({ children: [new TextRun({ text: data.basics.location, size: 16, font: "Arial" })] }));
+        if (data.basics.website) leftChildren.push(new Paragraph({ children: [new TextRun({ text: data.basics.website, size: 16, font: "Arial" })] }));
+
+        const skillsSections = data.sections.filter(s => s.title.toLowerCase().includes("skills"));
+        skillsSections.forEach(section => {
+            leftChildren.push(
+                 new Paragraph({
+                     spacing: { before: 300, after: 50 },
+                     children: [new TextRun({ text: section.title.toUpperCase(), bold: true, size: 16, color: "999999", font: "Arial" })]
+                 })
+            );
+            const fragments = section.content.split(/(<ul>|<\/ul>|<li>|<\/li>|<p>|<\/p>|<br\s*\/?>)/).filter(f => f.trim().length > 0 && !f.startsWith("<"));
+            fragments.forEach(text => {
+                 const cleanText = text.trim().replace(/&nbsp;/g, " ").replace(/&amp;/g, "&");
+                 if (!cleanText) return;
+                 leftChildren.push(
+                     new Paragraph({
+                         spacing: { before: 40, after: 40 },
+                         children: [new TextRun({ text: cleanText, size: 16, font: "Arial" })]
+                     })
+                 );
+            });
+        });
+
+        // Right Side: Experience, Education, etc.
+        const rightSections = data.sections.filter(s => !s.title.toLowerCase().includes("skills"));
+        rightSections.forEach(section => {
+            rightChildren.push(
+                new Paragraph({
+                    spacing: { before: 200, after: 100 },
+                    children: [new TextRun({ text: section.title.toUpperCase(), bold: true, size: 20, color: hex, font: "Arial" })]
+                })
+            );
+            const fragments = section.content.split(/(<ul>|<\/ul>|<li>|<\/li>|<p>|<\/p>|<br\s*\/?>)/).filter(f => f.trim().length > 0 && !f.startsWith("<"));
+            const rawContent = section.content;
+            fragments.forEach(text => {
+                 const cleanText = text.trim().replace(/&nbsp;/g, " ").replace(/&amp;/g, "&");
+                 if (!cleanText) return;
+                 const isBullet = rawContent.includes(`<li>${text}`) || rawContent.includes(`<li>${cleanText}`);
+                 rightChildren.push(
+                     new Paragraph({
+                         spacing: { before: 50, after: 50 },
+                         bullet: isBullet ? { level: 0 } : undefined,
+                         indent: isBullet ? { left: 400, hanging: 240 } : undefined,
+                         alignment: AlignmentType.LEFT,
+                         children: [new TextRun({ text: cleanText, size: 18, font: "Arial" })]
+                     })
+                 );
+            });
+        });
+
+        children.push(
+            new Table({
+                width: { size: 100, type: WidthType.PERCENTAGE },
+                borders: { 
+                    top: { style: BorderStyle.NONE, size: 0, color: "ffffff" },
+                    bottom: { style: BorderStyle.NONE, size: 0, color: "ffffff" },
+                    left: { style: BorderStyle.NONE, size: 0, color: "ffffff" },
+                    right: { style: BorderStyle.NONE, size: 0, color: "ffffff" },
+                    insideHorizontal: { style: BorderStyle.NONE, size: 0, color: "ffffff" },
+                    insideVertical: { style: BorderStyle.SINGLE, size: 6, color: "EEEEEE" } 
+                },
+                rows: [
+                    new TableRow({
+                        children: [
+                            new TableCell({
+                                width: { size: 35, type: WidthType.PERCENTAGE },
+                                margins: { right: 200, left: 0 },
+                                children: leftChildren
+                            }),
+                            new TableCell({
+                                width: { size: 65, type: WidthType.PERCENTAGE },
+                                margins: { left: 400, right: 0 },
+                                children: rightChildren
+                            })
+                        ]
+                    })
+                ]
+            })
+        );
+    } else {
+        // Shared logic for Compact and Classic
+        if (templateId === "compact") {
+            // Header for Compact uses a 2-column layout (Name/Label on Left, Contact on Right)
+            children.push(
+                new Table({
+                    width: { size: 100, type: WidthType.PERCENTAGE },
+                    borders: { 
+                        top: { style: BorderStyle.NONE, size: 0, color: "ffffff" },
+                        bottom: { style: BorderStyle.NONE, size: 0, color: "ffffff" },
+                        left: { style: BorderStyle.NONE, size: 0, color: "ffffff" },
+                        right: { style: BorderStyle.NONE, size: 0, color: "ffffff" },
+                        insideVertical: { style: BorderStyle.NONE, size: 0, color: "ffffff" },
+                        insideHorizontal: { style: BorderStyle.NONE, size: 0, color: "ffffff" }
+                    },
+                    rows: [
+                        new TableRow({
+                            children: [
+                                new TableCell({
+                                    width: { size: 50, type: WidthType.PERCENTAGE },
+                                    children: [
+                                        new Paragraph({
+                                            spacing: { before: 0, after: 30 },
+                                            children: [new TextRun({ text: data.basics.name.toUpperCase(), bold: true, size: 40, font: "Arial", color: hex })]
+                                        }),
+                                        new Paragraph({
+                                            spacing: { before: 0, after: 100 },
+                                            children: [new TextRun({ text: data.basics.label || "", size: 22, font: "Arial", color: "666666" })]
+                                        })
+                                    ]
+                                }),
+                                new TableCell({
+                                    width: { size: 50, type: WidthType.PERCENTAGE },
+                                    children: [
+                                        new Paragraph({
+                                            alignment: AlignmentType.RIGHT,
+                                            spacing: { before: 0, after: 30 },
+                                            children: [new TextRun({ text: [data.basics.email, data.basics.phone].filter(Boolean).join(" | "), size: 16, font: "Arial", color: "777777" })]
+                                        }),
+                                        new Paragraph({
+                                            alignment: AlignmentType.RIGHT,
+                                            spacing: { before: 0, after: 100 },
+                                            children: [new TextRun({ text: [data.basics.location, data.basics.website].filter(Boolean).join(" | "), size: 16, font: "Arial", color: "777777" })]
+                                        })
+                                    ]
+                                })
+                            ]
+                        })
+                    ]
+                })
+            );
+            children.push(
+                new Paragraph({
+                    border: { bottom: { color: "CCCCCC", style: BorderStyle.SINGLE, size: 4, space: 1 } },
+                    spacing: { before: 0, after: 150 }
+                })
+            );
+        } else {
+            // Classic Template (Centered)
+            children.push(
+                new Paragraph({
+                    alignment: AlignmentType.CENTER,
+                    spacing: { before: 200, after: 100 },
+                    children: [new TextRun({ text: data.basics.name.toUpperCase(), bold: true, size: 48, font: "Arial", color: hex })]
+                })
+            );
+            if (data.basics.label) {
+                children.push(
+                    new Paragraph({
+                        alignment: AlignmentType.CENTER,
+                        spacing: { after: 100 },
+                        children: [new TextRun({ text: data.basics.label, size: 24, font: "Arial", color: "444444" })]
+                    })
+                );
+            }
+            children.push(
+                new Paragraph({
+                    alignment: AlignmentType.CENTER,
+                    spacing: { after: 300 },
+                    border: { bottom: { color: hex, style: BorderStyle.SINGLE, size: 24, space: 10 } },
+                    children: [new TextRun({ text: basicsText, size: 18, font: "Arial", color: "555555" })]
+                })
+            );
+        }
+
+        // Sections
+        data.sections.forEach(section => {
+            if (templateId === "compact") {
+                children.push(
+                    new Paragraph({
+                        spacing: { before: 150, after: 50 },
+                        border: { left: { color: hex, style: BorderStyle.SINGLE, size: 24, space: 15 } },
+                        children: [
+                            new TextRun({ text: section.title.toUpperCase(), bold: true, size: 20, color: hex, font: "Arial" })
+                        ]
+                    })
+                );
+            } else {
+                children.push(
+                    new Paragraph({
+                        spacing: { before: 300, after: 100 },
+                        border: { bottom: { color: "CCCCCC", style: BorderStyle.SINGLE, size: 4, space: 4 } },
+                        children: [
+                            new TextRun({ text: section.title.toUpperCase(), bold: true, size: 24, color: hex, font: "Arial" })
+                        ]
+                    })
+                );
+            }
+
+            const fragments = section.content.split(/(<ul>|<\/ul>|<li>|<\/li>|<p>|<\/p>|<br\s*\/?>)/).filter(f => f.trim().length > 0 && !f.startsWith("<"));
+            const rawContent = section.content;
+            
+            fragments.forEach(text => {
+                 const cleanText = text.trim().replace(/&nbsp;/g, " ").replace(/&amp;/g, "&");
+                 if (!cleanText) return;
+                 const isBullet = rawContent.includes(`<li>${text}`) || rawContent.includes(`<li>${cleanText}`);
+                 children.push(
+                     new Paragraph({
+                         spacing: { before: 100, after: 100 },
+                         bullet: isBullet ? { level: 0 } : undefined,
+                         alignment: AlignmentType.LEFT,
+                         indent: isBullet ? { left: 400, hanging: 240 } : undefined,
+                         children: [
+                             new TextRun({ 
+                                 text: cleanText,
+                                 size: 20,
+                                 font: "Arial"
+                             })
+                         ]
+                     })
+                 )
+            })
         })
-    })
+    }
 
+    const isCompact = templateId === "compact";
     const doc = new Document({
         sections: [{
             properties: {
-                page: {
-                    margin: { top: 720, right: 900, bottom: 720, left: 900 }, // Generous margins
-                }
+                page: { margin: { 
+                    top: isCompact ? 500 : 720, 
+                    right: isCompact ? 500 : 720, 
+                    bottom: isCompact ? 500 : 720, 
+                    left: isCompact ? 500 : 720 
+                } }
             },
-            children: paragraphs,
+            children: children,
         }],
     })
 

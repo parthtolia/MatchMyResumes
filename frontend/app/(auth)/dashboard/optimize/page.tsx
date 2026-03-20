@@ -9,7 +9,7 @@ import { useGlobalData } from "@/components/dashboard/GlobalDataProvider"
 import { downloadElementAsPdf, downloadTextAsDocx } from "@/lib/download"
 import { ResumeEditor } from "@/components/editor/ResumeEditor"
 import { ResumeData, ResumeTemplateId, ResumeTheme } from "@/lib/types/resume"
-import { parseRawTextToResumeData, resumeDataToRawText } from "@/lib/resume-utils"
+import { parseRawTextToResumeData, resumeDataToRawText, resumeSectionsToResumeData } from "@/lib/resume-utils"
 
 import { UserButton, useUser as useClerkUser } from "@clerk/nextjs"
 
@@ -82,10 +82,12 @@ function OptimizeContent() {
             refreshData()
             setResult(res.data)
             
-            // Parse optimized text into structured data
-            if (res.data.optimized_text) {
-                const parsed = parseRawTextToResumeData(res.data.optimized_text)
-                setResumeData(parsed)
+            // Parse optimized sections directly into structured data for the editor
+            const sectionsMap: Record<string, string> | undefined = res.data.optimized_sections
+            if (sectionsMap && Object.keys(sectionsMap).length > 0) {
+                setResumeData(resumeSectionsToResumeData(sectionsMap))
+            } else if (res.data.optimized_text) {
+                setResumeData(parseRawTextToResumeData(res.data.optimized_text))
             }
         } catch (e: any) {
             setError(e.response?.data?.detail || e.message)

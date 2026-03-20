@@ -6,7 +6,8 @@ import OptimizerResult from "@/components/marketing/results/OptimizerResult"
 interface OptimizeResult {
   optimized_text: string
   changes_summary: string[]
-  structured_json: Record<string, string>
+  optimized_sections?: Record<string, string>
+  structured_json?: Record<string, string>
 }
 
 export default function OptimizerToolSection({ preview }: { preview?: React.ReactNode }) {
@@ -43,7 +44,7 @@ export default function OptimizerToolSection({ preview }: { preview?: React.Reac
   if (result) {
     return (
       <section id="tool" className="py-8 md:py-10">
-        <div className="max-w-5xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="space-y-6">
             <OptimizerResult {...result} />
             <div className="text-center">

@@ -4,7 +4,7 @@ import { resumes, resumeScores, jobDescriptions, usageLogs } from "@/lib/db/sche
 import { eq, and, desc, count } from "drizzle-orm";
 import { getAuthUserId, handleAuthError, AuthError } from "@/lib/auth";
 import { checkRateLimit, aiLimiter } from "@/lib/rate-limit";
-import { optimizeResume } from "@/lib/services/ai-service";
+import { optimizeResumeSectional } from "@/lib/services/ai-service";
 import { generateEmbedding } from "@/lib/services/embedding-service";
 import { computeKeywordScore } from "@/lib/scoring/ats-scorer";
 import { parseSections } from "@/lib/services/resume-parser";
@@ -109,10 +109,10 @@ export async function POST(request: NextRequest) {
       missingKeywords = missing;
     }
 
-    // Run AI optimization
+    // Run AI optimization (section-wise)
     let result;
     try {
-      result = await optimizeResume(
+      result = await optimizeResumeSectional(
         resume.rawText || "",
         rawJdText,
         missingKeywords
@@ -191,6 +191,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       optimized_text: result.optimized_text || "",
       changes_summary: result.changes_summary || [],
+      optimized_sections: result.optimized_sections || {},
       new_resume_id: newResumeId,
       structured_json: null,
     });

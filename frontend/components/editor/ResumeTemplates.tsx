@@ -11,11 +11,12 @@ const ClassicTemplate: React.FC<TemplateProps> = ({ data, theme }) => (
   <div className="p-8 bg-white text-black min-h-[1056px] shadow-lg" style={{ fontFamily: theme.fontFamily }}>
     <header className="text-center mb-8 border-b-2 pb-4" style={{ borderColor: theme.primaryColor }}>
       <h1 className="text-3xl font-bold uppercase tracking-wide" style={{ color: theme.headingColor }}>{data.basics.name}</h1>
+      {data.basics.label && <p className="text-lg font-semibold text-gray-700 mt-1">{data.basics.label}</p>}
       <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm mt-2 text-gray-600">
         {data.basics.email && <span>{data.basics.email}</span>}
         {data.basics.phone && <span>{data.basics.phone}</span>}
-        {data.basics.website && <span className="underline">{data.basics.website}</span>}
         {data.basics.location && <span>{data.basics.location}</span>}
+        {data.basics.website && <span className="underline">{data.basics.website}</span>}
       </div>
     </header>
 

@@ -30,33 +30,105 @@ function useGroq(): boolean {
   return Boolean(config.groqApiKey);
 }
 
-const RESUME_OPTIMIZER_SYSTEM_PROMPT = `You are an expert ATS resume optimization specialist. Your #1 goal is to MAXIMIZE the ATS keyword match score between the resume and the job description while keeping all content truthful.
+// ── Section extraction ─────────────────────────────────────────────────────
+const SECTION_EXTRACTION_PROMPT = `You are a precise resume parser.
+Your task is to split the given resume text into its named sections.
 
-KEYWORD INTEGRATION (HIGHEST PRIORITY):
-- You will receive a list of MISSING KEYWORDS that the resume currently lacks. Your primary task is to weave as many of these exact keywords as possible into the resume.
-- Use the EXACT keyword spelling/phrasing (e.g., if the keyword is "ci/cd", write "CI/CD" — not "continuous integration" alone).
-- Place keywords in the SKILLS section, bullet points, summary, and project descriptions — wherever they fit naturally.
-- If the candidate has related experience but used different terminology, REPLACE with the JD's exact term (e.g., "wrote tests" → "implemented test-driven development (TDD)").
-- Add a comprehensive SKILLS section (or expand the existing one) that lists ALL relevant technical skills from the JD that the candidate plausibly has based on their experience.
-- For each work experience bullet, check if any missing keyword can be truthfully woven in.
+Return a JSON object whose keys are the canonical section names from the list below,
+and whose values are the VERBATIM text block that belongs to that section.
 
-OTHER RULES:
-1. Do NOT invent or fabricate any experience, skills, or achievements — but DO rephrase existing content to use JD terminology
-2. Improve clarity and impact of existing content
-3. Add measurable impact where strongly implied (e.g., "managed team" → "managed team of 5")
-4. Keep ATS-safe formatting: no tables, no columns, standard section headers
-5. Use strong action verbs (achieved, delivered, developed, led, optimized)
-6. Improve bullet point structure for readability
-7. CRITICAL: Return the ENTIRE optimized resume. DO NOT truncate, summarize, or omit any sections (Experience, Education, etc.). Every single role from the original must be present in the output.
-8. ABSOLUTE RULE: You MUST output the EXACT SAME number of work experiences as the original resume. If the original has 5 jobs spanning 10 years, your output MUST have exactly 5 jobs spanning 10 years. Under NO circumstances are you allowed to delete, combine, or shorten the timeline of a candidate's career history.
-9. ABSOLUTE RULE: YOU MUST KEEP THE "EDUCATION", "SKILLS", "PROJECTS" (if present), and "SUMMARY" SECTIONS. Do not delete them.
-10. If a section exists in the original resume, it MUST exist in your output. You must retain every single previous company name, role title, date range, and education degree.
-11. ANTI-PLACEHOLDER RULE: NEVER output text like "(Education details not provided...)". You have the full text. If a section like Education was provided, transcribe it exactly as-is if you determine no ATS enhancements are needed. DO NOT hallucinate that data is missing.
+Canonical section names (use exactly these keys — omit any that are absent from the resume):
+- "basics"         → The header block containing: Full Name, then ALL contact-info lines
+                     (email, phone, LinkedIn, GitHub, location — even if they appear as one
+                     pipe-separated line like "email | phone | linkedin | city").
+                     Include the job title/label line if it appears in the header.
+                     Capture ALL lines BEFORE the first named section (Summary, Experience, etc.).
+- "summary"        → Professional Summary / Objective / Profile
+- "experience"     → Work Experience / Employment History / Professional Experience
+- "education"      → Education / Academic Background
+- "skills"         → Skills / Technical Skills / Core Competencies / Expertise
+- "projects"       → Projects / Personal Projects
+- "certifications" → Certifications / Licenses / Awards / Credentials
+- "other"          → anything else that doesn't fit above
 
-Return a JSON object with this exact structure:
+RULES:
+1. Copy the content VERBATIM — do not paraphrase, reorder, or reformat lines.
+2. Do NOT include the section header line itself (e.g. the word "Experience") in the value.
+3. For "basics": include every line before the first named section, exactly as written —
+   including pipe-separated contact lines like "john@email.com | +91-9876543210 | Mumbai, India".
+4. Return ONLY valid JSON. No markdown fences. No explanation outside the JSON.
+5. If a section is empty or absent, omit its key entirely.
+
+Example output:
 {
-  "optimized_text": "<full optimized resume as plain text>",
-  "changes_summary": ["<change 1>", "<change 2>"]
+  "basics": "John Smith\\nSoftware Engineer\\njohn@email.com | +1 555-1234 | linkedin.com/in/john | New York, USA",
+  "summary": "Experienced software engineer with 7+ years...",
+  "experience": "Senior Engineer | Acme Corp | Jan 2020 – Present\\n- Led team of 5 engineers\\n- Built CI/CD pipeline",
+  "skills": "Python, TypeScript, AWS, Docker, Kubernetes",
+  "education": "B.S. Computer Science | MIT | 2016"
+}`;
+
+// ── Per-section optimizer ──────────────────────────────────────────────────
+const SECTION_OPTIMIZER_PROMPT = `You are an expert ATS resume optimization specialist with strict fact preservation rules.
+You will receive ONE SECTION of a resume to optimize.
+
+===== CORE RULES (MANDATORY) =====
+
+FACTS (NEVER CHANGE):
+- Company names, job titles, designations, employment dates (exact months/years)
+- Degree names, institution names, graduation dates
+- Email addresses, phone numbers, locations, LinkedIn/GitHub URLs
+- Any line with the pattern: "Title | Company | Date" or "Company, Title (Year–Year)"
+- Marked lines with [HEADER - DO NOT MODIFY]
+
+CONTENT (YOU CAN IMPROVE):
+- Bullet points describing achievements under each role
+- Summary paragraphs and prose
+- Skills list items
+- Project descriptions
+
+===== SECTION-SPECIFIC RULES =====
+
+FOR BASICS SECTION:
+- Return exactly as-is. NO changes whatsoever.
+
+FOR EDUCATION SECTION:
+- Return exactly as-is. NO changes whatsoever.
+
+FOR EXPERIENCE SECTION:
+- Role HEADER lines (containing company, title, dates) MUST be reproduced CHARACTER-FOR-CHARACTER.
+- Role headers MUST appear on their own line — do NOT merge with bullets.
+- ONLY modify/add BULLET POINT lines (starting with - or •).
+- Preserve header line order exactly.
+- Do NOT convert to prose. Do NOT merge roles. Do NOT add new role entries.
+- For each role, you may: enhance existing bullets (add metrics, keywords, impact), add 1-2 new relevant bullets, or rephrase for clarity.
+- Always retain the original header verbatim.
+
+FOR SUMMARY SECTION:
+- Rewrite to emphasize JD-aligned keywords while keeping tone professional and length similar (±10%).
+- Preserve any factual claims (years of experience, specific technologies, proven achievements).
+
+FOR SKILLS SECTION:
+- Expand to include ALL relevant keywords from the JD that the candidate plausibly possesses.
+- Keep ALL existing skills.
+- Use EXACT keyword spelling (e.g., "CI/CD", not "continuous integration").
+- Organize as comma-separated or bullet list (match input format).
+
+FOR CERTIFICATIONS/PROJECTS SECTIONS:
+- Enhance descriptions with JD keywords where applicable.
+- Do NOT remove or fabricate any certifications.
+
+===== GENERAL RULES =====
+
+1. KEYWORD INTEGRATION: Weave provided MISSING KEYWORDS naturally — only where truthful.
+2. Output plain text only — no markdown, no **, no HTML, no bold formatting.
+3. No excessive whitespace. Single blank line between bullets/roles.
+4. If a role header appears multiple times in input, PRESERVE EACH one verbatim.
+
+Return a JSON object:
+{
+  "optimized_content": "<optimized plain text for this section — preserve all FACTS exactly>",
+  "changes": ["<brief description of changes made>"]
 }`;
 
 const JD_KEYWORD_EXTRACTION_PROMPT = `You are an expert ATS (Applicant Tracking System) keyword extraction engine.
@@ -181,6 +253,35 @@ function stripMarkdown(text: string): string {
   return text.trim();
 }
 
+async function fetchGroqWithFallback(client: Groq, options: any): Promise<string> {
+  // Ordered from best quality to highest rate-limit fallback
+  // Using exact models specified by user (assuming custom endpoint configuration)
+  const models = [
+    config.groqModel,
+    "openai/gpt-oss-120b",
+    "qwen/qwen3-32b"
+  ];
+  let lastError: any = null;
+  
+  // Deduplicate in case config.groqModel is one of the fallbacks
+  const uniqueModels = Array.from(new Set(models));
+
+  for (const model of uniqueModels) {
+    try {
+      const response = await client.chat.completions.create({
+        ...options,
+        model: model,
+      });
+      return response.choices[0].message.content || "";
+    } catch (e: any) {
+      console.warn(`Groq model ${model} failed: ${e.message}. Trying next fallback...`);
+      lastError = e;
+    }
+  }
+  
+  throw lastError || new Error("All Groq models failed.");
+}
+
 export async function extractKeywordsFromJdAi(
   jdText: string
 ): Promise<string[]> {
@@ -188,14 +289,13 @@ export async function extractKeywordsFromJdAi(
   try {
     if (useGroq()) {
       const client = getGroqClient();
-      const response = await client.chat.completions.create({
-        model: config.groqModel,
+      const raw = await fetchGroqWithFallback(client, {
         messages: [{ role: "user", content: prompt }],
         temperature: 0.1,
         max_tokens: 1024,
         response_format: { type: "json_object" },
       });
-      const raw = response.choices[0].message.content || "";
+      
       const parsed = JSON.parse(raw);
       let keywords: string[];
       if (Array.isArray(parsed)) {
@@ -225,54 +325,417 @@ export async function extractKeywordsFromJdAi(
   }
 }
 
+// ── Internal: deterministic regex-based section splitter (no AI) ───────────
+// CONSERVATIVE list — only headings almost never seen in bullet content.
+// "achievements", "qualifications", "honors", "credentials", "licenses",
+// "profile", "objective", "competencies", "expertise" are intentionally
+// OMITTED because they appear frequently inside experience bullet text.
+const SECTION_HEADER_MAP: Record<string, string> = {
+  // Summary
+  "summary": "summary",
+  "professional summary": "summary",
+  "career summary": "summary",
+  "executive summary": "summary",
+  "about me": "summary",
+  "introduction": "summary",
+  // Experience
+  "experience": "experience",
+  "work experience": "experience",
+  "professional experience": "experience",
+  "employment history": "experience",
+  "work history": "experience",
+  "career history": "experience",
+  "relevant experience": "experience",
+  // Education
+  "education": "education",
+  "academic background": "education",
+  "educational background": "education",
+  "education & training": "education",
+  "education and training": "education",
+  // Skills
+  "skills": "skills",
+  "technical skills": "skills",
+  "core competencies": "skills",
+  "key skills": "skills",
+  "technologies": "skills",
+  "technical expertise": "skills",
+  "skills & technologies": "skills",
+  "skills and technologies": "skills",
+  // Projects
+  "projects": "projects",
+  "personal projects": "projects",
+  "academic projects": "projects",
+  "key projects": "projects",
+  "notable projects": "projects",
+  // Certifications — only very specific labels
+  "certifications": "certifications",
+  "certifications & courses": "certifications",
+  "certifications and courses": "certifications",
+  "certificates": "certifications",
+  "professional certifications": "certifications",
+  "awards & certifications": "certifications",
+};
+
+function isSectionHeader(line: string): string | null {
+  const trimmed = line.trim();
+  if (!trimmed) return null;
+
+  // Skip lines that are clearly content:
+  // - Starts with a bullet character (normalized in cleanText)
+  if (trimmed.startsWith("-") || trimmed.startsWith("•") || trimmed.startsWith("*")) return null;
+  
+  // - Contains sentence-like content? 
+  //   We allow trailing periods/colons (common in PDFs), 
+  //   but reject if period is followed by space and more characters (a sentence).
+  if (/[.!?]\s+[A-Z0-9]/.test(trimmed)) return null;
+  
+  // - Contains @ (email) or looks like a URL
+  if (trimmed.includes("@") || /https?:\/\//.test(trimmed)) return null;
+  
+  // - Too long to be a header
+  if (trimmed.length > 50) return null;
+
+  const normalized = trimmed.toLowerCase().replace(/[:.]$/, "").trim();
+
+  // Exact match in our conservative map
+  if (SECTION_HEADER_MAP[normalized]) return SECTION_HEADER_MAP[normalized];
+
+  // All-caps match (many resumes use ALL CAPS headers like "WORK EXPERIENCE")
+  // Must be all uppercase letters+symbols (no digits allowed in headers usually)
+  if (trimmed === trimmed.toUpperCase() && /^[A-Z][A-Z\s&-]{2,}$/.test(trimmed)) {
+    if (SECTION_HEADER_MAP[trimmed.toLowerCase()]) {
+      return SECTION_HEADER_MAP[trimmed.toLowerCase()];
+    }
+  }
+
+  return null;
+}
+
+function extractSectionsFromText(resumeText: string): Record<string, string> {
+  const lines = resumeText.split("\n");
+
+  const sections: Record<string, string[]> = {};
+  let currentSection: string | null = null; // null = basics (before first header)
+  let basicsLines: string[] = [];
+  let foundFirstSection = false;
+
+  for (const rawLine of lines) {
+    const detected = isSectionHeader(rawLine);
+
+    if (detected) {
+      foundFirstSection = true;
+      currentSection = detected;
+      if (!sections[currentSection]) sections[currentSection] = [];
+    } else {
+      if (!foundFirstSection) {
+        basicsLines.push(rawLine);
+      } else if (currentSection) {
+        if (!sections[currentSection]) sections[currentSection] = [];
+        sections[currentSection].push(rawLine);
+      }
+    }
+  }
+
+  const result: Record<string, string> = {};
+
+  const basicsJoined = basicsLines.join("\n").trim();
+  if (basicsJoined) result["basics"] = basicsJoined;
+
+  for (const [key, contentLines] of Object.entries(sections)) {
+    const joined = contentLines.join("\n").trim();
+    if (joined) result[key] = joined;
+  }
+
+  return result;
+}
+
+// ── Helper: detect role header lines in experience sections ──────────────
+function detectRoleHeaders(text: string): Map<number, string> {
+  const headers = new Map<number, string>();
+  const lines = text.split("\n");
+
+  lines.forEach((line, i) => {
+    const t = line.trim();
+    // Skip bullets and empty lines
+    if (!t || t.startsWith("-") || t.startsWith("•") || t.startsWith("*")) return;
+
+    // Pattern 1: "Title | Company | Date" or "Company | Title | Date"
+    if (t.includes("|") && /\d{4}|present|current/i.test(t) && t.length < 150) {
+      headers.set(i, t);
+      return;
+    }
+
+    // Pattern 2: "Title, Company (Jan 2020 – Mar 2023)" or "Engineer @ Company, 2020-2023"
+    if (
+      /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|may|june|july|august|september|october|november|december)\b.*\d{4}/i.test(t) &&
+      t.length < 150
+    ) {
+      headers.set(i, t);
+      return;
+    }
+
+    // Pattern 3: Single line with year range "2020 - 2023" or "2020-2024" (but > 10 chars to exclude random years)
+    if (/\d{4}\s*[-–—]\s*\d{4}|present|current/i.test(t) && t.length < 120 && t.length > 10) {
+      // Only if line doesn't look like a bullet or sub-item
+      if (!/^[\s]*[-–—•*]/.test(line)) {
+        headers.set(i, t);
+      }
+    }
+  });
+
+  return headers;
+}
+
+// ── Helper: restore role headers to ensure they are preserved ──────────────
+function restoreRoleHeaders(optimizedText: string, originalHeaders: Map<number, string>): string {
+  const optimizedLines = optimizedText.split("\n");
+  const originalLines = Array.from(originalHeaders.values());
+
+  // For each expected role header, check if it appears in the optimized version
+  // If not found or altered, insert it back in the correct position
+  let result = optimizedLines.slice();
+
+  for (const [index, originalHeader] of originalHeaders.entries()) {
+    // Check if this header appears anywhere in the optimized text
+    const headerFound = result.some(line => line.trim() === originalHeader);
+
+    if (!headerFound) {
+      // Header was lost or modified; restore it
+      // Best effort: insert at the same relative position if possible
+      if (index < result.length) {
+        // Replace the line at this position if it's not a bullet
+        const lineAtIndex = result[index]?.trim() || "";
+        if (!lineAtIndex.startsWith("-") && !lineAtIndex.startsWith("•") && lineAtIndex) {
+          result[index] = originalHeader;
+        } else {
+          // Insert before the first bullet
+          result.splice(index, 0, originalHeader);
+        }
+      } else {
+        result.push(originalHeader);
+      }
+    }
+  }
+
+  return result.join("\n").trim();
+}
+
+// ── AI-based section extraction with fallback ──────────────────────────────
+async function extractSectionsWithAI(
+  resumeText: string
+): Promise<Record<string, string>> {
+  const prompt = `${SECTION_EXTRACTION_PROMPT}\n\nRESUME TEXT:\n${String(resumeText).slice(0, 6000)}`;
+
+  try {
+    if (useGroq()) {
+      const client = getGroqClient();
+      const raw = await fetchGroqWithFallback(client, {
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.1,
+        max_tokens: 4000,
+        response_format: { type: "json_object" },
+      });
+      const parsed = JSON.parse(cleanJsonString(raw));
+      // Handle JSON object or array response
+      if (typeof parsed === "object" && !Array.isArray(parsed)) {
+        return parsed;
+      }
+      return parsed;
+    } else {
+      const model = getGeminiModel();
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: "application/json" },
+      });
+      const raw = result.response.text();
+      const parsed = JSON.parse(cleanJsonString(raw));
+      return parsed;
+    }
+  } catch (e) {
+    console.warn("AI section extraction failed, falling back to regex extraction:", e);
+    return extractSectionsFromText(resumeText);
+  }
+}
+
+// ── Internal: optimize a single named section ──────────────────────────────
+async function optimizeSingleSection(
+  sectionName: string,
+  sectionContent: string,
+  jdText: string,
+  missingKeywords: string[]
+): Promise<{ optimized_content: string; changes: string[] }> {
+  // Basics and Education are kept verbatim
+  if (sectionName === "basics" || sectionName === "education") {
+    return { optimized_content: sectionContent, changes: [] };
+  }
+
+  const kwList = missingKeywords.slice(0, 25);
+  const kwSection = kwList.length
+    ? kwList.map((kw) => `  - ${kw}`).join("\n")
+    : "  (none)";
+
+  // For EXPERIENCE section: detect and protect role headers
+  let roleHeaders: Map<number, string> = new Map();
+  let headerProtectionNote = "";
+
+  if (sectionName === "experience") {
+    roleHeaders = detectRoleHeaders(sectionContent);
+    if (roleHeaders.size > 0) {
+      headerProtectionNote = `\n=== ROLE HEADER LINES (DO NOT MODIFY) ===
+${Array.from(roleHeaders.values())
+  .map((h) => `[HEADER - DO NOT MODIFY]: ${h}`)
+  .join("\n")}
+`;
+    }
+  }
+
+  const userContent = `=== SECTION NAME: ${sectionName.toUpperCase()} ===
+
+=== MISSING JD KEYWORDS (integrate where applicable) ===
+${kwSection}
+
+=== JOB DESCRIPTION (for context, up to 3500 chars) ===
+${String(jdText).slice(0, 3500)}
+${headerProtectionNote}
+
+=== SECTION CONTENT TO OPTIMIZE ===
+${sectionContent}`;
+
+  let raw: string;
+  try {
+    if (useGroq()) {
+      const client = getGroqClient();
+      raw = await fetchGroqWithFallback(client, {
+        messages: [
+          { role: "system", content: SECTION_OPTIMIZER_PROMPT },
+          { role: "user", content: userContent },
+        ],
+        temperature: 0.35,
+        max_tokens: 3500,
+        response_format: { type: "json_object" },
+      });
+    } else {
+      const model = getGeminiModel();
+      const fullPrompt = `${SECTION_OPTIMIZER_PROMPT}\n\n${userContent}`;
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: fullPrompt }] }],
+        generationConfig: { responseMimeType: "application/json" },
+      });
+      raw = result.response.text();
+    }
+    const parsed = JSON.parse(cleanJsonString(raw));
+    let optimizedContent = parsed.optimized_content || sectionContent;
+
+    // Post-process: restore role headers if needed (EXPERIENCE section)
+    if (sectionName === "experience" && roleHeaders.size > 0) {
+      optimizedContent = restoreRoleHeaders(optimizedContent, roleHeaders);
+    }
+
+    return {
+      optimized_content: optimizedContent,
+      changes: Array.isArray(parsed.changes) ? parsed.changes : [],
+    };
+  } catch (e) {
+    console.warn(`Section "${sectionName}" optimization failed, keeping original:`, e);
+    return { optimized_content: sectionContent, changes: [] };
+  }
+}
+
+// ── Public: section-wise optimizer (new primary entry point) ───────────────
+export async function optimizeResumeSectional(
+  resumeText: string,
+  jdText: string,
+  missingKeywords: string[]
+): Promise<{
+  optimized_text: string;
+  optimized_sections: Record<string, string>;
+  changes_summary: string[];
+}> {
+  // Step 1 – Extract sections (AI-based with regex fallback)
+  const rawSections = await extractSectionsWithAI(resumeText);
+
+  // Step 1.1 - Deduplicate basics from other sections (PDF header/footer residue)
+  const basicsContent = rawSections["basics"] || "";
+  const basicsLines = basicsContent.split("\n").map(l => l.trim()).filter(l => l.length > 3);
+  
+  const deduplicatedSections: Record<string, string> = { ...rawSections };
+  for (const [key, content] of Object.entries(rawSections)) {
+    if (key === "basics" || !content) continue;
+    
+    // Split content into lines and filter out any line that exactly matches a basics line
+    const refinedLines = content.split("\n").filter(line => {
+      const tl = line.trim();
+      if (tl.length < 4) return true;
+      return !basicsLines.some(bl => tl === bl || bl.includes(tl) || tl.includes(bl));
+    });
+    
+    deduplicatedSections[key] = refinedLines.join("\n").trim();
+  }
+
+  // Canonical section order for reassembly
+  const SECTION_ORDER = ["basics", "summary", "experience", "skills", "education", "projects", "certifications", "other"];
+
+  // Include any extra keys from our extraction
+  const allKeys = Array.from(
+    new Set([...SECTION_ORDER, ...Object.keys(deduplicatedSections)])
+  ).filter((k) => deduplicatedSections[k]);
+
+  const kwList = (missingKeywords || []).slice(0, 20);
+
+  // Step 2 – Optimize each section (in parallel for speed)
+  const optimized: Record<string, string> = {};
+  const allChanges: string[] = [];
+
+  await Promise.all(
+    allKeys.map(async (sectionName) => {
+      const content = deduplicatedSections[sectionName];
+      if (!content?.trim()) return;
+      const res = await optimizeSingleSection(sectionName, content, jdText, kwList);
+      optimized[sectionName] = res.optimized_content;
+      allChanges.push(...res.changes);
+    })
+  );
+
+  // Step 3 – Reassemble into a full plain-text resume
+  const headerLabels: Record<string, string> = {
+    summary: "SUMMARY",
+    experience: "WORK EXPERIENCE",
+    education: "EDUCATION",
+    skills: "SKILLS",
+    projects: "PROJECTS",
+    certifications: "CERTIFICATIONS",
+    other: "",
+  };
+
+  let fullText = "";
+  for (const key of allKeys) {
+    if (!optimized[key]?.trim()) continue;
+    if (key === "basics") {
+      fullText += optimized[key] + "\n\n";
+    } else {
+      const header = headerLabels[key] ?? key.toUpperCase();
+      fullText += header + "\n" + optimized[key] + "\n\n";
+    }
+  }
+
+  return {
+    optimized_text: fullText.trim(),
+    optimized_sections: optimized,
+    changes_summary: allChanges.length ? allChanges : ["Resume optimized for ATS keyword alignment."],
+  };
+}
+
+// ── Legacy single-call optimizer (kept for backward compat) ────────────────
 export async function optimizeResume(
   resumeText: string,
   jdText: string,
   missingKeywords: string[]
 ): Promise<{ optimized_text: string; changes_summary: string[] }> {
-  const kwList = (missingKeywords || []).slice(0, 20);
-  const kwSection = kwList.length
-    ? kwList.map((kw) => `  - ${kw}`).join("\n")
-    : "  (none provided)";
-  const userContent = `=== MISSING KEYWORDS (MUST integrate as many as possible using EXACT spelling) ===
-${kwSection}
-
-Your goal: integrate every keyword above into the resume where truthfully applicable. Each keyword that appears as an exact match in the output directly increases the candidate's ATS score. Aim for 80%+ keyword coverage.
-
-=== JOB DESCRIPTION ===
-${String(jdText).slice(0, 3000)}
-
-=== CURRENT RESUME (optimize this) ===
-${String(resumeText).slice(0, 10000)}`;
-
-  let raw: string;
-
-  if (useGroq()) {
-    const client = getGroqClient();
-    const response = await client.chat.completions.create({
-      model: config.groqModel,
-      messages: [
-        { role: "system", content: RESUME_OPTIMIZER_SYSTEM_PROMPT },
-        { role: "user", content: userContent },
-      ],
-      temperature: 0.4,
-      max_tokens: 8192,
-      response_format: { type: "json_object" },
-    });
-    raw = response.choices[0].message.content || "";
-  } else {
-    const model = getGeminiModel();
-    const fullPrompt = `${RESUME_OPTIMIZER_SYSTEM_PROMPT}\n\n${userContent}`;
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: fullPrompt }] }],
-      generationConfig: {
-        responseMimeType: "application/json",
-      },
-    });
-    raw = result.response.text();
-  }
-
-  return parseOptimizeResponse(raw);
+  const result = await optimizeResumeSectional(resumeText, jdText, missingKeywords);
+  return {
+    optimized_text: result.optimized_text,
+    changes_summary: result.changes_summary,
+  };
 }
 
 export async function generateCoverLetter(
@@ -311,8 +774,7 @@ Write the cover letter now:`;
 
   if (useGroq()) {
     const client = getGroqClient();
-    const response = await client.chat.completions.create({
-      model: config.groqModel,
+    text = await fetchGroqWithFallback(client, {
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userContent },
@@ -320,7 +782,6 @@ Write the cover letter now:`;
       temperature: 0.7,
       max_tokens: 4000,
     });
-    text = response.choices[0].message.content || "";
   } else {
     const ai = new GoogleGenerativeAI(config.geminiApiKey);
     const model = ai.getGenerativeModel({

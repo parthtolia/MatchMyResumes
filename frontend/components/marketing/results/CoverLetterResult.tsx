@@ -3,7 +3,7 @@ import { motion } from "framer-motion"
 import { useState } from "react"
 import { Copy, Download, Check, ArrowRight, FileText as FileTextIcon, FileDown } from "lucide-react"
 import Link from "next/link"
-import { downloadTextAsPdf, downloadTextAsDocx } from "@/lib/download"
+import { downloadTextAsPdf, downloadPlainTextAsDocx } from "@/lib/download"
 
 interface CoverLetterResultProps {
   content: string
@@ -33,7 +33,7 @@ export default function CoverLetterResult({ content, tone, length, company_name,
   }
 
   const handleDownloadPdf = () => downloadTextAsPdf(content, "cover_letter.pdf")
-  const handleDownloadDocx = () => downloadTextAsDocx(content, "cover_letter.docx")
+  const handleDownloadDocx = () => downloadPlainTextAsDocx(content, "cover_letter.docx")
 
   const wordCount = content.split(/\s+/).filter(Boolean).length
 

@@ -94,8 +94,15 @@ export function cleanText(text: string): string {
   // Remove excessive whitespace/blank lines
   text = text.replace(/\n{3,}/g, "\n\n");
   text = text.replace(/[ \t]+/g, " ");
-  // Remove common PDF artifacts (non-ASCII)
-  text = text.replace(/[^\x00-\x7F]+/g, " ");
+  // Normalize Unicode bullet characters → ASCII dash for consistent parsing
+  text = text.replace(/[•·►▪▸‣⦿⁃◦∙○●■□→⮕➤➢✦✧◆◇▶]/g, "-");
+  // Normalize em-dash / en-dash → ASCII dash
+  text = text.replace(/[–—]/g, "-");
+  // Normalize smart quotes → ASCII quotes
+  text = text.replace(/[""]/g, '"');
+  text = text.replace(/['']/g, "'");
+  // Remove remaining non-printable/control chars but keep newlines, tabs, standard ASCII
+  text = text.replace(/[^\x20-\x7E\n\r\t]/g, "");
   return text.trim();
 }
 
