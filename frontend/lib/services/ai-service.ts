@@ -333,7 +333,7 @@ async function fetchGroqWithFallback(client: Groq, options: any): Promise<string
   throw lastError || new Error("All Groq models failed.");
 }
 
-// ── AI-based contact information extraction ────────────────────────────────
+// ── PHASE 2: Simple regex-based contact information extraction ──────────────
 export async function extractContactInfoFromBasics(
   basicsText: string
 ): Promise<{
@@ -346,32 +346,111 @@ export async function extractContactInfoFromBasics(
 }> {
   if (!basicsText?.trim()) return { name: "" };
 
-  const prompt = `${CONTACT_EXTRACTION_PROMPT}\n\nBASICS SECTION:\n${basicsText}`;
-  try {
-    if (useGroq()) {
-      const client = getGroqClient();
-      const raw = await fetchGroqWithFallback(client, {
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.02,
-        max_tokens: 500,
-        response_format: { type: "json_object" },
-      });
-      const parsed = JSON.parse(cleanJsonString(raw));
-      return typeof parsed === "object" ? parsed : { name: "" };
-    } else {
-      const model = getGeminiModel();
-      const result = await model.generateContent({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json" },
-      });
-      const raw = result.response.text();
-      const parsed = JSON.parse(cleanJsonString(raw));
-      return typeof parsed === "object" ? parsed : { name: "" };
-    }
-  } catch (e) {
-    console.warn("Contact info extraction failed:", e);
-    return { name: "" };
+  const result: any = {};
+  const lines = basicsText.split("\n").map((l) => l.trim()).filter(Boolean);
+
+  // Extract all tokens (split on pipes, commas, etc.)
+  const tokens: string[] = [];
+  for (const line of lines) {
+    const parts = line
+      .split(/\s*[\|,\t]\s*/)
+      .map((p) => p.trim())
+      .filter(Boolean);
+    tokens.push(...parts);
   }
+
+  const usedTokens = new Set<string>();
+
+  // STEP 1: Extract email
+  for (const token of tokens) {
+    if (!result.email && /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i.test(token)) {
+      result.email = token;
+      usedTokens.add(token);
+      break;
+    }
+  }
+
+  // STEP 2: Extract phone (7+ digits)
+  for (const token of tokens) {
+    if (
+      !result.phone &&
+      !token.includes("@") &&
+      !token.startsWith("http") &&
+      !/linkedin|github/i.test(token)
+    ) {
+      const digitsOnly = token.replace(/\D/g, "");
+      if (digitsOnly.length >= 7 && digitsOnly.length <= 20) {
+        result.phone = token;
+        usedTokens.add(token);
+        break;
+      }
+    }
+  }
+
+  // STEP 3: Extract website/LinkedIn/GitHub
+  for (const token of tokens) {
+    if (
+      !result.website &&
+      (token.startsWith("http") || /linkedin\.com|github\.com/i.test(token))
+    ) {
+      result.website = token;
+      usedTokens.add(token);
+      break;
+    }
+  }
+
+  // STEP 4: Extract location (contains comma, no @, no http, no years)
+  for (const token of tokens) {
+    if (
+      !result.location &&
+      token.includes(",") &&
+      token.length < 50 &&
+      !token.includes("@") &&
+      !token.startsWith("http") &&
+      !/linkedin|github/i.test(token) &&
+      !/\d{4}/.test(token)
+    ) {
+      result.location = token;
+      usedTokens.add(token);
+      break;
+    }
+  }
+
+  // STEP 5: Extract name (first unused, non-numeric, substantial token)
+  for (const token of tokens) {
+    if (usedTokens.has(token)) continue;
+    if (
+      !result.name &&
+      token.length > 2 &&
+      !token.includes("@") &&
+      !token.startsWith("http") &&
+      !/\d{3,}/.test(token) &&
+      !token.includes(",")
+    ) {
+      result.name = token;
+      usedTokens.add(token);
+      break;
+    }
+  }
+
+  // STEP 6: Extract title (first remaining short token, likely job title)
+  for (const token of tokens) {
+    if (usedTokens.has(token)) continue;
+    if (
+      !result.title &&
+      token.length > 2 &&
+      token.length < 60 &&
+      !token.includes("@") &&
+      !token.startsWith("http") &&
+      !/\d{4}|linkedin|github/i.test(token) &&
+      !token.includes(",")
+    ) {
+      result.title = token;
+      break;
+    }
+  }
+
+  return result;
 }
 
 export async function extractKeywordsFromJdAi(
