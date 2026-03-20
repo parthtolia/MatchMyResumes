@@ -14,14 +14,16 @@ const SectionEditor: React.FC<SectionEditorProps> = ({ content, onChange, placeh
   const [isMounted, setIsMounted] = useState(false)
   const contentRef = useRef(content)
 
-  const editorConfig = {
-    extensions: [
-      StarterKit,
-      Placeholder.configure({
-        placeholder: placeholder || "Start typing...",
-      }),
-    ],
-    content: contentRef.current,
+  const extensions = [
+    StarterKit,
+    Placeholder.configure({
+      placeholder: placeholder || "Start typing...",
+    }),
+  ]
+
+  const editor = useEditor({
+    extensions,
+    content: isMounted ? contentRef.current : "",
     immediatelyRender: false,
     onUpdate: ({ editor }: { editor: any }) => {
       onChange(editor.getHTML())
@@ -31,9 +33,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({ content, onChange, placeh
         class: "prose prose-sm prose-invert max-w-none focus:outline-none min-h-[50px] text-gray-100",
       },
     },
-  }
-
-  const editor = useEditor(isMounted ? editorConfig : { content: "", immediatelyRender: false })
+  })
 
   // Ensure editor only initializes on client after hydration
   useEffect(() => {

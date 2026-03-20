@@ -45,12 +45,25 @@ export function parseRawTextToResumeData(text: string): ResumeData {
       }
     }
     
-    // Phone
-    if (!basics.phone && /(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/.test(line)) {
-       const phoneMatch = line.match(/(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/);
-       if (phoneMatch) {
-           basics.phone = phoneMatch[0];
-           contactInfoLines.add(line);
+    // Phone - universal format
+    if (!basics.phone) {
+       // Try to match common phone patterns
+       const phonePatterns = [
+         /\+\d{1,3}[\s.-]?\d{1,4}[\s.-]?\d{1,4}[\s.-]?\d{1,4}/,  // +1-234-567-8900
+         /\(\d{3}\)[\s.-]?\d{3}[\s.-]?\d{4}/,                     // (123) 456-7890
+         /\d{3}[\s.-]\d{3}[\s.-]\d{4}/                            // 123-456-7890
+       ];
+
+       for (const pattern of phonePatterns) {
+         const phoneMatch = line.match(pattern);
+         if (phoneMatch) {
+           const digitsOnly = phoneMatch[0].replace(/\D/g, "");
+           if (digitsOnly.length >= 7) {
+             basics.phone = phoneMatch[0];
+             contactInfoLines.add(line);
+             break;
+           }
+         }
        }
     }
 
@@ -212,9 +225,10 @@ export function resumeSectionsToResumeData(
 
     // ── Pass 1: greedily find email, phone, website, location from ALL tokens
     const EMAIL_RE = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/;
-    // Phone: optional + sign, then digits/spaces/parens/dashes, 7-15 digits total
-    // Also supports Indian formats: +91-XXXXXXXXXX, 91-XXXXXXXXXX, 09XXXXXXXXXX
-    const PHONE_RE = /(\+?91[\s.-]?\d{4,5}[\s.-]?\d{4,5}|\+?[\d][\d\s().x\-]{5,17}\d)/;
+    // Phone: universal format - optional country code (+/00), then digits with optional separators
+    // Supports: +1-234-567-8900, (123) 456-7890, 123.456.7890, +91-9876543210, etc.
+    // Requires 7-15 digits total
+    const PHONE_RE = /(?:\+\d{1,3}[\s.-]?)?(?:\(?\d{1,4}\)?[\s.-]?)*\d{1,4}[\s.-]?\d{1,4}[\s.-]?\d{1,4}/;
     const URL_RE = /https?:\/\/[^\s]+/;
 
     const usedTokens = new Set<string>();
@@ -233,7 +247,8 @@ export function resumeSectionsToResumeData(
         PHONE_RE.test(token)
       ) {
         const digitsOnly = token.replace(/\D/g, "");
-        if (digitsOnly.length >= 7 && digitsOnly.length <= 15) {
+        // Accept phone numbers with 7-15 digits (covers most international formats)
+        if (digitsOnly.length >= 7 && digitsOnly.length <= 20) {
           const m = token.match(PHONE_RE);
           if (m) {
             basics.phone = m[0].trim();
