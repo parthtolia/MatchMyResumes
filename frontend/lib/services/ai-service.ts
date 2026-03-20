@@ -326,10 +326,7 @@ export async function extractKeywordsFromJdAi(
 }
 
 // ── Internal: deterministic regex-based section splitter (no AI) ───────────
-// CONSERVATIVE list — only headings almost never seen in bullet content.
-// "achievements", "qualifications", "honors", "credentials", "licenses",
-// "profile", "objective", "competencies", "expertise" are intentionally
-// OMITTED because they appear frequently inside experience bullet text.
+// Comprehensive list of section header variations
 const SECTION_HEADER_MAP: Record<string, string> = {
   // Summary
   "summary": "summary",
@@ -338,6 +335,8 @@ const SECTION_HEADER_MAP: Record<string, string> = {
   "executive summary": "summary",
   "about me": "summary",
   "introduction": "summary",
+  "professional profile": "summary",
+  "overview": "summary",
   // Experience
   "experience": "experience",
   "work experience": "experience",
@@ -346,12 +345,16 @@ const SECTION_HEADER_MAP: Record<string, string> = {
   "work history": "experience",
   "career history": "experience",
   "relevant experience": "experience",
+  "professional background": "experience",
+  "experience summary": "experience",
   // Education
   "education": "education",
   "academic background": "education",
   "educational background": "education",
   "education & training": "education",
   "education and training": "education",
+  "academic qualifications": "education",
+  "qualifications": "education",
   // Skills
   "skills": "skills",
   "technical skills": "skills",
@@ -361,19 +364,23 @@ const SECTION_HEADER_MAP: Record<string, string> = {
   "technical expertise": "skills",
   "skills & technologies": "skills",
   "skills and technologies": "skills",
+  "competencies": "skills",
+  "technical competencies": "skills",
   // Projects
   "projects": "projects",
   "personal projects": "projects",
   "academic projects": "projects",
   "key projects": "projects",
   "notable projects": "projects",
-  // Certifications — only very specific labels
+  // Certifications
   "certifications": "certifications",
   "certifications & courses": "certifications",
   "certifications and courses": "certifications",
   "certificates": "certifications",
   "professional certifications": "certifications",
   "awards & certifications": "certifications",
+  "licenses": "certifications",
+  "credentials": "certifications",
 };
 
 function isSectionHeader(line: string): string | null {
@@ -383,28 +390,40 @@ function isSectionHeader(line: string): string | null {
   // Skip lines that are clearly content:
   // - Starts with a bullet character (normalized in cleanText)
   if (trimmed.startsWith("-") || trimmed.startsWith("•") || trimmed.startsWith("*")) return null;
-  
-  // - Contains sentence-like content? 
-  //   We allow trailing periods/colons (common in PDFs), 
+
+  // - Contains sentence-like content?
+  //   We allow trailing periods/colons (common in PDFs),
   //   but reject if period is followed by space and more characters (a sentence).
   if (/[.!?]\s+[A-Z0-9]/.test(trimmed)) return null;
-  
+
   // - Contains @ (email) or looks like a URL
   if (trimmed.includes("@") || /https?:\/\//.test(trimmed)) return null;
-  
-  // - Too long to be a header
-  if (trimmed.length > 50) return null;
 
-  const normalized = trimmed.toLowerCase().replace(/[:.]$/, "").trim();
+  // - Contains numbers (usually not in headers, but can appear in dates or years — skip if year-like)
+  if (/\b(19|20)\d{2}\b/.test(trimmed)) return null;  // Skip lines with years
+  if (/\d{1,2}[/-]\d{1,2}[/-]\d{4}/.test(trimmed)) return null;  // Skip dates
 
-  // Exact match in our conservative map
+  // - Too long to be a header (but allow up to 80 chars for longer titles)
+  if (trimmed.length > 80) return null;
+
+  const normalized = trimmed.toLowerCase().replace(/[:.\s]+$/, "").trim();
+
+  // Exact match in our map
   if (SECTION_HEADER_MAP[normalized]) return SECTION_HEADER_MAP[normalized];
 
+  // Partial match: check if normalized starts with any known section keyword
+  // This helps with variations like "SKILLS - TECHNICAL" → "skills"
+  for (const [key, sectionName] of Object.entries(SECTION_HEADER_MAP)) {
+    if (key.length >= 4 && normalized.startsWith(key)) {
+      return sectionName;
+    }
+  }
+
   // All-caps match (many resumes use ALL CAPS headers like "WORK EXPERIENCE")
-  // Must be all uppercase letters+symbols (no digits allowed in headers usually)
   if (trimmed === trimmed.toUpperCase() && /^[A-Z][A-Z\s&-]{2,}$/.test(trimmed)) {
-    if (SECTION_HEADER_MAP[trimmed.toLowerCase()]) {
-      return SECTION_HEADER_MAP[trimmed.toLowerCase()];
+    const lowerKey = trimmed.toLowerCase().replace(/[:.]$/, "").trim();
+    if (SECTION_HEADER_MAP[lowerKey]) {
+      return SECTION_HEADER_MAP[lowerKey];
     }
   }
 
@@ -524,37 +543,35 @@ function restoreRoleHeaders(optimizedText: string, originalHeaders: Map<number, 
 async function extractSectionsWithAI(
   resumeText: string
 ): Promise<Record<string, string>> {
-  const prompt = `${SECTION_EXTRACTION_PROMPT}\n\nRESUME TEXT:\n${String(resumeText).slice(0, 6000)}`;
+  // For now, use regex extraction as primary since it's more reliable
+  // AI extraction can be added later with better prompt engineering
+  const sections = extractSectionsFromText(resumeText);
 
-  try {
-    if (useGroq()) {
-      const client = getGroqClient();
-      const raw = await fetchGroqWithFallback(client, {
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.1,
-        max_tokens: 4000,
-        response_format: { type: "json_object" },
-      });
-      const parsed = JSON.parse(cleanJsonString(raw));
-      // Handle JSON object or array response
-      if (typeof parsed === "object" && !Array.isArray(parsed)) {
-        return parsed;
+  // Validate extraction - if sections are empty or look wrong, try to improve
+  if (Object.keys(sections).length <= 1 || !sections.experience) {
+    // Try AI extraction as fallback if regex extraction failed
+    const prompt = `${SECTION_EXTRACTION_PROMPT}\n\nRESUME TEXT:\n${String(resumeText).slice(0, 6000)}`;
+    try {
+      if (useGroq()) {
+        const client = getGroqClient();
+        const raw = await fetchGroqWithFallback(client, {
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.05,
+          max_tokens: 4000,
+          response_format: { type: "json_object" },
+        });
+        const parsed = JSON.parse(cleanJsonString(raw));
+        if (typeof parsed === "object" && !Array.isArray(parsed) && Object.keys(parsed).length > 1) {
+          return parsed;
+        }
       }
-      return parsed;
-    } else {
-      const model = getGeminiModel();
-      const result = await model.generateContent({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json" },
-      });
-      const raw = result.response.text();
-      const parsed = JSON.parse(cleanJsonString(raw));
-      return parsed;
+    } catch (e) {
+      console.warn("AI section extraction also failed:", e);
     }
-  } catch (e) {
-    console.warn("AI section extraction failed, falling back to regex extraction:", e);
-    return extractSectionsFromText(resumeText);
   }
+
+  // Return regex extraction results
+  return sections;
 }
 
 // ── Internal: optimize a single named section ──────────────────────────────
@@ -581,10 +598,12 @@ async function optimizeSingleSection(
   if (sectionName === "experience") {
     roleHeaders = detectRoleHeaders(sectionContent);
     if (roleHeaders.size > 0) {
-      headerProtectionNote = `\n=== ROLE HEADER LINES (DO NOT MODIFY) ===
+      headerProtectionNote = `\n=== ROLE HEADER LINES THAT MUST NOT BE CHANGED ===
 ${Array.from(roleHeaders.values())
-  .map((h) => `[HEADER - DO NOT MODIFY]: ${h}`)
+  .map((h, idx) => `${idx + 1}. ${h}`)
   .join("\n")}
+
+These lines MUST appear exactly as shown above in the output with no changes to company name, job title, or dates.
 `;
     }
   }
@@ -631,8 +650,14 @@ ${sectionContent}`;
       optimizedContent = restoreRoleHeaders(optimizedContent, roleHeaders);
     }
 
+    // Clean up any placeholder text that might have leaked into the output
+    optimizedContent = optimizedContent
+      .replace(/\[HEADER\s*[-–—]\s*DO\s+NOT\s+MODIFY\]:\s*/gi, "")
+      .replace(/^=== ROLE HEADER.*/gm, "")
+      .replace(/^These lines MUST appear.*/gm, "");
+
     return {
-      optimized_content: optimizedContent,
+      optimized_content: optimizedContent.trim(),
       changes: Array.isArray(parsed.changes) ? parsed.changes : [],
     };
   } catch (e) {
