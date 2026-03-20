@@ -152,21 +152,55 @@ export async function downloadTextAsDocx(data: ResumeData, filename: string, tem
                     children: [new TextRun({ text: section.title.toUpperCase(), bold: true, size: 20, color: hex, font: "Arial" })]
                 })
             );
-            const fragments = section.content.split(/(<ul>|<\/ul>|<li>|<\/li>|<p>|<\/p>|<br\s*\/?>)/).filter(f => f.trim().length > 0 && !f.startsWith("<"));
-            const rawContent = section.content;
-            fragments.forEach(text => {
-                 const cleanText = text.trim().replace(/&nbsp;/g, " ").replace(/&amp;/g, "&");
-                 if (!cleanText) return;
-                 const isBullet = rawContent.includes(`<li>${text}`) || rawContent.includes(`<li>${cleanText}`);
-                 rightChildren.push(
-                     new Paragraph({
-                         spacing: { before: 50, after: 50 },
-                         bullet: isBullet ? { level: 0 } : undefined,
-                         indent: isBullet ? { left: 400, hanging: 240 } : undefined,
-                         alignment: AlignmentType.LEFT,
-                         children: [new TextRun({ text: cleanText, size: 18, font: "Arial" })]
-                     })
-                 );
+
+            // Parse HTML content more carefully
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = section.content;
+
+            // Process each child element
+            Array.from(tempDiv.childNodes).forEach(node => {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    const text = (node.textContent || '').trim();
+                    if (text) {
+                        rightChildren.push(new Paragraph({
+                            spacing: { before: 50, after: 50 },
+                            children: [new TextRun({ text, size: 18, font: "Arial" })]
+                        }));
+                    }
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    const elem = node as HTMLElement;
+                    if (elem.tagName === 'P') {
+                        // Check if it's a bold header (role | company | date)
+                        const strong = elem.querySelector('strong');
+                        if (strong) {
+                            const headerText = strong.textContent || '';
+                            rightChildren.push(new Paragraph({
+                                spacing: { before: 100, after: 50 },
+                                children: [new TextRun({ text: headerText, bold: true, size: 18, font: "Arial" })]
+                            }));
+                        } else {
+                            const text = elem.textContent || '';
+                            if (text.trim()) {
+                                rightChildren.push(new Paragraph({
+                                    spacing: { before: 50, after: 50 },
+                                    children: [new TextRun({ text: text.trim(), size: 18, font: "Arial" })]
+                                }));
+                            }
+                        }
+                    } else if (elem.tagName === 'UL') {
+                        Array.from(elem.querySelectorAll('li')).forEach(li => {
+                            const text = (li.textContent || '').trim();
+                            if (text) {
+                                rightChildren.push(new Paragraph({
+                                    spacing: { before: 40, after: 40 },
+                                    bullet: { level: 0 },
+                                    indent: { left: 400, hanging: 240 },
+                                    children: [new TextRun({ text, size: 18, font: "Arial" })]
+                                }));
+                            }
+                        });
+                    }
+                }
             });
         });
 

@@ -119,8 +119,8 @@ export const ResumeEditor: React.FC<ResumeEditorProps> = ({
 
       <div className="flex flex-col lg:flex-row gap-6 h-full">
         {/* Editor Main Area - Smaller Basis */}
-        <div className={`lg:basis-[40%] space-y-6 ${activeTab === "preview" ? "hidden lg:block" : "block"}`}>
-            <div className="glass p-6 min-h-full space-y-8">
+        <div className={`lg:basis-[40%] space-y-6 ${activeTab === "preview" ? "hidden lg:block" : "block"} overflow-y-auto max-h-[calc(100vh-180px)] custom-scrollbar`}>
+            <div className="glass p-6 space-y-8">
             {/* Basics Section */}
             <section className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -156,11 +156,17 @@ export const ResumeEditor: React.FC<ResumeEditorProps> = ({
                     onChange={(e) => handleBasicsChange("phone", e.target.value)}
                     placeholder="Phone Number"
                 />
-                <input 
+                <input
                     className="bg-transparent border-b border-white/10 text-xs text-gray-200 focus:border-violet-500 outline-none pb-1 transition-colors md:col-span-2"
                     value={data.basics.location || ""}
                     onChange={(e) => handleBasicsChange("location", e.target.value)}
                     placeholder="City, Country"
+                />
+                <input
+                    className="bg-transparent border-b border-white/10 text-xs text-gray-200 focus:border-violet-500 outline-none pb-1 transition-colors md:col-span-2"
+                    value={data.basics.website || ""}
+                    onChange={(e) => handleBasicsChange("website", e.target.value)}
+                    placeholder="LinkedIn / GitHub / Portfolio URL"
                 />
                 </div>
             </section>

@@ -271,10 +271,18 @@ export function resumeSectionsToResumeData(
       }
       // Website / LinkedIn / GitHub
       if (!basics.website && (URL_RE.test(token) || /linkedin\.com|github\.com/i.test(token))) {
+        let website = "";
         const urlM = token.match(URL_RE);
-        basics.website = urlM ? urlM[0] : token;
-        usedTokens.add(token);
-        continue;
+        if (urlM) {
+          website = urlM[0];
+        } else if (/linkedin\.com|github\.com/i.test(token)) {
+          website = token;
+        }
+        if (website) {
+          basics.website = website;
+          usedTokens.add(token);
+          continue;
+        }
       }
       // Location: has comma, short, no bulk digits
       if (
@@ -454,4 +462,112 @@ export function resumeSectionsToResumeData(
   }));
 
   return { basics, sections: resumeSections };
+}
+
+/**
+ * Convert a StructuredResume (from the extraction pipeline) into ResumeData.
+ * This is Step 5 of the pipeline — converts clean structured JSON to UI-ready Tiptap HTML.
+ *
+ * All sections are rendered as plain text with proper HTML formatting for the editor:
+ * - Basics: structured fields (name, email, phone, location, title)
+ * - Summary: plain text paragraph in <p>
+ * - Experience: role header as <p><strong> + bullets as <ul><li>
+ * - Skills: comma-separated list in <p>
+ * - Education: one line per degree in <p>
+ * - Certifications: one per line in <ul><li> format
+ */
+export function structuredResumeToResumeData(structured: {
+  name: string;
+  email: string;
+  phone: string;
+  location: string;
+  title: string;
+  website?: string;
+  summary: string;
+  skills: string[];
+  certifications: string[];
+  education: Array<{ degree: string; institution: string; year: string }>;
+  experience: Array<{ company: string; role: string; duration: string; points: string[] }>;
+}): ResumeData {
+  const basics: ResumeBasics = {
+    name: structured.name || "",
+    label: structured.title || undefined,
+    email: structured.email || undefined,
+    phone: structured.phone || undefined,
+    location: structured.location || undefined,
+    website: structured.website || undefined,
+  };
+
+  const sections: ResumeSection[] = [];
+
+  // Helper to generate unique IDs
+  const genId = () => Math.random().toString(36).substring(2, 11);
+
+  // Summary
+  if (structured.summary?.trim()) {
+    sections.push({
+      id: genId(),
+      title: "SUMMARY",
+      content: `<p>${structured.summary}</p>`,
+    });
+  }
+
+  // Work Experience
+  if (structured.experience && structured.experience.length > 0) {
+    const expHtml = structured.experience
+      .map((exp) => {
+        const header = `<p><strong>${exp.role} | ${exp.company} | ${exp.duration}</strong></p>`;
+        const bullets =
+          exp.points && exp.points.length > 0
+            ? `<ul>${exp.points
+                .map((p) => `<li>${p}</li>`)
+                .join("")}</ul>`
+            : "";
+        return header + bullets;
+      })
+      .join("");
+    sections.push({
+      id: genId(),
+      title: "WORK EXPERIENCE",
+      content: expHtml,
+    });
+  }
+
+  // Skills
+  if (structured.skills && structured.skills.length > 0) {
+    sections.push({
+      id: genId(),
+      title: "SKILLS",
+      content: `<p>${structured.skills.join(", ")}</p>`,
+    });
+  }
+
+  // Education
+  if (structured.education && structured.education.length > 0) {
+    const eduHtml = structured.education
+      .map((e) => {
+        const line = `${e.degree}${e.institution ? " | " + e.institution : ""}${e.year ? " | " + e.year : ""}`;
+        return `<p>${line}</p>`;
+      })
+      .join("");
+    sections.push({
+      id: genId(),
+      title: "EDUCATION",
+      content: eduHtml,
+    });
+  }
+
+  // Certifications
+  if (structured.certifications && structured.certifications.length > 0) {
+    const certHtml = `<ul>${structured.certifications
+      .map((c) => `<li>${c}</li>`)
+      .join("")}</ul>`;
+    sections.push({
+      id: genId(),
+      title: "CERTIFICATIONS",
+      content: certHtml,
+    });
+  }
+
+  return { basics, sections };
 }

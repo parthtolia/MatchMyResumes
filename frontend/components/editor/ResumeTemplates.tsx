@@ -64,8 +64,13 @@ const ModernTemplate: React.FC<TemplateProps> = ({ data, theme }) => (
           <h2 className="text-sm font-black uppercase tracking-widest mb-3" style={{ color: theme.primaryColor }}>
             {section.title}
           </h2>
-          <div 
+          <div
             className="text-sm leading-relaxed text-gray-800"
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.75rem'
+            }}
             dangerouslySetInnerHTML={{ __html: section.content }}
           />
         </section>

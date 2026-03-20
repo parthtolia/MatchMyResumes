@@ -6,22 +6,36 @@ import { ArrowRight } from "lucide-react"
 import { downloadElementAsPdf, downloadTextAsDocx } from "@/lib/download"
 import { ResumeEditor } from "@/components/editor/ResumeEditor"
 import { ResumeData, ResumeTemplateId, ResumeTheme } from "@/lib/types/resume"
-import { parseRawTextToResumeData, resumeDataToRawText, resumeSectionsToResumeData } from "@/lib/resume-utils"
+import { parseRawTextToResumeData, resumeDataToRawText, resumeSectionsToResumeData, structuredResumeToResumeData } from "@/lib/resume-utils"
+import type { StructuredResume } from "@/lib/types/structured-resume"
 
 interface OptimizerResultProps {
   optimized_text: string
   changes_summary: string[]
   optimized_sections?: Record<string, string>
   structured_json?: Record<string, string>
+  structured_resume?: StructuredResume
+  missing_fields?: string[]
 }
 
-export default function OptimizerResult({ optimized_text, changes_summary, optimized_sections }: OptimizerResultProps) {
+export default function OptimizerResult({
+  optimized_text,
+  changes_summary,
+  optimized_sections,
+  structured_resume
+}: OptimizerResultProps) {
   const [copied, setCopied] = useState(false)
-  const [resumeData, setResumeData] = useState<ResumeData>(() =>
-    optimized_sections && Object.keys(optimized_sections).length > 0
-      ? resumeSectionsToResumeData(optimized_sections)
-      : parseRawTextToResumeData(optimized_text)
-  )
+  const [resumeData, setResumeData] = useState<ResumeData>(() => {
+    // Prefer new structured_resume if available
+    if (structured_resume) {
+      return structuredResumeToResumeData(structured_resume)
+    }
+    // Fallback to existing paths for backward compat
+    if (optimized_sections && Object.keys(optimized_sections).length > 0) {
+      return resumeSectionsToResumeData(optimized_sections)
+    }
+    return parseRawTextToResumeData(optimized_text)
+  })
   const [templateId, setTemplateId] = useState<ResumeTemplateId>("classic")
   const [theme, setTheme] = useState<ResumeTheme>({
     primaryColor: "#7c3aed",

@@ -627,7 +627,7 @@ function isSectionHeader(line: string): string | null {
   return null;
 }
 
-function extractSectionsFromText(resumeText: string): Record<string, string> {
+export function extractSectionsFromText(resumeText: string): Record<string, string> {
   const lines = resumeText.split("\n");
 
   const sections: Record<string, string[]> = {};
@@ -1083,7 +1083,7 @@ Optimize only the bullet points (lines starting with - or •) below each role h
     // For certifications section, ensure we don't have instruction artifacts
     if (sectionName === "certifications") {
       const lines = optimizedContent.split("\n");
-      const cleanedLines = lines.filter(l => {
+      const cleanedLines = lines.filter((l: string) => {
         const trimmed = l.trim();
         // Remove lines that look like instructions
         return !(
@@ -1474,4 +1474,117 @@ Write the cover letter now:`;
   }
 
   return stripMarkdown(text);
+}
+
+// ── New Structured Pipeline Prompts ────────────────────────────────────────────
+
+/** Prompt for AI-based section segmentation (fallback when regex confidence is low) */
+export const AI_SEGMENTATION_PROMPT = `You are a resume section extractor. Split the resume text into named sections.
+Return ONLY this JSON — no markdown:
+{ "header": "", "summary": "", "experience": "", "education": "", "skills": "", "certifications": "" }
+
+Rules:
+- Copy text verbatim from the resume into each section.
+- "header" = everything before the first section heading (name, contact, title).
+- If a section is absent, return "" for that key.
+- Include ALL text; do not truncate.`;
+
+/** Prompt for structured data extraction (Step 3 of pipeline) */
+export const STRUCTURED_EXTRACTION_PROMPT = `You are a precise resume data extractor. Extract ONLY information explicitly present. NEVER hallucinate.
+
+Return ONLY this JSON object (no markdown fences):
+{
+  "name": "", "email": "", "phone": "", "location": "", "title": "", "website": "", "summary": "",
+  "skills": ["concise skill keywords only, no long phrases"],
+  "certifications": ["certification names"],
+  "education": [{"degree": "", "institution": "", "year": ""}],
+  "experience": [{"company": "", "role": "", "duration": "", "points": ["bullet text, no leading dashes"]}]
+}
+
+Rules:
+- Absent fields: "" for strings, [] for arrays.
+- website: Extract LinkedIn URL, GitHub URL, or portfolio website if present (e.g., https://linkedin.com/in/..., https://github.com/..., or personal website URL).
+- Preserve company/role/duration CHARACTER-FOR-CHARACTER.
+- Strip leading - • * from bullet points.
+- Experience in document order.
+- Skills: individual keywords only (max 3 words each).`;
+
+/** Prompt for optimizing structured resume with JD alignment (Step 4 of pipeline) */
+export const STRUCTURED_OPTIMIZATION_PROMPT = `You are an ATS resume optimizer. Improve ONLY summary and experience bullet points.
+
+PRESERVE UNCHANGED (return byte-for-byte): experience[].company, experience[].role, experience[].duration, education, certifications, name, email, phone, location, title.
+
+IMPROVE:
+- summary: rewrite for JD alignment, preserve factual claims
+- experience[].points: rephrase for clarity, integrate JD keywords, return 3–6 bullets per role
+- skills: ADD relevant ATS keywords from missing list (only if truthful); NEVER remove existing
+
+KEYWORD RULES:
+- Add at most 2 new keywords per experience entry
+- Do not repeat the same keyword multiple times within one role
+- Maintain natural sentence readability — no keyword stuffing
+
+Return the COMPLETE StructuredResume JSON. No markdown.`;
+
+// ── Helper: Retry wrapper for structured AI calls ──────────────────────────────
+
+interface StructuredAIOptions {
+  maxRetries?: number;
+  backoffMs?: number;
+}
+
+/**
+ * Call AI with retry logic for structured extractions.
+ * Tries Groq primary → Gemini fallback, with retries on JSON parse failure.
+ */
+export async function callStructuredAIWithRetry(
+  systemPrompt: string,
+  userMessage: string,
+  options: StructuredAIOptions = {}
+): Promise<Record<string, any>> {
+  const { maxRetries = 2, backoffMs = 500 } = options;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      let responseText: string;
+
+      if (useGroq()) {
+        const client = getGroqClient();
+        responseText = await fetchGroqWithFallback(client, {
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userMessage },
+          ],
+          temperature: 0.2,
+          max_tokens: 4096,
+          response_format: { type: "json_object" },
+        });
+      } else {
+        const model = getGeminiModel();
+        const result = await model.generateContent([
+          { text: `${systemPrompt}\n\n${userMessage}` },
+        ]);
+        responseText = result.response.text();
+      }
+
+      const cleanedJson = cleanJsonString(responseText);
+      const parsed = JSON.parse(cleanedJson);
+      return parsed;
+    } catch (e) {
+      // If last attempt, throw; otherwise retry with backoff
+      if (attempt === maxRetries) {
+        throw new Error(
+          `callStructuredAIWithRetry failed after ${maxRetries + 1} attempts: ${
+            e instanceof Error ? e.message : String(e)
+          }`
+        );
+      }
+
+      // Wait before retry with exponential backoff
+      const waitMs = backoffMs * Math.pow(2, attempt);
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+    }
+  }
+
+  throw new Error("Exhausted all retries");
 }

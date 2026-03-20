@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, publicAiLimiter } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
-import { parseResume, parseSections } from "@/lib/services/resume-parser";
-import { optimizeResumeSectional } from "@/lib/services/ai-service";
 import { computeKeywordScore } from "@/lib/scoring/ats-scorer";
+import { runExtractionPipeline } from "@/lib/services/resume-pipeline";
 
 export const maxDuration = 60;
 
@@ -60,9 +59,21 @@ export async function POST(request: NextRequest) {
     const fileType = file.type === "application/pdf" ? "pdf" : "docx";
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    let parsed;
+    // Compute missing keywords upfront for optimization step
+    // For this, we need to quickly parse the resume first
+    let initialKeywords: string[] = [];
     try {
-      parsed = await parseResume(buffer, fileType);
+      const { parseResume } = await import("@/lib/services/resume-parser");
+      const parsed = await parseResume(buffer, fileType);
+      if (parsed.raw_text && parsed.raw_text.length >= 50) {
+        const [, , keywords] = await computeKeywordScore(parsed.raw_text, jdText);
+        initialKeywords = keywords;
+      } else {
+        return NextResponse.json(
+          { detail: "Resume appears to be empty or too short" },
+          { status: 400 }
+        );
+      }
     } catch {
       return NextResponse.json(
         { detail: "Could not parse the uploaded file" },
@@ -70,42 +81,46 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!parsed.raw_text || parsed.raw_text.length < 50) {
-      return NextResponse.json(
-        { detail: "Resume appears to be empty or too short" },
-        { status: 400 }
-      );
-    }
-
-    // Compute missing keywords
-    const [, , missingKeywords] = await computeKeywordScore(
-      parsed.raw_text,
-      jdText
-    );
-
-    // Run AI optimization (section-wise)
-    let result;
+    // Run new extraction pipeline
+    let pipelineResult;
     try {
-      result = await optimizeResumeSectional(parsed.raw_text, jdText, missingKeywords);
+      pipelineResult = await runExtractionPipeline(
+        buffer,
+        fileType,
+        jdText,
+        initialKeywords
+      );
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Unknown error";
+      console.error("Pipeline error:", message);
       return NextResponse.json(
-        { detail: `AI optimization failed: ${message}` },
+        { detail: `Resume optimization failed: ${message}` },
         { status: 500 }
       );
     }
 
+    // Return new response with structured data
     const response: any = {
-      optimized_text: result.optimized_text || "",
-      changes_summary: result.changes_summary || [],
-      optimized_sections: result.optimized_sections || {},
-      structured_json: parseSections(result.optimized_text || ""),
-    };
+      // Backward compat fields (empty now, but present)
+      optimized_text: "",
+      changes_summary: pipelineResult.changes_summary,
+      optimized_sections: {},
+      structured_json: {},
 
-    // Include contact info if extracted by AI
-    if ((result as any).contact_info) {
-      response.contact_info = (result as any).contact_info;
-    }
+      // New fields from pipeline
+      structured_resume: pipelineResult.optimized,
+      missing_fields: pipelineResult.missing_fields,
+      confidence_score: pipelineResult.confidence_score,
+
+      // Contact info for backward compat
+      contact_info: {
+        name: pipelineResult.optimized.name,
+        email: pipelineResult.optimized.email,
+        phone: pipelineResult.optimized.phone,
+        location: pipelineResult.optimized.location,
+        title: pipelineResult.optimized.title,
+      },
+    };
 
     return NextResponse.json(response);
   } catch (error) {
