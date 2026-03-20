@@ -558,35 +558,50 @@ function isSectionHeader(line: string): string | null {
   const trimmed = line.trim();
   if (!trimmed) return null;
 
+  // PHASE 3: Stricter section header detection to prevent false positives
+
   // Skip lines that are clearly content (not headers):
   // - Starts with a bullet character
   if (trimmed.startsWith("-") || trimmed.startsWith("•") || trimmed.startsWith("*")) return null;
 
-  // - Is clearly a sentence (has sentence-like punctuation mid-line or at end with continuation)
-  //   But be careful: "Web Developer, Inc. | 2020-2023" is NOT a sentence
-  //   Check for pattern like ". " followed by capital letter (sentence continuation)
-  if (/\.[A-Z][a-z]/.test(trimmed)) return null;
+  // - Is a sentence or prose (multiple spaces, sentence punctuation, real words)
+  //   Check for: period/exclamation/question followed by space and capital (sentence pattern)
+  if (/[.!?]\s+[A-Z][a-z]/.test(trimmed)) return null;
+  //   Check for: contains more than 2 words (likely prose, not a header)
+  const wordCount = trimmed.split(/\s+/).length;
+  if (wordCount > 6) return null;
 
-  // - Too long to be a header (but allow up to 120 chars for longer titles)
-  if (trimmed.length > 120) return null;
+  // - Too long to be a header (headers are short, < 80 chars)
+  if (trimmed.length > 80) return null;
 
-  // - IMPORTANT: Don't reject lines just because they contain contact info
-  //   Contact lines should be in "basics" section, not filtered here
-  //   Email/URL/phone can appear in basics, so don't use them as rejection criteria
+  // - Contains date patterns (job date ranges) - likely experience content, not a header
+  if (/\d{4}\s*[-–—]\s*(\d{4}|present|current)/i.test(trimmed)) return null;
+
+  // - Contains pipes with dates/companies (role header, not section header)
+  if (trimmed.includes("|") && /\d{4}|present|current/i.test(trimmed)) return null;
+
+  // - Looks like a company name or job role line (too specific)
+  if (/\b(at|company|engineer|developer|manager|analyst|specialist)\b/i.test(trimmed) && wordCount <= 5) {
+    // Only if it doesn't match known section names
+    const normalized = trimmed.toLowerCase().replace(/[:.\s]+$/, "").trim();
+    if (!SECTION_HEADER_MAP[normalized]) return null;
+  }
 
   const normalized = trimmed.toLowerCase().replace(/[:.\s]+$/, "").trim();
 
-  // Exact match in our map
+  // Exact match in our map (most reliable)
   if (SECTION_HEADER_MAP[normalized]) return SECTION_HEADER_MAP[normalized];
 
   // Partial match: check if normalized starts with any known section keyword
+  // But require minimum 4 chars to avoid false matches like "ski" for "skills"
   for (const [key, sectionName] of Object.entries(SECTION_HEADER_MAP)) {
-    if (key.length >= 4 && normalized.startsWith(key)) {
+    if (key.length >= 4 && normalized.startsWith(key) && normalized.length < key.length + 8) {
       return sectionName;
     }
   }
 
   // All-caps match (many resumes use ALL CAPS headers like "WORK EXPERIENCE")
+  // But only if it matches known section names
   if (trimmed === trimmed.toUpperCase() && /^[A-Z][A-Z\s&-]{2,}$/.test(trimmed)) {
     const lowerKey = trimmed.toLowerCase().replace(/[:.]$/, "").trim();
     if (SECTION_HEADER_MAP[lowerKey]) {
@@ -613,11 +628,32 @@ function extractSectionsFromText(resumeText: string): Record<string, string> {
       currentSection = detected;
       if (!sections[currentSection]) sections[currentSection] = [];
     } else {
+      const trimmed = rawLine.trim();
+      if (!trimmed) continue; // Skip empty lines
+
       if (!foundFirstSection) {
         basicsLines.push(rawLine);
       } else if (currentSection) {
-        if (!sections[currentSection]) sections[currentSection] = [];
-        sections[currentSection].push(rawLine);
+        // PHASE 3: Validate content belongs to this section
+        // Prevent experience bullets from appearing in skills
+        // Prevent education content in experience
+        const isValidForSection = validateSectionContent(trimmed, currentSection);
+        if (isValidForSection) {
+          if (!sections[currentSection]) sections[currentSection] = [];
+          sections[currentSection].push(rawLine);
+        } else {
+          // Content doesn't match section type - might be a missed header
+          const redetected = isSectionHeader(trimmed);
+          if (redetected) {
+            // This line should actually be a header
+            currentSection = redetected;
+            if (!sections[currentSection]) sections[currentSection] = [];
+          } else {
+            // Unknown content - add to current section anyway
+            if (!sections[currentSection]) sections[currentSection] = [];
+            sections[currentSection].push(rawLine);
+          }
+        }
       }
     }
   }
@@ -633,6 +669,59 @@ function extractSectionsFromText(resumeText: string): Record<string, string> {
   }
 
   return result;
+}
+
+// ── Helper: Validate that content belongs to a section type ────────────────
+function validateSectionContent(line: string, sectionName: string): boolean {
+  const trimmed = line.trim();
+
+  // Empty lines are always OK
+  if (!trimmed) return true;
+
+  // Bullet points are OK in most sections
+  if (trimmed.startsWith("-") || trimmed.startsWith("•") || trimmed.startsWith("*")) return true;
+
+  // Section-specific validation
+  if (sectionName === "experience") {
+    // Experience: should have company/title/dates or bullets
+    // Accept: lines with dates, "at"/"Company" patterns, or bullets
+    if (/\d{4}|present|current|\bat\b|engineer|developer|manager/i.test(trimmed)) return true;
+    if (trimmed.startsWith("-") || trimmed.startsWith("•")) return true;
+    // Reject: lines that look like certifications, education, skills
+    if (/bachelor|master|certificate|certified|proficiency|license|skill:/i.test(trimmed)) return false;
+    return true;
+  }
+
+  if (sectionName === "education") {
+    // Education: should have degree, school, date
+    // Accept: lines with years, degree keywords, school names
+    if (/bachelor|master|phd|b\.|m\.|degree|university|college|\d{4}/i.test(trimmed)) return true;
+    if (trimmed.startsWith("-") || trimmed.startsWith("•")) return true;
+    // Reject: work experience bullets
+    if (/engineer|developer|manager|designed|implemented|built|led\s+/i.test(trimmed)) return false;
+    return true;
+  }
+
+  if (sectionName === "skills") {
+    // Skills: should be comma-separated or bullets with skills
+    // Reject: lines with job titles, dates, company names
+    if (/\d{4}[-–—]\d{4}|present|current/.test(trimmed)) return false;
+    if (/at\s+[A-Z]|company|inc\.|ltd\.|llc/i.test(trimmed)) return false;
+    return true;
+  }
+
+  if (sectionName === "certifications") {
+    // Certifications: should mention cert, license, award, credential
+    // Reject: pure job descriptions
+    if (/certificate|certified|license|credential|award|badge/i.test(trimmed)) return true;
+    if (trimmed.startsWith("-") || trimmed.startsWith("•")) return true;
+    // Single line might be cert name
+    if (trimmed.length < 100) return true;
+    return false;
+  }
+
+  // Default: accept (for summary, projects, other)
+  return true;
 }
 
 // ── Helper: detect role header lines in experience sections ──────────────
