@@ -685,10 +685,20 @@ function validateSectionContent(line: string, sectionName: string): boolean {
   if (sectionName === "experience") {
     // Experience: should have company/title/dates or bullets
     // Accept: lines with dates, "at"/"Company" patterns, or bullets
-    if (/\d{4}|present|current|\bat\b|engineer|developer|manager/i.test(trimmed)) return true;
-    if (trimmed.startsWith("-") || trimmed.startsWith("•")) return true;
+    if (/\d{4}|present|current|\bat\b|engineer|developer|manager/i.test(trimmed)) {
+      console.log(`✅ VALIDATED: Experience line accepted: "${trimmed.substring(0, 50)}..."`);
+      return true;
+    }
+    if (trimmed.startsWith("-") || trimmed.startsWith("•")) {
+      console.log(`✅ VALIDATED: Experience bullet accepted: "${trimmed.substring(0, 50)}..."`);
+      return true;
+    }
     // Reject: lines that look like certifications, education, skills
-    if (/bachelor|master|certificate|certified|proficiency|license|skill:/i.test(trimmed)) return false;
+    if (/bachelor|master|certificate|certified|proficiency|license|skill:/i.test(trimmed)) {
+      console.log(`❌ REJECTED: Non-experience line in experience: "${trimmed.substring(0, 50)}..."`);
+      return false;
+    }
+    console.log(`✅ VALIDATED: Experience line (generic): "${trimmed.substring(0, 50)}..."`);
     return true;
   }
 
@@ -817,6 +827,21 @@ async function extractSectionsWithAI(
   // PHASE 1: Use REGEX-based extraction as PRIMARY (more reliable for boundaries)
   // AI extraction available as optional fallback only
   const sections = extractSectionsFromText(resumeText);
+
+  // DIAGNOSTIC LOG 1: After section extraction
+  console.log(
+    "🔍 DEBUG: Sections extracted (REGEX-PRIMARY):",
+    Object.keys(sections)
+  );
+  if (sections.basics) {
+    console.log("  📋 BASICS content (first 200 chars):", sections.basics.substring(0, 200));
+  }
+  if (sections.experience) {
+    console.log("  📋 EXPERIENCE content (first 300 chars):", sections.experience.substring(0, 300));
+  }
+  if (sections.skills) {
+    console.log("  📋 SKILLS content:", sections.skills);
+  }
 
   // Validate extraction - if sections look incomplete, optionally try AI as fallback
   const hasMinimalContent =
@@ -1166,11 +1191,18 @@ export async function optimizeResumeSectional(
   let contactInfoPromise = Promise.resolve({});
   if (basicsContent) {
     // Fire-and-forget: extract in background
+    console.log("🔍 DEBUG: Extracting contact info from basics section");
     contactInfoPromise = extractContactInfoFromBasics(basicsContent)
+      .then((info) => {
+        console.log("✅ Contact extraction result:", info);
+        return info;
+      })
       .catch((e) => {
-        console.warn("Contact extraction failed (non-blocking):", e);
+        console.warn("❌ Contact extraction failed (non-blocking):", e);
         return {};
       });
+  } else {
+    console.warn("⚠️ DEBUG: No basics content found for contact extraction");
   }
 
   // Canonical section order for reassembly
@@ -1191,8 +1223,13 @@ export async function optimizeResumeSectional(
     allKeys.map(async (sectionName) => {
       const content = deduplicatedSections[sectionName];
       if (!content?.trim()) return;
+
+      console.log(`🔍 DEBUG: Optimizing ${sectionName} section (first 200 chars):`, content.substring(0, 200));
+
       const res = await optimizeSingleSection(sectionName, content, jdText, kwList);
       let optimizedContent = res.optimized_content;
+
+      console.log(`✅ Optimized ${sectionName} section (first 200 chars):`, optimizedContent.substring(0, 200));
 
       // PHASE 5: Categorize skills if applicable
       if (sectionName === "skills") {
