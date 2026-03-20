@@ -31,37 +31,41 @@ function useGroq(): boolean {
 }
 
 // ── Section extraction ─────────────────────────────────────────────────────
-const SECTION_EXTRACTION_PROMPT = `You are a precise resume parser.
-Your task is to split the given resume text into its named sections.
+const SECTION_EXTRACTION_PROMPT = `You are a precise resume parser specializing in careful section extraction.
+Your task is to split the given resume text into its named sections, preserving all contact information.
 
 Return a JSON object whose keys are the canonical section names from the list below,
 and whose values are the VERBATIM text block that belongs to that section.
 
 Canonical section names (use exactly these keys — omit any that are absent from the resume):
-- "basics"         → The header block containing: Full Name, then ALL contact-info lines
-                     (email, phone, LinkedIn, GitHub, location — even if they appear as one
-                     pipe-separated line like "email | phone | linkedin | city").
-                     Include the job title/label line if it appears in the header.
-                     Capture ALL lines BEFORE the first named section (Summary, Experience, etc.).
-- "summary"        → Professional Summary / Objective / Profile
+- "basics"         → The header block containing: Full Name (REQUIRED), Title/Position, and ALL contact-info
+                     This includes: email, phone, location/city, LinkedIn, GitHub, website, or any combo.
+                     Capture ALL lines BEFORE the first major section header (Summary, Experience, Education, Skills, etc).
+                     CRITICAL: Do NOT omit any line that comes before the first section header.
+- "summary"        → Professional Summary / Objective / Profile / About Me
 - "experience"     → Work Experience / Employment History / Professional Experience
-- "education"      → Education / Academic Background
-- "skills"         → Skills / Technical Skills / Core Competencies / Expertise
-- "projects"       → Projects / Personal Projects
-- "certifications" → Certifications / Licenses / Awards / Credentials
+- "education"      → Education / Academic Background / Qualifications
+- "skills"         → Skills / Technical Skills / Core Competencies / Expertise / Technologies
+- "projects"       → Projects / Personal Projects / Key Projects
+- "certifications" → Certifications / Licenses / Awards / Credentials / Certifications & Courses
 - "other"          → anything else that doesn't fit above
 
 RULES:
 1. Copy the content VERBATIM — do not paraphrase, reorder, or reformat lines.
 2. Do NOT include the section header line itself (e.g. the word "Experience") in the value.
-3. For "basics": include every line before the first named section, exactly as written —
-   including pipe-separated contact lines like "john@email.com | +91-9876543210 | Mumbai, India".
-4. Return ONLY valid JSON. No markdown fences. No explanation outside the JSON.
-5. If a section is empty or absent, omit its key entirely.
+3. For "basics": include EVERY line before the first major section header, no exceptions.
+   Even if a line has an email, phone, or looks "structural", if it comes before the first section header, it belongs here.
+4. Contact information may appear in many formats:
+   - Separate lines: "john@email.com" / "+1 555-1234" / "New York, USA"
+   - Pipe-separated: "john@email.com | +1 555-1234 | linkedin.com/in/john | New York, USA"
+   - Comma-separated: "john@email.com, +1 555-1234, New York, USA"
+   Include ALL of these verbatim in the basics section.
+5. Return ONLY valid JSON. No markdown fences. No explanation outside the JSON.
+6. If a section is empty or absent, omit its key entirely.
 
 Example output:
 {
-  "basics": "John Smith\\nSoftware Engineer\\njohn@email.com | +1 555-1234 | linkedin.com/in/john | New York, USA",
+  "basics": "POORNIMA SONKAR\\nSoftware Engineer\\njohn@email.com | +91-9876543210 | Mumbai, India",
   "summary": "Experienced software engineer with 7+ years...",
   "experience": "Senior Engineer | Acme Corp | Jan 2020 – Present\\n- Led team of 5 engineers\\n- Built CI/CD pipeline",
   "skills": "Python, TypeScript, AWS, Docker, Kubernetes",
@@ -69,66 +73,82 @@ Example output:
 }`;
 
 // ── Per-section optimizer ──────────────────────────────────────────────────
-const SECTION_OPTIMIZER_PROMPT = `You are an expert ATS resume optimization specialist with strict fact preservation rules.
+const SECTION_OPTIMIZER_PROMPT = `You are an expert ATS resume optimization specialist with STRICT fact preservation rules.
 You will receive ONE SECTION of a resume to optimize.
 
-===== CORE RULES (MANDATORY) =====
+===== CRITICAL CORE RULES (NON-NEGOTIABLE) =====
 
-FACTS (NEVER CHANGE):
+FACTS THAT MUST NEVER CHANGE:
 - Company names, job titles, designations, employment dates (exact months/years)
 - Degree names, institution names, graduation dates
 - Email addresses, phone numbers, locations, LinkedIn/GitHub URLs
-- Any line with the pattern: "Title | Company | Date" or "Company, Title (Year–Year)"
+- Any line with role headers: "Title | Company | Date" or "Company, Title (Year–Year)" or similar
+- School/degree headers like "B.S. Computer Science | University Name | 2020"
 - Marked lines with [HEADER - DO NOT MODIFY]
 
-CONTENT (YOU CAN IMPROVE):
-- Bullet points describing achievements under each role
-- Summary paragraphs and prose
+CONTENT YOU CAN IMPROVE:
+- Bullet point descriptions under roles (enhance, reword, add metrics)
+- Summary paragraphs and prose sections
 - Skills list items
 - Project descriptions
+- Certification descriptions
 
 ===== SECTION-SPECIFIC RULES =====
 
 FOR BASICS SECTION:
-- Return exactly as-is. NO changes whatsoever.
+- RETURN EXACTLY AS-IS. NO CHANGES. NOT A SINGLE CHARACTER.
+- This section contains: Name, Title, Email, Phone, Location, Links
+- Simply output it unchanged.
 
 FOR EDUCATION SECTION:
-- Return exactly as-is. NO changes whatsoever.
+- RETURN EXACTLY AS-IS. NO CHANGES. Preserve degree names, schools, dates exactly.
+- You may reorder bullet points under each degree but NOT the degree headers themselves.
 
-FOR EXPERIENCE SECTION:
-- Role HEADER lines (containing company, title, dates) MUST be reproduced CHARACTER-FOR-CHARACTER.
-- Role headers MUST appear on their own line — do NOT merge with bullets.
-- ONLY modify/add BULLET POINT lines (starting with - or •).
-- Preserve header line order exactly.
-- Do NOT convert to prose. Do NOT merge roles. Do NOT add new role entries.
-- For each role, you may: enhance existing bullets (add metrics, keywords, impact), add 1-2 new relevant bullets, or rephrase for clarity.
-- Always retain the original header verbatim.
+FOR EXPERIENCE SECTION (MOST CRITICAL):
+- Each role consists of a HEADER LINE and optional BULLET POINTS below it.
+- HEADER LINE FORMAT: One of these patterns (preserve character-for-character):
+  * "Company Name | Job Title | Start Date – End Date"
+  * "Company Name | Job Title | Start Date – Present"
+  * "Job Title at Company Name (Date Range)"
+  * "Company Name, Job Title (Start Year – End Year)"
+  * Any similar format with company + title + dates on ONE line
+- BULLET LINES: Start with "-" or "•", describe achievements/responsibilities
+- CRITICAL: Do NOT reformat headers. If input shows "Senior Engineer | Google | Jan 2020 – Mar 2023", output EXACTLY that.
+- ONLY modify bullet point lines (those starting with - or •)
+- Preserve header order exactly as they appear in input
+- DO NOT convert headers to prose. DO NOT merge multiple roles.
+- For each role's bullets: enhance/reword for clarity, add 1-2 new bullets if missing context, integrate JD keywords naturally.
+- Structure desired: Header on own line, then 3-5 bullets describing measurable achievements (quantify with numbers/metrics if available).
 
 FOR SUMMARY SECTION:
-- Rewrite to emphasize JD-aligned keywords while keeping tone professional and length similar (±10%).
-- Preserve any factual claims (years of experience, specific technologies, proven achievements).
+- Rewrite to emphasize JD-aligned keywords while maintaining professional tone and similar length (±10%).
+- Preserve factual claims: years of experience, specific proven technologies, achievements.
+- Integrate up to 5-7 missing keywords naturally (only if truthful to the person's background).
 
 FOR SKILLS SECTION:
 - Expand to include ALL relevant keywords from the JD that the candidate plausibly possesses.
-- Keep ALL existing skills.
+- Keep ALL existing skills (never remove).
 - Use EXACT keyword spelling (e.g., "CI/CD", not "continuous integration").
-- Organize as comma-separated or bullet list (match input format).
+- Organize as comma-separated list matching input format (if comma-separated, keep comma-separated; if bullets, keep bullets).
 
 FOR CERTIFICATIONS/PROJECTS SECTIONS:
-- Enhance descriptions with JD keywords where applicable.
-- Do NOT remove or fabricate any certifications.
+- Enhance descriptions (if present) with JD keywords where applicable.
+- NEVER remove, fabricate, or falsify any certifications/projects.
+- Preserve all facts; improve clarity/impact.
 
 ===== GENERAL RULES =====
 
-1. KEYWORD INTEGRATION: Weave provided MISSING KEYWORDS naturally — only where truthful.
-2. Output plain text only — no markdown, no **, no HTML, no bold formatting.
-3. No excessive whitespace. Single blank line between bullets/roles.
-4. If a role header appears multiple times in input, PRESERVE EACH one verbatim.
+1. KEYWORD INTEGRATION: Weave provided MISSING KEYWORDS naturally into existing content — ONLY where truthful.
+2. Output PLAIN TEXT ONLY — no markdown, no **, no HTML, no bold, no formatting.
+3. No excessive whitespace. Single blank line between roles (in experience) or list items.
+4. If a role/degree header appears multiple times, preserve EACH one verbatim.
+5. NEVER fabricate experience, dates, companies, degrees, or skills the person doesn't have.
+6. When in doubt, preserve the original.
 
 Return a JSON object:
 {
-  "optimized_content": "<optimized plain text for this section — preserve all FACTS exactly>",
-  "changes": ["<brief description of changes made>"]
+  "optimized_content": "<optimized plain text for this section — PRESERVE ALL FACTS exactly>",
+  "changes": ["<brief description of changes made>", "..."]
 }`;
 
 const JD_KEYWORD_EXTRACTION_PROMPT = `You are an expert ATS (Applicant Tracking System) keyword extraction engine.
@@ -387,24 +407,21 @@ function isSectionHeader(line: string): string | null {
   const trimmed = line.trim();
   if (!trimmed) return null;
 
-  // Skip lines that are clearly content:
-  // - Starts with a bullet character (normalized in cleanText)
+  // Skip lines that are clearly content (not headers):
+  // - Starts with a bullet character
   if (trimmed.startsWith("-") || trimmed.startsWith("•") || trimmed.startsWith("*")) return null;
 
-  // - Contains sentence-like content?
-  //   We allow trailing periods/colons (common in PDFs),
-  //   but reject if period is followed by space and more characters (a sentence).
-  if (/[.!?]\s+[A-Z0-9]/.test(trimmed)) return null;
+  // - Is clearly a sentence (has sentence-like punctuation mid-line or at end with continuation)
+  //   But be careful: "Web Developer, Inc. | 2020-2023" is NOT a sentence
+  //   Check for pattern like ". " followed by capital letter (sentence continuation)
+  if (/\.[A-Z][a-z]/.test(trimmed)) return null;
 
-  // - Contains @ (email) or looks like a URL
-  if (trimmed.includes("@") || /https?:\/\//.test(trimmed)) return null;
+  // - Too long to be a header (but allow up to 120 chars for longer titles)
+  if (trimmed.length > 120) return null;
 
-  // - Contains numbers (usually not in headers, but can appear in dates or years — skip if year-like)
-  if (/\b(19|20)\d{2}\b/.test(trimmed)) return null;  // Skip lines with years
-  if (/\d{1,2}[/-]\d{1,2}[/-]\d{4}/.test(trimmed)) return null;  // Skip dates
-
-  // - Too long to be a header (but allow up to 80 chars for longer titles)
-  if (trimmed.length > 80) return null;
+  // - IMPORTANT: Don't reject lines just because they contain contact info
+  //   Contact lines should be in "basics" section, not filtered here
+  //   Email/URL/phone can appear in basics, so don't use them as rejection criteria
 
   const normalized = trimmed.toLowerCase().replace(/[:.\s]+$/, "").trim();
 
@@ -412,7 +429,6 @@ function isSectionHeader(line: string): string | null {
   if (SECTION_HEADER_MAP[normalized]) return SECTION_HEADER_MAP[normalized];
 
   // Partial match: check if normalized starts with any known section keyword
-  // This helps with variations like "SKILLS - TECHNICAL" → "skills"
   for (const [key, sectionName] of Object.entries(SECTION_HEADER_MAP)) {
     if (key.length >= 4 && normalized.startsWith(key)) {
       return sectionName;
@@ -479,26 +495,41 @@ function detectRoleHeaders(text: string): Map<number, string> {
     if (!t || t.startsWith("-") || t.startsWith("•") || t.startsWith("*")) return;
 
     // Pattern 1: "Title | Company | Date" or "Company | Title | Date"
-    if (t.includes("|") && /\d{4}|present|current/i.test(t) && t.length < 150) {
-      headers.set(i, t);
-      return;
-    }
-
-    // Pattern 2: "Title, Company (Jan 2020 – Mar 2023)" or "Engineer @ Company, 2020-2023"
-    if (
-      /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|may|june|july|august|september|october|november|december)\b.*\d{4}/i.test(t) &&
-      t.length < 150
-    ) {
-      headers.set(i, t);
-      return;
-    }
-
-    // Pattern 3: Single line with year range "2020 - 2023" or "2020-2024" (but > 10 chars to exclude random years)
-    if (/\d{4}\s*[-–—]\s*\d{4}|present|current/i.test(t) && t.length < 120 && t.length > 10) {
-      // Only if line doesn't look like a bullet or sub-item
-      if (!/^[\s]*[-–—•*]/.test(line)) {
+    // This is the most common format for structured resumes
+    if (t.includes("|")) {
+      // Must have at least a year or "Present"
+      if (/\b\d{4}\b|present|current/i.test(t) && t.length < 200) {
         headers.set(i, t);
+        return;
       }
+    }
+
+    // Pattern 2: "Title, Company (Jan 2020 – Mar 2023)" or variations
+    // Look for month abbreviation or full month name followed by year
+    if (/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december)\b.*\d{4}/i.test(t) && t.length < 200) {
+      headers.set(i, t);
+      return;
+    }
+
+    // Pattern 3: "Company, Title, YYYY-YYYY" format
+    if (/,.*\d{4}\s*[-–—]\s*(\d{4}|present|current)/i.test(t) && t.length < 200) {
+      headers.set(i, t);
+      return;
+    }
+
+    // Pattern 4: Starts with company name followed by year range
+    // e.g., "Acme Corp | 2020 - 2023" or similar
+    if (t.includes(",") || t.includes("|")) {
+      if (/\d{4}\s*[-–—]\s*(\d{4}|present|current)|present|current/i.test(t) && t.length < 150) {
+        headers.set(i, t);
+        return;
+      }
+    }
+
+    // Pattern 5: "Title at Company (Date Range)" - less common but valid
+    if (/\sat\s/i.test(t) && /\d{4}|\(.*\)/i.test(t) && t.length < 150) {
+      headers.set(i, t);
+      return;
     }
   });
 
@@ -539,38 +570,50 @@ function restoreRoleHeaders(optimizedText: string, originalHeaders: Map<number, 
   return result.join("\n").trim();
 }
 
-// ── AI-based section extraction with fallback ──────────────────────────────
+// ── AI-based section extraction (primary method) ────────────────────────────
 async function extractSectionsWithAI(
   resumeText: string
 ): Promise<Record<string, string>> {
-  // For now, use regex extraction as primary since it's more reliable
-  // AI extraction can be added later with better prompt engineering
-  const sections = extractSectionsFromText(resumeText);
+  // Use AI-based extraction as PRIMARY method
+  // It's more robust for handling contact info, section boundaries, and edge cases
+  const prompt = `${SECTION_EXTRACTION_PROMPT}\n\nRESUME TEXT:\n${String(resumeText).slice(0, 8000)}`;
 
-  // Validate extraction - if sections are empty or look wrong, try to improve
-  if (Object.keys(sections).length <= 1 || !sections.experience) {
-    // Try AI extraction as fallback if regex extraction failed
-    const prompt = `${SECTION_EXTRACTION_PROMPT}\n\nRESUME TEXT:\n${String(resumeText).slice(0, 6000)}`;
-    try {
-      if (useGroq()) {
-        const client = getGroqClient();
-        const raw = await fetchGroqWithFallback(client, {
-          messages: [{ role: "user", content: prompt }],
-          temperature: 0.05,
-          max_tokens: 4000,
-          response_format: { type: "json_object" },
-        });
-        const parsed = JSON.parse(cleanJsonString(raw));
-        if (typeof parsed === "object" && !Array.isArray(parsed) && Object.keys(parsed).length > 1) {
+  try {
+    if (useGroq()) {
+      const client = getGroqClient();
+      const raw = await fetchGroqWithFallback(client, {
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.02,  // Very low temperature for precise extraction
+        max_tokens: 5000,
+        response_format: { type: "json_object" },
+      });
+      const parsed = JSON.parse(cleanJsonString(raw));
+      if (typeof parsed === "object" && !Array.isArray(parsed)) {
+        // Validate we got at least basics or experience
+        if (parsed.basics || parsed.experience) {
           return parsed;
         }
       }
-    } catch (e) {
-      console.warn("AI section extraction also failed:", e);
+    } else {
+      const model = getGeminiModel();
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: "application/json" },
+      });
+      const raw = result.response.text();
+      const parsed = JSON.parse(cleanJsonString(raw));
+      if (typeof parsed === "object" && !Array.isArray(parsed)) {
+        if (parsed.basics || parsed.experience) {
+          return parsed;
+        }
+      }
     }
+  } catch (e) {
+    console.warn("AI section extraction failed, falling back to regex:", e);
   }
 
-  // Return regex extraction results
+  // Fallback to regex extraction if AI fails
+  const sections = extractSectionsFromText(resumeText);
   return sections;
 }
 
@@ -591,34 +634,41 @@ async function optimizeSingleSection(
     ? kwList.map((kw) => `  - ${kw}`).join("\n")
     : "  (none)";
 
-  // For EXPERIENCE section: detect and protect role headers
+  // For EXPERIENCE section: detect and protect role headers with special markers
   let roleHeaders: Map<number, string> = new Map();
-  let headerProtectionNote = "";
+  let markedContent = sectionContent;
 
   if (sectionName === "experience") {
     roleHeaders = detectRoleHeaders(sectionContent);
     if (roleHeaders.size > 0) {
-      headerProtectionNote = `\n=== ROLE HEADER LINES THAT MUST NOT BE CHANGED ===
-${Array.from(roleHeaders.values())
-  .map((h, idx) => `${idx + 1}. ${h}`)
-  .join("\n")}
-
-These lines MUST appear exactly as shown above in the output with no changes to company name, job title, or dates.
-`;
+      // Mark role headers with special markers so AI can identify them
+      let lines = sectionContent.split("\n");
+      const sortedIndices = Array.from(roleHeaders.keys()).sort((a, b) => b - a); // Process in reverse to maintain indices
+      for (const idx of sortedIndices) {
+        lines[idx] = `[ROLE_HEADER_START]${roleHeaders.get(idx)}[ROLE_HEADER_END]`;
+      }
+      markedContent = lines.join("\n");
     }
   }
 
   const userContent = `=== SECTION NAME: ${sectionName.toUpperCase()} ===
 
-=== MISSING JD KEYWORDS (integrate where applicable) ===
+=== MISSING JD KEYWORDS (integrate naturally where applicable) ===
 ${kwSection}
 
-=== JOB DESCRIPTION (for context, up to 3500 chars) ===
+=== JOB DESCRIPTION (for context) ===
 ${String(jdText).slice(0, 3500)}
-${headerProtectionNote}
 
 === SECTION CONTENT TO OPTIMIZE ===
-${sectionContent}`;
+${markedContent}
+
+${
+  sectionName === "experience"
+    ? `\nIMPORTANT: Lines marked with [ROLE_HEADER_START]...[ROLE_HEADER_END] contain company name, job title, and dates.
+PRESERVE these EXACTLY character-for-character. Remove the markers but keep the content unchanged.
+Optimize only the bullet points (lines starting with - or •) below each role header.`
+    : ""
+}`;
 
   let raw: string;
   try {
@@ -645,16 +695,20 @@ ${sectionContent}`;
     const parsed = JSON.parse(cleanJsonString(raw));
     let optimizedContent = parsed.optimized_content || sectionContent;
 
-    // Post-process: restore role headers if needed (EXPERIENCE section)
-    if (sectionName === "experience" && roleHeaders.size > 0) {
-      optimizedContent = restoreRoleHeaders(optimizedContent, roleHeaders);
-    }
-
-    // Clean up any placeholder text that might have leaked into the output
+    // Clean up role header markers
     optimizedContent = optimizedContent
+      .replace(/\[ROLE_HEADER_START\]/g, "")
+      .replace(/\[ROLE_HEADER_END\]/g, "")
       .replace(/\[HEADER\s*[-–—]\s*DO\s+NOT\s+MODIFY\]:\s*/gi, "")
       .replace(/^=== ROLE HEADER.*/gm, "")
-      .replace(/^These lines MUST appear.*/gm, "");
+      .replace(/^These lines MUST appear.*/gm, "")
+      .replace(/^IMPORTANT:.*$/gm, "");
+
+    // Post-process: for experience section, ensure proper formatting
+    // (Header on own line, bullets indented or on following lines)
+    if (sectionName === "experience" && roleHeaders.size > 0) {
+      optimizedContent = formatExperienceSection(optimizedContent);
+    }
 
     return {
       optimized_content: optimizedContent.trim(),
@@ -664,6 +718,46 @@ ${sectionContent}`;
     console.warn(`Section "${sectionName}" optimization failed, keeping original:`, e);
     return { optimized_content: sectionContent, changes: [] };
   }
+}
+
+// ── Helper: format experience section for proper display ──────────────────────
+function formatExperienceSection(text: string): string {
+  const lines = text.split("\n");
+  const formatted: string[] = [];
+  let lastWasHeader = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    // Is this a role header? (has pipe, "at", or contains company/title/date patterns)
+    const isRoleHeader =
+      trimmed.includes("|") ||
+      /\bat\b/i.test(trimmed) ||
+      /\bcompany\b|\btitle\b|(\d{4}\s*[-–—]\s*(\d{4}|present|current))/i.test(trimmed);
+
+    if (isRoleHeader && !trimmed.startsWith("-") && !trimmed.startsWith("•")) {
+      // This is a role header
+      if (formatted.length > 0 && formatted[formatted.length - 1] !== "") {
+        formatted.push(""); // Blank line before new role
+      }
+      formatted.push(trimmed);
+      lastWasHeader = true;
+    } else if (trimmed.startsWith("-") || trimmed.startsWith("•")) {
+      // This is a bullet point
+      formatted.push(trimmed);
+      lastWasHeader = false;
+    } else if (trimmed) {
+      // Other content - if it follows a header, treat as a bullet
+      if (lastWasHeader) {
+        formatted.push("- " + trimmed);
+      } else {
+        formatted.push(trimmed);
+      }
+    }
+  }
+
+  return formatted.join("\n").trim();
 }
 
 // ── Public: section-wise optimizer (new primary entry point) ───────────────
@@ -680,20 +774,40 @@ export async function optimizeResumeSectional(
   const rawSections = await extractSectionsWithAI(resumeText);
 
   // Step 1.1 - Deduplicate basics from other sections (PDF header/footer residue)
+  // But be careful: only remove truly duplicate header info, not legitimate content
   const basicsContent = rawSections["basics"] || "";
-  const basicsLines = basicsContent.split("\n").map(l => l.trim()).filter(l => l.length > 3);
-  
+  const basicsLines = basicsContent
+    .split("\n")
+    .map(l => l.trim())
+    .filter(l => l.length > 3);
+
   const deduplicatedSections: Record<string, string> = { ...rawSections };
+  const basicsPatternsToRemove = [
+    // Only remove common header-like patterns: name, email, phone, location
+    /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i, // Email
+    /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/, // Phone
+    /^https?:\/\//, // URLs/LinkedIn
+  ];
+
   for (const [key, content] of Object.entries(rawSections)) {
     if (key === "basics" || !content) continue;
-    
-    // Split content into lines and filter out any line that exactly matches a basics line
+
+    // Only deduplicate for sections that shouldn't have contact info
+    if (!["experience", "education", "skills", "certifications"].includes(key)) continue;
+
     const refinedLines = content.split("\n").filter(line => {
       const tl = line.trim();
       if (tl.length < 4) return true;
-      return !basicsLines.some(bl => tl === bl || bl.includes(tl) || tl.includes(bl));
+
+      // Check if this line matches a basics pattern
+      for (const pattern of basicsPatternsToRemove) {
+        if (pattern.test(tl)) return false;
+      }
+
+      // Also check against exact basics lines (but be lenient - only exact matches for full lines)
+      return !basicsLines.some(bl => tl === bl);
     });
-    
+
     deduplicatedSections[key] = refinedLines.join("\n").trim();
   }
 
