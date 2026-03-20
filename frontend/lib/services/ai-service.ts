@@ -964,10 +964,11 @@ Optimize only the bullet points (lines starting with - or •) below each role h
       .replace(/^\s*For each role|^\s*Each bullet|^\s*Quantify with|^\s*Leave a blank/gm, "")
       .trim();
 
-    // PHASE 1: Skip aggressive formatting for now
-    // Let text flow naturally - resume-utils handles HTML formatting
-    // formatExperienceSection() was too aggressive and breaking section boundaries
-    // Will address formatting in Phase 4 with simpler approach
+    // PHASE 4: Apply simple formatting for experience section
+    // (just adds spacing, doesn't reorganize content)
+    if (sectionName === "experience" && roleHeaders.size > 0) {
+      optimizedContent = formatExperienceSection(optimizedContent);
+    }
 
     // For certifications section, ensure we don't have instruction artifacts
     if (sectionName === "certifications") {
@@ -994,77 +995,43 @@ Optimize only the bullet points (lines starting with - or •) below each role h
   }
 }
 
-// ── Helper: format experience section for proper display ──────────────────────
+// ── PHASE 4: Simple work experience formatting (minimal changes) ──────────────
 function formatExperienceSection(text: string): string {
+  // PHASE 4: Minimal formatting - preserve text structure, just fix spacing
   const lines = text.split("\n");
   const result: string[] = [];
-  let i = 0;
+  let lastLineWasHeader = false;
 
-  while (i < lines.length) {
-    const line = lines[i].trim();
+  for (const line of lines) {
+    const trimmed = line.trim();
 
-    // Skip empty lines for now, we'll add them back strategically
-    if (!line) {
-      i++;
-      continue;
-    }
+    // Skip empty lines
+    if (!trimmed) continue;
 
-    // Is this a role header? (has pipe, dates, or company@position patterns)
+    // Is this a role header? (has dates and company/title info)
     const isRoleHeader =
-      (line.includes("|") ||
-        /\bat\b/i.test(line) ||
-        /\bcompany\b|\btitle\b|(\d{4}\s*[-–—]\s*(\d{4}|present|current))/i.test(line)) &&
-      !line.startsWith("-") &&
-      !line.startsWith("•");
+      trimmed.includes("|") ||
+      /\d{4}\s*[-–—]\s*(\d{4}|present|current)/i.test(trimmed);
 
     if (isRoleHeader) {
-      // Add blank line before role header (except for first role)
-      if (result.length > 0 && result[result.length - 1] !== "") {
+      // Add blank line before header (except first)
+      if (result.length > 0) {
         result.push("");
       }
-      result.push(line);
-      i++;
-
-      // Collect bullets for this role
-      const bullets: string[] = [];
-      while (i < lines.length) {
-        const nextLine = lines[i].trim();
-        if (!nextLine) {
-          i++;
-          continue;
-        }
-
-        // Is this a bullet?
-        if (nextLine.startsWith("-") || nextLine.startsWith("•")) {
-          // Normalize to "- " format
-          const bulletText = nextLine.substring(1).trim();
-          bullets.push(`- ${bulletText}`);
-          i++;
-        } else if (isRoleHeader || (nextLine.includes("|") || /\d{4}/.test(nextLine))) {
-          // Next role header encountered
-          break;
-        } else {
-          // Treat as content under this role
-          bullets.push(`- ${nextLine}`);
-          i++;
-        }
-      }
-
-      // Add bullets with a blank line after header
-      if (bullets.length > 0) {
-        result.push(""); // Blank line after header
-        result.push(...bullets);
-      }
+      result.push(trimmed);
+      lastLineWasHeader = true;
+    } else if (trimmed.startsWith("-") || trimmed.startsWith("•")) {
+      // Bullet point
+      result.push(trimmed);
+      lastLineWasHeader = false;
     } else {
-      // Not a role header, treat as content
-      result.push(line);
-      i++;
+      // Regular content - add blank line after header if needed
+      if (lastLineWasHeader && trimmed && !trimmed.startsWith("-")) {
+        result.push(""); // Blank line after header
+      }
+      result.push(trimmed);
+      lastLineWasHeader = false;
     }
-  }
-
-  // Remove trailing empty lines
-  while (result.length > 0 && result[result.length - 1] === "") {
-    result.pop();
   }
 
   return result.join("\n").trim();
