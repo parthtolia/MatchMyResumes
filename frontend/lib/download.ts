@@ -234,13 +234,17 @@ export async function downloadTextAsDocx(data: ResumeData, filename: string, tem
             })
         );
     } else {
-        // Shared logic for Compact and Classic
+        // Shared logic for Compact and Classic - Build contact info with website
+        const contactInfo = [data.basics.email, data.basics.phone, data.basics.location, data.basics.website]
+            .filter(Boolean)
+            .join(" | ");
+
         if (templateId === "compact") {
             // Header for Compact uses a 2-column layout (Name/Label on Left, Contact on Right)
             children.push(
                 new Table({
                     width: { size: 100, type: WidthType.PERCENTAGE },
-                    borders: { 
+                    borders: {
                         top: { style: BorderStyle.NONE, size: 0, color: "ffffff" },
                         bottom: { style: BorderStyle.NONE, size: 0, color: "ffffff" },
                         left: { style: BorderStyle.NONE, size: 0, color: "ffffff" },
@@ -269,13 +273,8 @@ export async function downloadTextAsDocx(data: ResumeData, filename: string, tem
                                     children: [
                                         new Paragraph({
                                             alignment: AlignmentType.RIGHT,
-                                            spacing: { before: 0, after: 30 },
-                                            children: [new TextRun({ text: [data.basics.email, data.basics.phone].filter(Boolean).join(" | "), size: 16, font: "Arial", color: "777777" })]
-                                        }),
-                                        new Paragraph({
-                                            alignment: AlignmentType.RIGHT,
                                             spacing: { before: 0, after: 100 },
-                                            children: [new TextRun({ text: [data.basics.location, data.basics.website].filter(Boolean).join(" | "), size: 16, font: "Arial", color: "777777" })]
+                                            children: [new TextRun({ text: contactInfo, size: 16, font: "Arial", color: "777777" })]
                                         })
                                     ]
                                 })
@@ -313,20 +312,22 @@ export async function downloadTextAsDocx(data: ResumeData, filename: string, tem
                     alignment: AlignmentType.CENTER,
                     spacing: { after: 300 },
                     border: { bottom: { color: hex, style: BorderStyle.SINGLE, size: 24, space: 10 } },
-                    children: [new TextRun({ text: basicsText, size: 18, font: "Arial", color: "555555" })]
+                    children: [new TextRun({ text: contactInfo, size: 18, font: "Arial", color: "555555" })]
                 })
             );
         }
 
-        // Sections
+        // Sections - Use DOM-based parsing for proper headers
         data.sections.forEach(section => {
             if (templateId === "compact") {
+                // Compact section header with left border
                 children.push(
                     new Paragraph({
-                        spacing: { before: 150, after: 50 },
+                        spacing: { before: 150, after: 75 },
                         border: { left: { color: hex, style: BorderStyle.SINGLE, size: 24, space: 15 } },
+                        indent: { left: 250 },
                         children: [
-                            new TextRun({ text: section.title.toUpperCase(), bold: true, size: 20, color: hex, font: "Arial" })
+                            new TextRun({ text: section.title.toUpperCase(), bold: true, size: 22, color: hex, font: "Arial" })
                         ]
                     })
                 );
@@ -342,29 +343,60 @@ export async function downloadTextAsDocx(data: ResumeData, filename: string, tem
                 );
             }
 
-            const fragments = section.content.split(/(<ul>|<\/ul>|<li>|<\/li>|<p>|<\/p>|<br\s*\/?>)/).filter(f => f.trim().length > 0 && !f.startsWith("<"));
-            const rawContent = section.content;
-            
-            fragments.forEach(text => {
-                 const cleanText = text.trim().replace(/&nbsp;/g, " ").replace(/&amp;/g, "&");
-                 if (!cleanText) return;
-                 const isBullet = rawContent.includes(`<li>${text}`) || rawContent.includes(`<li>${cleanText}`);
-                 children.push(
-                     new Paragraph({
-                         spacing: { before: 100, after: 100 },
-                         bullet: isBullet ? { level: 0 } : undefined,
-                         alignment: AlignmentType.LEFT,
-                         indent: isBullet ? { left: 400, hanging: 240 } : undefined,
-                         children: [
-                             new TextRun({ 
-                                 text: cleanText,
-                                 size: 20,
-                                 font: "Arial"
-                             })
-                         ]
-                     })
-                 )
-            })
+            // Parse HTML content using DOM
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = section.content;
+
+            Array.from(tempDiv.childNodes).forEach(node => {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    const text = (node.textContent || '').trim();
+                    if (text) {
+                        const fontSize = templateId === "compact" ? 18 : 20;
+                        const spacing = templateId === "compact" ? { before: 40, after: 40 } : { before: 50, after: 50 };
+                        children.push(new Paragraph({
+                            spacing,
+                            children: [new TextRun({ text, size: fontSize, font: "Arial" })]
+                        }));
+                    }
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    const elem = node as HTMLElement;
+                    if (elem.tagName === 'P') {
+                        const strong = elem.querySelector('strong');
+                        if (strong) {
+                            // Bold header (role | company | date)
+                            const headerText = strong.textContent || '';
+                            const headerSize = templateId === "compact" ? 18 : 20;
+                            children.push(new Paragraph({
+                                spacing: { before: 80, after: 50 },
+                                children: [new TextRun({ text: headerText, bold: true, size: headerSize, font: "Arial" })]
+                            }));
+                        } else {
+                            const text = elem.textContent || '';
+                            if (text.trim()) {
+                                const fontSize = templateId === "compact" ? 18 : 20;
+                                const spacing = templateId === "compact" ? { before: 40, after: 40 } : { before: 50, after: 50 };
+                                children.push(new Paragraph({
+                                    spacing,
+                                    children: [new TextRun({ text: text.trim(), size: fontSize, font: "Arial" })]
+                                }));
+                            }
+                        }
+                    } else if (elem.tagName === 'UL') {
+                        Array.from(elem.querySelectorAll('li')).forEach(li => {
+                            const text = (li.textContent || '').trim();
+                            if (text) {
+                                const bulletSize = templateId === "compact" ? 18 : 20;
+                                children.push(new Paragraph({
+                                    spacing: { before: 35, after: 35 },
+                                    bullet: { level: 0 },
+                                    indent: { left: 400, hanging: 240 },
+                                    children: [new TextRun({ text, size: bulletSize, font: "Arial" })]
+                                }));
+                            }
+                        });
+                    }
+                }
+            });
         })
     }
 

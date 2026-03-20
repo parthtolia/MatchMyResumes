@@ -117,9 +117,9 @@ export const ResumeEditor: React.FC<ResumeEditorProps> = ({
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 h-full">
+      <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-180px)]">
         {/* Editor Main Area - Smaller Basis */}
-        <div className={`lg:basis-[40%] space-y-6 ${activeTab === "preview" ? "hidden lg:block" : "block"} overflow-y-auto max-h-[calc(100vh-180px)] custom-scrollbar`}>
+        <div className={`lg:basis-[40%] space-y-6 ${activeTab === "preview" ? "hidden lg:block" : "block"} overflow-y-auto h-full custom-scrollbar`}>
             <div className="glass p-6 space-y-8">
             {/* Basics Section */}
             <section className="space-y-4">

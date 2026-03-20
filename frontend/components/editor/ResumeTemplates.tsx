@@ -47,7 +47,7 @@ const ModernTemplate: React.FC<TemplateProps> = ({ data, theme }) => (
           <h3 className="font-bold uppercase text-gray-400 mb-1">Contact</h3>
           {data.basics.email && <p className="break-all">{data.basics.email}</p>}
           {data.basics.phone && <p>{data.basics.phone}</p>}
-          {data.basics.website && <p className="text-violet-600">{data.basics.website}</p>}
+          {data.basics.website && <p className="text-violet-600 break-all">{data.basics.website}</p>}
         </div>
         {data.sections.filter(s => s.title.toLowerCase().includes("skills") || s.title.toLowerCase().includes("competenc")).map(s => (
           <div key={s.id}>
