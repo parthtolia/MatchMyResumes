@@ -38,7 +38,7 @@ export default function OptimizerResult({
   })
   const [templateId, setTemplateId] = useState<ResumeTemplateId>("classic")
   const [theme, setTheme] = useState<ResumeTheme>({
-    primaryColor: "#7c3aed",
+    primaryColor: "#1a1a1a",
     headingColor: "#1a1a1a",
     textColor: "#333333",
     fontFamily: "Inter, sans-serif"

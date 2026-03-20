@@ -200,7 +200,7 @@ export const ResumeEditor: React.FC<ResumeEditorProps> = ({
         </div>
 
         {/* Preview Main Area - Larger flex-1 */}
-        <div id="resume-preview-container" className={`flex-1 hidden xl:flex justify-center bg-gray-950/20 rounded-2xl border border-white/5 p-4 overflow-y-auto max-h-[1200px] sticky top-[100px] custom-scrollbar ${activeTab === "edit" ? "xl:flex" : "block"}`}>
+        <div id="resume-preview-container" className={`flex-1 hidden xl:flex justify-center bg-gray-950/20 rounded-2xl border border-white/5 p-4 overflow-y-auto sticky top-4 custom-scrollbar ${activeTab === "edit" ? "xl:flex" : "block"}`}>
             <div className="w-full h-fit max-w-[816px] origin-top transform scale-[0.7] min-[1400px]:scale-[0.85] min-[1600px]:scale-[0.95] min-[1800px]:scale-[1.0] transition-all">
             <div id="resume-canvas-content">
                 <ResumeTemplates 
