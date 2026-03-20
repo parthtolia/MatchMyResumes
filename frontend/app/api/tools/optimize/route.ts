@@ -95,12 +95,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({
+    const response: any = {
       optimized_text: result.optimized_text || "",
       changes_summary: result.changes_summary || [],
       optimized_sections: result.optimized_sections || {},
       structured_json: parseSections(result.optimized_text || ""),
-    });
+    };
+
+    // Include contact info if extracted by AI
+    if ((result as any).contact_info) {
+      response.contact_info = (result as any).contact_info;
+    }
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Public optimize error:", error);
     return NextResponse.json(

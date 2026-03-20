@@ -188,13 +188,20 @@ export async function POST(request: NextRequest) {
       feature: "ai_optimize",
     });
 
-    return NextResponse.json({
+    const response: any = {
       optimized_text: result.optimized_text || "",
       changes_summary: result.changes_summary || [],
       optimized_sections: result.optimized_sections || {},
       new_resume_id: newResumeId,
       structured_json: null,
-    });
+    };
+
+    // Include contact info if extracted by AI
+    if ((result as any).contact_info) {
+      response.contact_info = (result as any).contact_info;
+    }
+
+    return NextResponse.json(response);
   } catch (error) {
     if (error instanceof AuthError) return handleAuthError(error);
     console.error("Optimize resume error:", error);
