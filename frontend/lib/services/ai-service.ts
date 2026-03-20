@@ -389,16 +389,20 @@ export async function extractContactInfoFromBasics(
 
   const usedTokens = new Set<string>();
 
-  // STEP 1: Extract email
+  // STEP 1: Extract email (look for @ pattern)
   for (const token of tokens) {
-    if (!result.email && /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i.test(token)) {
-      result.email = token;
-      usedTokens.add(token);
-      break;
+    if (!result.email && token.includes("@")) {
+      const emailMatch = token.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i);
+      if (emailMatch) {
+        result.email = emailMatch[0];
+        usedTokens.add(token);
+        console.log("  ✅ Email found:", result.email);
+        break;
+      }
     }
   }
 
-  // STEP 2: Extract phone (7+ digits)
+  // STEP 2: Extract phone (7-20 digits, with common separators)
   for (const token of tokens) {
     if (
       !result.phone &&
@@ -407,9 +411,13 @@ export async function extractContactInfoFromBasics(
       !/linkedin|github/i.test(token)
     ) {
       const digitsOnly = token.replace(/\D/g, "");
+      // Indian phone: +91-XXXXXXXX (10 digits after +91)
+      // US phone: +1-XXX-XXX-XXXX (10 digits)
+      // International: 7-20 digits
       if (digitsOnly.length >= 7 && digitsOnly.length <= 20) {
         result.phone = token;
         usedTokens.add(token);
+        console.log("  ✅ Phone found:", result.phone);
         break;
       }
     }

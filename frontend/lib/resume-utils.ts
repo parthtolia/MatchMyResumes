@@ -220,12 +220,12 @@ export function resumeSectionsToResumeData(
     const basicsText = sections.basics || "";
     const rawLines = basicsText.split("\n").map((l) => l.trim()).filter(Boolean);
 
-    // Tokenise: split each line on pipe separators AND runs of 2+ spaces/tabs.
-    // This handles both "email | phone | LinkedIn" and "email  phone  linkedin" formats.
+    // Tokenise: split each line on pipe separators, bullets, dashes, and runs of 2+ spaces/tabs.
+    // This handles: "email | phone | LinkedIn" AND "phone • email" AND "phone – location"
     const tokens: string[] = [];
     for (const line of rawLines) {
       const parts = line
-        .split(/\s*\|\s*|\t+|  +/)  // pipe, tab, or 2+ spaces
+        .split(/\s*[\|•–\-]\s*|\t+|  +/)  // ✅ FIXED: Added bullet (•) and dash (–)
         .map((p) => p.trim())
         .filter(Boolean);
       if (parts.length > 1) {
@@ -367,18 +367,46 @@ export function resumeSectionsToResumeData(
    * - Contact-info lines that leaked from page headers are stripped.
    * - Consecutive bullet lines are grouped into one <ul> block.
    * - Role header lines (Company | Title | Date) rendered as <strong>.
+   * - For EXPERIENCE: lines after headers (that aren't headers) → bullets.
    * - Everything else rendered as <p>.
    */
   function toHtml(rawContent: string, sectionKey: string): string {
     const lines = rawContent.split("\n").filter((l) => l.trim());
     const parts: string[] = [];
     let bulletBuffer: string[] = [];
+    let lastWasRoleHeader = false;
 
     const flushBullets = () => {
       if (bulletBuffer.length > 0) {
         parts.push(`<ul>${bulletBuffer.map((b) => `<li>${b}</li>`).join("")}</ul>`);
         bulletBuffer = [];
       }
+    };
+
+    // Role header detection helper
+    const isRoleHeader = (l: string): boolean => {
+      return (
+        l.length < 150 &&
+        (
+          // Pattern 1: Has pipe (Company | Title | Date)
+          (l.match(/\|/g) || []).length >= 1 ||
+          // Pattern 2: Has em-dash or en-dash
+          l.includes("–") ||
+          l.includes("—") ||
+          // Pattern 3: "Month Year – Month Year" date range
+          /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+\d{4}\s*[-–—]/i.test(l) ||
+          // Pattern 4: "Year - Year" style
+          /\b(19|20)\d{2}\s*[-–—]\s*((19|20)\d{2}|present|current|now)\b/i.test(l) ||
+          // Pattern 5: Comma followed by year range
+          /,\s*\(?\s*\b(19|20)\d{2}[-–—]/.test(l) ||
+          // Pattern 6: "Company (Month Year – ...)" format
+          /\(.*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+\d{4}/i.test(l) ||
+          // Pattern 7: @ with dates
+          (l.includes("@") && /\b(19|20)\d{2}|present|current/i.test(l)) ||
+          // Pattern 8: ALL CAPS company/title
+          (l.length < 80 && l === l.toUpperCase() && /[A-Z]{2,}/.test(l) && !/\d/.test(l.substring(0, 10)))
+        )
+      );
     };
 
     for (const rawLine of lines) {
@@ -388,43 +416,30 @@ export function resumeSectionsToResumeData(
       // Skip contact-info lines in non-basics sections (PDF page-header residue)
       if (sectionKey !== "basics" && isContactInfoLine(l)) continue;
 
-      // Bullet line?
+      // Explicit bullet line?
       if (l.startsWith("-") || l.startsWith("•") || l.startsWith("*")) {
         bulletBuffer.push(l.substring(1).trim());
+        lastWasRoleHeader = false;
         continue;
       }
 
-      // Flush any pending bullets before emitting a non-bullet line
-      flushBullets();
+      // Check if this is a role header
+      const headerDetected = isRoleHeader(l);
 
-      // Role / company header heuristic for experience sections:
-      // Detect patterns like: "Title | Company | Date", "Company (Month Year – Month Year)", etc.
-      const isRoleHeader =
-        l.length < 150 &&
-        (
-          // Pattern 1: Multiple pipes (Title | Company | Location | Date)
-          (l.match(/\|/g) || []).length >= 1 ||
-          // Pattern 2: Em-dash or en-dash (common in "Dates" or "Company – City" separators)
-          l.includes("–") ||
-          l.includes("—") ||
-          // Pattern 3: "Month Year – Month Year" style date range (e.g., "Jan 2023 - Mar 2023")
-          /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+\d{4}\s*[-–—]/i.test(l) ||
-          // Pattern 4: "Year - Year" style (e.g., "2019 - 2022" or "2019–2022")
-          /\b(19|20)\d{2}\s*[-–—]\s*((19|20)\d{2}|present|current|now)\b/i.test(l) ||
-          // Pattern 5: Comma followed by year range (e.g., "Company, 2019-2023")
-          /,\s*\(?\s*\b(19|20)\d{2}[-–—]/.test(l) ||
-          // Pattern 6: "Company (Month Year – ...)" format
-          /\(.*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+\d{4}/i.test(l) ||
-          // Pattern 7: Contains @ symbol with company name (Software Engineer @ Company)
-          (l.includes("@") && /\b(19|20)\d{2}|present|current/i.test(l)) ||
-          // Pattern 8: All caps short line (< 80 chars) that looks like a title/company (common in formatted resumes)
-          (l.length < 80 && l === l.toUpperCase() && /[A-Z]{2,}/.test(l) && !/\d/.test(l.substring(0, 10)))
-        );
-
-      if (isRoleHeader && sectionKey === "experience") {
+      if (headerDetected && sectionKey === "experience") {
+        // Found role header in experience section
+        flushBullets();
         parts.push(`<p><strong>${l}</strong></p>`);
+        lastWasRoleHeader = true;
+      } else if (lastWasRoleHeader && sectionKey === "experience") {
+        // Line after role header in experience → treat as bullet
+        bulletBuffer.push(l);
+        lastWasRoleHeader = false;
       } else {
+        // Regular content
+        flushBullets();
         parts.push(`<p>${l}</p>`);
+        lastWasRoleHeader = false;
       }
     }
 

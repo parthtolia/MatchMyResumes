@@ -85,10 +85,20 @@ function OptimizeContent() {
             // Parse optimized sections directly into structured data for the editor
             const sectionsMap: Record<string, string> | undefined = res.data.optimized_sections
             const contactInfo: Record<string, string> | undefined = res.data.contact_info
+
+            console.log("📋 OPTIMIZE RESPONSE:", {
+              hasOptimizedSections: !!sectionsMap,
+              hasContactInfo: !!contactInfo,
+              contactInfoData: contactInfo,
+              sectionsKeys: Object.keys(sectionsMap || {}),
+            })
+
             if (sectionsMap && Object.keys(sectionsMap).length > 0) {
                 // Pass contact info extracted by AI for accurate basics section
+                console.log("🔄 Calling resumeSectionsToResumeData with contactInfo:", contactInfo)
                 setResumeData(resumeSectionsToResumeData(sectionsMap, undefined, contactInfo))
             } else if (res.data.optimized_text) {
+                console.log("⚠️ Using fallback parseRawTextToResumeData (no sections)")
                 setResumeData(parseRawTextToResumeData(res.data.optimized_text))
             }
         } catch (e: any) {
