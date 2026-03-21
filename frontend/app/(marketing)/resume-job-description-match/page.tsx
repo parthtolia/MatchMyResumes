@@ -11,6 +11,8 @@ import {
   CrossSellSection,
 } from "@/components/marketing/ToolPageSections"
 import JdMatchToolSection from "@/components/marketing/tools/JdMatchToolSection"
+import { VideoEmbed } from "@/components/marketing/VideoEmbed"
+import { VideoObjectJsonLd } from "@/components/JsonLd"
 
 export const metadata: Metadata = {
   title: "Resume vs Job Description Match Score — Compare Your Resume to Any JD | MatchMyResumes",
@@ -169,6 +171,21 @@ export default function ResumeJdMatchPage() {
           },
         ]}
       />
+
+      {/* Video tutorial — TODO: replace youtubeId with actual YouTube ID after recording */}
+      <VideoObjectJsonLd
+        name="How to Match Your Resume to a Job Description"
+        description="Learn how to upload your resume and job description to get a detailed match score with keyword gap analysis."
+        uploadDate={new Date().toISOString()}
+        youtubeId={undefined}
+      />
+      <section className="max-w-5xl mx-auto px-6 py-12">
+        <h2 className="text-3xl font-bold text-white mb-8 text-center">See It In Action</h2>
+        <VideoEmbed
+          youtubeId={undefined}
+          title="How to Match Your Resume to a Job Description"
+        />
+      </section>
 
       <FaqSection faqs={faqs} />
 

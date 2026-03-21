@@ -1,7 +1,8 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Logo } from "@/components/ui/Logo"
-import { BlogPostingJsonLd } from "@/components/JsonLd"
+import { BlogPostingJsonLd, VideoObjectJsonLd } from "@/components/JsonLd"
+import { VideoEmbed } from "@/components/marketing/VideoEmbed"
 import { blogPosts, getPostBySlug } from "../posts"
 import type { Metadata } from "next"
 
@@ -57,6 +58,14 @@ export default async function BlogPostPage({
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white">
       <BlogPostingJsonLd post={post} />
+      {post.slug === "how-to-beat-ats-systems-2026" && (
+        <VideoObjectJsonLd
+          name="How to Beat ATS in 2026 — Full Guide"
+          description="Complete guide to understanding ATS systems and optimizing your resume to pass automated screening filters."
+          uploadDate={new Date().toISOString()}
+          youtubeId={undefined}
+        />
+      )}
       <nav className="flex items-center justify-between px-8 py-4 border-b border-white/5">
         <Link href="/">
           <Logo />
@@ -87,6 +96,18 @@ export default async function BlogPostPage({
             <span>{post.readTime}</span>
           </div>
         </div>
+
+        {post.slug === "how-to-beat-ats-systems-2026" && (
+          <>
+            {/* Video tutorial — TODO: replace youtubeId with actual YouTube ID after recording */}
+            <div className="mb-12">
+              <VideoEmbed
+                youtubeId={undefined}
+                title="How to Beat ATS in 2026 — Full Guide"
+              />
+            </div>
+          </>
+        )}
 
         <div className="prose prose-invert prose-sm max-w-none text-gray-300 leading-relaxed [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-white [&_h2]:mt-10 [&_h2]:mb-4 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-white [&_h3]:mt-8 [&_h3]:mb-3 [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:ml-6 [&_li]:mb-1 [&_strong]:text-white [&_a]:text-violet-400 [&_a:hover]:text-violet-300 [&_blockquote]:border-l-2 [&_blockquote]:border-violet-500/50 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-400">
           <BlogContent content={post.content} />

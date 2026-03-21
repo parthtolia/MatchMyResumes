@@ -10,6 +10,8 @@ import {
   CrossSellSection,
 } from "@/components/marketing/ToolPageSections"
 import CoverLetterToolSection from "@/components/marketing/tools/CoverLetterToolSection"
+import { VideoEmbed } from "@/components/marketing/VideoEmbed"
+import { VideoObjectJsonLd } from "@/components/JsonLd"
 
 export const metadata: Metadata = {
   title: "AI Cover Letter Generator — Tailored Cover Letters in Seconds | MatchMyResumes",
@@ -136,6 +138,21 @@ export default function CoverLetterGeneratorPage() {
           },
         ]}
       />
+
+      {/* Video tutorial — TODO: replace youtubeId with actual YouTube ID after recording */}
+      <VideoObjectJsonLd
+        name="How to Write a Cover Letter with AI in 30 Seconds"
+        description="Learn how to generate a tailored, personalized cover letter using AI by uploading your resume and job description."
+        uploadDate={new Date().toISOString()}
+        youtubeId={undefined}
+      />
+      <section className="max-w-5xl mx-auto px-6 py-12">
+        <h2 className="text-3xl font-bold text-white mb-8 text-center">See It In Action</h2>
+        <VideoEmbed
+          youtubeId={undefined}
+          title="How to Write a Cover Letter with AI in 30 Seconds"
+        />
+      </section>
 
       <FaqSection faqs={faqs} />
 

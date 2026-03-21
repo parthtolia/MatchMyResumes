@@ -10,6 +10,8 @@ import {
   CrossSellSection,
 } from "@/components/marketing/ToolPageSections"
 import OptimizerToolSection from "@/components/marketing/tools/OptimizerToolSection"
+import { VideoEmbed } from "@/components/marketing/VideoEmbed"
+import { VideoObjectJsonLd } from "@/components/JsonLd"
 
 export const metadata: Metadata = {
   title: "AI Resume Optimizer — Optimize Your Resume for ATS | MatchMyResumes",
@@ -142,6 +144,21 @@ export default function AiResumeOptimizerPage() {
           },
         ]}
       />
+
+      {/* Video tutorial — TODO: replace youtubeId with actual YouTube ID after recording */}
+      <VideoObjectJsonLd
+        name="How to Optimize Your Resume with AI (Free)"
+        description="Learn how to use AI to naturally integrate missing keywords and tailor your resume for any job description in 30 seconds."
+        uploadDate={new Date().toISOString()}
+        youtubeId={undefined}
+      />
+      <section className="max-w-5xl mx-auto px-6 py-12">
+        <h2 className="text-3xl font-bold text-white mb-8 text-center">See It In Action</h2>
+        <VideoEmbed
+          youtubeId={undefined}
+          title="How to Optimize Your Resume with AI (Free)"
+        />
+      </section>
 
       <FaqSection faqs={faqs} />
 
