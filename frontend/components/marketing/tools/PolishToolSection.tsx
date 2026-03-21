@@ -2,11 +2,16 @@
 import { useState } from "react"
 import PublicToolForm from "@/components/marketing/PublicToolForm"
 import OptimizerResult from "@/components/marketing/results/OptimizerResult"
+import type { StructuredResume } from "@/lib/types/structured-resume"
 
 interface PolishResult {
   optimized_text: string
   changes_summary: string[]
-  structured_resume?: Record<string, any>
+  optimized_sections?: Record<string, string>
+  structured_json?: Record<string, string>
+  structured_resume?: StructuredResume
+  missing_fields?: string[]
+  confidence_score?: number
   contact_info?: Record<string, string>
 }
 
