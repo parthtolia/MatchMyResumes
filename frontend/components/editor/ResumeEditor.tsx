@@ -36,6 +36,7 @@ export const ResumeEditor: React.FC<ResumeEditorProps> = ({
 }) => {
   const [data, setData] = useState<ResumeData>(initialData)
   const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit")
+  const [customColor, setCustomColor] = useState<string>(theme.headingColor || "#1a1a1a")
 
   useEffect(() => {
     setData(initialData)
@@ -90,7 +91,7 @@ export const ResumeEditor: React.FC<ResumeEditorProps> = ({
                 <Palette size={16} className="text-emerald-400" />
                 <span className="text-xs uppercase tracking-widest opacity-60">Heading Color:</span>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
                 {[
                     { color: "#1a1a1a", label: "Charcoal" },
                     { color: "#1e3a5f", label: "Navy Blue" },
@@ -102,12 +103,31 @@ export const ResumeEditor: React.FC<ResumeEditorProps> = ({
                 ].map(({ color, label }) => (
                     <button
                         key={color}
-                        onClick={() => onThemeChange({ headingColor: color, primaryColor: color })}
+                        onClick={() => {
+                          setCustomColor(color)
+                          onThemeChange({ headingColor: color, primaryColor: color })
+                        }}
                         className={`w-5 h-5 rounded-full border-2 ${theme.headingColor === color ? "border-white" : "border-transparent"} transition-transform hover:scale-110`}
                         style={{ backgroundColor: color }}
                         title={label}
                     />
                 ))}
+                {/* Custom color picker */}
+                <div className="relative group">
+                    <label className="cursor-pointer flex items-center justify-center w-6 h-6 rounded-full border-2 border-dashed border-emerald-400/50 hover:border-emerald-400 transition-colors" title="Custom Color">
+                        <input
+                            type="color"
+                            value={customColor}
+                            onChange={(e) => {
+                              const newColor = e.target.value
+                              setCustomColor(newColor)
+                              onThemeChange({ headingColor: newColor, primaryColor: newColor })
+                            }}
+                            className="w-0 h-0 opacity-0 cursor-pointer"
+                        />
+                        <span className="text-xs text-emerald-400">+</span>
+                    </label>
+                </div>
             </div>
         </div>
 

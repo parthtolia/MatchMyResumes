@@ -77,6 +77,8 @@ const howItWorks = [
 export default function ResumePolicePage() {
   return (
     <ToolPageShell>
+      <FeatureStrip active="/resume-polish" />
+
       <ToolHero
         headline="Polish Your Resume"
         headlineAccent="with AI in Seconds"
@@ -85,8 +87,6 @@ export default function ResumePolicePage() {
       />
 
       <PolishToolSection />
-
-      <FeatureStrip active="/resume-polish" />
 
       <HowItWorksSection steps={howItWorks} />
 

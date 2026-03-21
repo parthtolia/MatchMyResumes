@@ -21,6 +21,7 @@ const tools = [
   { href: "/ats-score-checker", label: "ATS Score Checker" },
   { href: "/resume-job-description-match", label: "Resume vs JD Match" },
   { href: "/ai-resume-optimizer", label: "AI Resume Optimizer" },
+  { href: "/resume-polish", label: "Resume Polish" },
   { href: "/cover-letter-generator", label: "Cover Letter Generator" },
 ]
 
