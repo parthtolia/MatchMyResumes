@@ -9,8 +9,7 @@ const ResumeExampleDownloadSection = dynamic(
   () =>
     import("@/components/marketing/tools/ResumeExampleDownloadSection").then(
       (mod) => mod.ResumeExampleDownloadSection
-    ),
-  { ssr: false }
+    )
 )
 
 export function generateStaticParams() {
@@ -282,6 +281,36 @@ export default async function ResumeExamplePage({
                 </div>
               </details>
             ))}
+          </div>
+        </section>
+
+        {/* Related Guides */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold text-white mb-6">
+            Further Reading
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Link
+              href="/blog/how-to-beat-ats-systems-2026"
+              className="group rounded-xl border border-white/10 bg-[#111118] p-4 hover:border-violet-500/40 transition-colors"
+            >
+              <h3 className="font-semibold text-white group-hover:text-violet-400 transition-colors mb-2">How to Beat ATS Systems</h3>
+              <p className="text-sm text-gray-400">10 proven strategies to optimize your resume for ATS filters.</p>
+            </Link>
+            <Link
+              href="/blog/resume-keywords-that-get-you-hired"
+              className="group rounded-xl border border-white/10 bg-[#111118] p-4 hover:border-violet-500/40 transition-colors"
+            >
+              <h3 className="font-semibold text-white group-hover:text-violet-400 transition-colors mb-2">Resume Keywords Guide</h3>
+              <p className="text-sm text-gray-400">50+ keywords that get you hired, by industry and role.</p>
+            </Link>
+            <Link
+              href="/blog/ai-resume-optimization-guide"
+              className="group rounded-xl border border-white/10 bg-[#111118] p-4 hover:border-violet-500/40 transition-colors"
+            >
+              <h3 className="font-semibold text-white group-hover:text-violet-400 transition-colors mb-2">AI Resume Optimization</h3>
+              <p className="text-sm text-gray-400">How AI can 3x your interview rate while maintaining authenticity.</p>
+            </Link>
           </div>
         </section>
 

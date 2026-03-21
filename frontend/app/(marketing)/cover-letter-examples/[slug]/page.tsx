@@ -212,10 +212,10 @@ export default async function CoverLetterExamplePage({
             personalized cover letter in seconds.
           </p>
           <Link
-            href="/sign-up"
+            href="/cover-letter-generator"
             className="inline-block btn-glow text-white px-8 py-3 rounded-xl font-medium"
           >
-            Try MatchMyResumes Free
+            Generate Your Cover Letter
           </Link>
         </div>
 

@@ -5,6 +5,20 @@ import { BlogPostingJsonLd } from "@/components/JsonLd"
 import { blogPosts, getPostBySlug } from "../posts"
 import type { Metadata } from "next"
 
+// Map blog post categories to relevant tool pages for CTAs
+function getCtaHref(category: string): string {
+  switch (category) {
+    case "ATS Tips":
+      return "/ats-score-checker"
+    case "Resume Tips":
+      return "/ai-resume-optimizer"
+    case "AI & Career":
+      return "/ai-resume-optimizer"
+    default:
+      return "/ats-score-checker"
+  }
+}
+
 export function generateStaticParams() {
   return blogPosts.map((post) => ({ slug: post.slug }))
 }
@@ -86,7 +100,7 @@ export default async function BlogPostPage({
             Get your free ATS score and AI-powered optimization suggestions.
           </p>
           <Link
-            href="/sign-up"
+            href={getCtaHref(post.category)}
             className="inline-block btn-glow text-white px-8 py-3 rounded-xl font-medium"
           >
             Try MatchMyResumes Free
@@ -152,6 +166,7 @@ function BlogContent({ content }: { content: string }) {
 
 function inlineFormat(text: string): string {
   return text
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-violet-400 hover:text-violet-300 underline">$1</a>')
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.*?)\*/g, "<em>$1</em>")
     .replace(/`(.*?)`/g, '<code class="bg-white/10 px-1.5 py-0.5 rounded text-sm">$1</code>')

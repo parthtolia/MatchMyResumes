@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Home, ScanSearch, FileText, BookOpen, ArrowRight } from "lucide-react"
+import { Home, ScanSearch, FileText, BookOpen, ArrowRight, GitCompareArrows } from "lucide-react"
 
 const links = [
   {
@@ -31,6 +31,12 @@ const links = [
     icon: FileText,
     title: "Cover Letter Generator",
     description: "Create tailored cover letters with AI",
+  },
+  {
+    href: "/alternatives",
+    icon: GitCompareArrows,
+    title: "Compare Tools",
+    description: "See why MatchMyResumes is the best choice",
   },
 ]
 

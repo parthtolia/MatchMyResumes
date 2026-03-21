@@ -116,7 +116,7 @@ Aim for 70-80% keyword match. No candidate is a perfect match, and recruiters kn
 
 Beating the ATS isn't about gaming the system — it's about clearly communicating your qualifications in a format that both machines and humans can read. Focus on relevant keywords, clean formatting, and tailoring each application to the specific role.
 
-Want to check your resume's ATS score instantly? Try MatchMyResumes' free ATS scoring tool to see exactly how your resume stacks up against any job description.
+Want to check your resume's ATS score instantly? [Use MatchMyResumes' free ATS scoring tool](/ats-score-checker) to see exactly how your resume stacks up against any job description.
     `.trim(),
   },
   {
@@ -232,6 +232,8 @@ Some words have become so overused they've lost all meaning:
 ## Final Tip: Quality Over Quantity
 
 A resume with 20 perfectly placed, relevant keywords will outperform one with 50 keywords stuffed randomly. Focus on the keywords that matter for your specific target role, and back each one up with a concrete achievement.
+
+Once you've identified your keywords, [use our free ATS score checker](/ats-score-checker) to see exactly which keywords you're missing from your resume against your target job description.
     `.trim(),
   },
   {
@@ -337,7 +339,7 @@ The AI arms race in hiring is just beginning. As ATS systems get smarter, optimi
 
 The candidates who embrace AI as a tool — while maintaining authenticity — will consistently outperform those who don't.
 
-Ready to see how your resume scores? Try MatchMyResumes to get an instant ATS compatibility score and AI-powered optimization suggestions tailored to your target role.
+Ready to see how your resume scores? [Try MatchMyResumes to get an instant ATS compatibility score](/ai-resume-optimizer) and AI-powered optimization suggestions tailored to your target role.
     `.trim(),
   },
   {

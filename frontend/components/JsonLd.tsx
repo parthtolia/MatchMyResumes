@@ -190,3 +190,40 @@ export function BreadcrumbJsonLd({
     />
   )
 }
+
+export function VideoObjectJsonLd({
+  name,
+  description,
+  thumbnailUrl,
+  uploadDate,
+  youtubeId,
+}: {
+  name: string
+  description: string
+  thumbnailUrl?: string
+  uploadDate: string
+  youtubeId?: string
+}) {
+  // If no YouTube ID, don't render schema
+  if (!youtubeId) {
+    return null
+  }
+
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    name,
+    description,
+    thumbnailUrl: thumbnailUrl || `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`,
+    uploadDate,
+    contentUrl: `https://www.youtube.com/watch?v=${youtubeId}`,
+    embedUrl: `https://www.youtube.com/embed/${youtubeId}`,
+  }
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
+  )
+}

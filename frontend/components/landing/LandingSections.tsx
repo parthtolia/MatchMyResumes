@@ -668,6 +668,7 @@ function FooterSection() {
                 <Link href="/#how-it-works" className="hover:text-white transition-colors">How It Works</Link>
                 <Link href="/resume-examples" className="hover:text-white transition-colors">Resume Examples</Link>
                 <Link href="/cover-letter-examples" className="hover:text-white transition-colors">Cover Letter Examples</Link>
+                <Link href="/alternatives" className="hover:text-white transition-colors">Compare Tools</Link>
               </div>
             </div>
             <div>

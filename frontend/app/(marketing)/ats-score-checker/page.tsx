@@ -11,6 +11,8 @@ import {
   CrossSellSection,
 } from "@/components/marketing/ToolPageSections"
 import AtsScoreToolSection from "@/components/marketing/tools/AtsScoreToolSection"
+import { VideoEmbed } from "@/components/marketing/VideoEmbed"
+import { VideoObjectJsonLd } from "@/components/JsonLd"
 
 export const metadata: Metadata = {
   title: "Free ATS Resume Score Checker — Check ATS Compatibility | MatchMyResumes",
@@ -157,6 +159,21 @@ export default function AtsScoreCheckerPage() {
           },
         ]}
       />
+
+      {/* Video tutorial — TODO: replace youtubeId with actual YouTube ID after recording */}
+      <VideoObjectJsonLd
+        name="How to Check Your ATS Score in 60 Seconds"
+        description="Learn how to upload your resume and get an instant ATS compatibility score with detailed breakdown."
+        uploadDate={new Date().toISOString()}
+        youtubeId={undefined}
+      />
+      <section className="max-w-5xl mx-auto px-6 py-12">
+        <h2 className="text-3xl font-bold text-white mb-8 text-center">See It In Action</h2>
+        <VideoEmbed
+          youtubeId={undefined}
+          title="How to Check Your ATS Score in 60 Seconds"
+        />
+      </section>
 
       <FaqSection faqs={faqs} />
 
