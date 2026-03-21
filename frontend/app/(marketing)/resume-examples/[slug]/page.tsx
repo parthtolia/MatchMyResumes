@@ -117,7 +117,7 @@ export default async function ResumeExamplePage({
       {/* Nav */}
       <Navbar />
 
-      <article className="max-w-3xl mx-auto px-6 pt-32 pb-16">
+      <div className="max-w-7xl mx-auto px-6 pt-32 pb-16">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">
           <Link href="/" className="hover:text-white transition-colors">
@@ -141,6 +141,11 @@ export default async function ResumeExamplePage({
         <h1 className="text-4xl font-bold text-white mb-10">
           {example.title} Resume Example &amp; ATS Keywords (2026)
         </h1>
+
+        {/* Two-column layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left column - main content */}
+          <div className="lg:col-span-2">
 
         {/* Professional Summary */}
         <section className="mb-12">
@@ -239,9 +244,6 @@ export default async function ResumeExamplePage({
           </div>
         </section>
 
-        {/* Download Resume */}
-        <ResumeExampleDownloadSection example={example} />
-
         {/* Resume Tips */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold text-white mb-4">
@@ -330,6 +332,15 @@ export default async function ResumeExamplePage({
             Try MatchMyResumes Free
           </Link>
         </div>
+          </div>
+
+          {/* Right sidebar - Sticky Download Section */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24">
+              <ResumeExampleDownloadSection example={example} />
+            </div>
+          </div>
+        </div>
 
         {/* Related Examples */}
         {related.length > 0 && (
@@ -355,7 +366,7 @@ export default async function ResumeExamplePage({
             </div>
           </section>
         )}
-      </article>
+      </div>
     </div>
   )
 }
