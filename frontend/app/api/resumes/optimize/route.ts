@@ -4,12 +4,60 @@ import { resumes, resumeScores, jobDescriptions, usageLogs } from "@/lib/db/sche
 import { eq, and, desc, count } from "drizzle-orm";
 import { getAuthUserId, handleAuthError, AuthError } from "@/lib/auth";
 import { checkRateLimit, aiLimiter } from "@/lib/rate-limit";
-import { optimizeResumeSectional } from "@/lib/services/ai-service";
+import { runExtractionPipelineFromText } from "@/lib/services/resume-pipeline";
 import { generateEmbedding } from "@/lib/services/embedding-service";
 import { computeKeywordScore } from "@/lib/scoring/ats-scorer";
-import { parseSections } from "@/lib/services/resume-parser";
+import type { StructuredResume } from "@/lib/types/structured-resume";
 
 export const maxDuration = 60;
+
+/**
+ * Serialize a StructuredResume back to plain text for storage.
+ * Used when saving optimized resume as a new version.
+ */
+function serializeStructuredResume(sr: StructuredResume): string {
+  const lines: string[] = [];
+
+  if (sr.name) lines.push(sr.name);
+  if (sr.title) lines.push(sr.title);
+
+  const contact = [sr.email, sr.phone, sr.location]
+    .filter(Boolean)
+    .join(" | ");
+  if (contact) lines.push(contact);
+
+  if (sr.summary) lines.push("\nSUMMARY\n" + sr.summary);
+
+  if (sr.skills?.length) {
+    lines.push("\nSKILLS\n" + sr.skills.join(", "));
+  }
+
+  if (sr.experience?.length) {
+    lines.push("\nWORK EXPERIENCE");
+    for (const e of sr.experience) {
+      lines.push(`${e.role} | ${e.company} | ${e.duration}`);
+      for (const p of e.points) {
+        lines.push("- " + p);
+      }
+    }
+  }
+
+  if (sr.education?.length) {
+    lines.push("\nEDUCATION");
+    for (const e of sr.education) {
+      lines.push(`${e.degree} | ${e.institution} | ${e.year}`.trim());
+    }
+  }
+
+  if (sr.certifications?.length) {
+    lines.push("\nCERTIFICATIONS");
+    for (const c of sr.certifications) {
+      lines.push("- " + c);
+    }
+  }
+
+  return lines.join("\n");
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -109,11 +157,12 @@ export async function POST(request: NextRequest) {
       missingKeywords = missing;
     }
 
-    // Run AI optimization (section-wise)
-    let result;
+    // Run extraction and optimization pipeline
+    let pipelineResult;
     try {
-      result = await optimizeResumeSectional(
+      pipelineResult = await runExtractionPipelineFromText(
         resume.rawText || "",
+        (resume.fileType as "pdf" | "docx") || "pdf",
         rawJdText,
         missingKeywords
       );
@@ -160,11 +209,12 @@ export async function POST(request: NextRequest) {
       const baseName = parts.join(".");
       const newFilename = `${baseName}_${cleanJdTitle}_v${newVersion}.${ext}`;
 
-      const newEmbedding = await generateEmbedding(
-        result.optimized_text || ""
-      );
-
-      const parsedStructure = parseSections(result.optimized_text || "");
+      // Serialize optimized resume to text
+      const optimizedRawText =
+        serializeStructuredResume(pipelineResult.optimized) ||
+        resume.rawText ||
+        "";
+      const newEmbedding = await generateEmbedding(optimizedRawText);
 
       newResumeId = crypto.randomUUID();
       await db.insert(resumes).values({
@@ -172,8 +222,8 @@ export async function POST(request: NextRequest) {
         userId,
         filename: newFilename,
         fileType: resume.fileType,
-        rawText: result.optimized_text || resume.rawText,
-        structuredJson: parsedStructure,
+        rawText: optimizedRawText,
+        structuredJson: pipelineResult.optimized,
         embedding: newEmbedding,
         versionTag: tag,
         isOptimized: true,
@@ -189,17 +239,25 @@ export async function POST(request: NextRequest) {
     });
 
     const response: any = {
-      optimized_text: result.optimized_text || "",
-      changes_summary: result.changes_summary || [],
-      optimized_sections: result.optimized_sections || {},
+      // Backward-compat stubs (dashboard page will prefer structured_resume now)
+      optimized_text: "",
+      changes_summary: pipelineResult.changes_summary,
+      optimized_sections: {},
       new_resume_id: newResumeId,
       structured_json: null,
-    };
 
-    // Include contact info if extracted by AI
-    if ((result as any).contact_info) {
-      response.contact_info = (result as any).contact_info;
-    }
+      // New canonical fields (matches public endpoint)
+      structured_resume: pipelineResult.optimized,
+      missing_fields: pipelineResult.missing_fields,
+      confidence_score: pipelineResult.confidence_score,
+      contact_info: {
+        name: pipelineResult.optimized.name,
+        email: pipelineResult.optimized.email,
+        phone: pipelineResult.optimized.phone,
+        location: pipelineResult.optimized.location,
+        title: pipelineResult.optimized.title,
+      },
+    };
 
     return NextResponse.json(response);
   } catch (error) {

@@ -679,3 +679,94 @@ export async function runExtractionPipeline(
     };
   }
 }
+
+/**
+ * Extract and optimize resume from raw text (instead of file buffer).
+ * Skips the file-parse step and uses the text directly.
+ * Used by authenticated endpoints that have raw text already stored in DB.
+ * NEVER throws — always returns a valid PipelineResult.
+ */
+export async function runExtractionPipelineFromText(
+  rawText: string,
+  fileType: "pdf" | "docx",
+  jdText: string,
+  missingKeywords: string[]
+): Promise<PipelineResult> {
+  try {
+    // Step 1.5: Quality check
+    const textUsable = isTextUsable(rawText);
+    if (!textUsable) {
+      return {
+        structured: emptyStructuredResume(),
+        optimized: emptyStructuredResume(),
+        raw_text: rawText,
+        changes_summary: [],
+        missing_fields: [
+          "name",
+          "email",
+          "phone",
+          "skills",
+          "experience",
+        ],
+        confidence_score: 0.1,
+      };
+    }
+
+    // Step 2: Segment
+    const segmentation = await segmentResumeText(rawText);
+
+    // Step 3: Extract structured data
+    const structured = await extractStructuredData(rawText, segmentation);
+
+    // Detect missing fields after extraction
+    const missingFields = detectMissingFields(structured);
+
+    // Step 4: Optimize
+    let optimized = structured;
+    let optimizationSucceeded = false;
+    try {
+      optimized = await optimizeStructuredResume(structured, jdText, missingKeywords);
+      optimizationSucceeded = true;
+    } catch (e) {
+      console.warn("Optimization step failed, using unoptimized result:", e);
+    }
+
+    // Generate changes summary
+    const changes_summary = generateChangesSummary(structured, optimized);
+
+    // Compute confidence score
+    const confidence_score = computeConfidenceScore({
+      textUsable,
+      segmentationConfidence: segmentation.confidence,
+      missingFields,
+      extractionUsedAI: true,
+      optimizationSucceeded,
+    });
+
+    return {
+      structured,
+      optimized,
+      raw_text: rawText,
+      changes_summary,
+      missing_fields: missingFields,
+      confidence_score,
+    };
+  } catch (e) {
+    // Complete failure: return empty but valid result
+    console.error("Pipeline from text completely failed:", e);
+    return {
+      structured: emptyStructuredResume(),
+      optimized: emptyStructuredResume(),
+      raw_text: rawText,
+      changes_summary: [],
+      missing_fields: [
+        "name",
+        "email",
+        "phone",
+        "skills",
+        "experience",
+      ],
+      confidence_score: 0.0,
+    };
+  }
+}

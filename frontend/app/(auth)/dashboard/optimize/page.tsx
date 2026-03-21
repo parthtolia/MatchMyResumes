@@ -9,7 +9,8 @@ import { useGlobalData } from "@/components/dashboard/GlobalDataProvider"
 import { downloadElementAsPdf, downloadTextAsDocx } from "@/lib/download"
 import { ResumeEditor } from "@/components/editor/ResumeEditor"
 import { ResumeData, ResumeTemplateId, ResumeTheme } from "@/lib/types/resume"
-import { parseRawTextToResumeData, resumeDataToRawText, resumeSectionsToResumeData } from "@/lib/resume-utils"
+import type { StructuredResume } from "@/lib/types/structured-resume"
+import { parseRawTextToResumeData, resumeDataToRawText, resumeSectionsToResumeData, structuredResumeToResumeData } from "@/lib/resume-utils"
 
 import { UserButton, useUser as useClerkUser } from "@clerk/nextjs"
 
@@ -82,24 +83,21 @@ function OptimizeContent() {
             refreshData()
             setResult(res.data)
 
-            // Parse optimized sections directly into structured data for the editor
-            const sectionsMap: Record<string, string> | undefined = res.data.optimized_sections
-            const contactInfo: Record<string, string> | undefined = res.data.contact_info
+            // Use the new extraction pipeline response format
+            const data = res.data
 
-            console.log("📋 OPTIMIZE RESPONSE:", {
-              hasOptimizedSections: !!sectionsMap,
-              hasContactInfo: !!contactInfo,
-              contactInfoData: contactInfo,
-              sectionsKeys: Object.keys(sectionsMap || {}),
-            })
-
-            if (sectionsMap && Object.keys(sectionsMap).length > 0) {
-                // Pass contact info extracted by AI for accurate basics section
-                console.log("🔄 Calling resumeSectionsToResumeData with contactInfo:", contactInfo)
-                setResumeData(resumeSectionsToResumeData(sectionsMap, undefined, contactInfo))
-            } else if (res.data.optimized_text) {
-                console.log("⚠️ Using fallback parseRawTextToResumeData (no sections)")
-                setResumeData(parseRawTextToResumeData(res.data.optimized_text))
+            if (data.structured_resume) {
+              // Prefer structured_resume (new pipeline format)
+              console.log("✨ Using structured_resume from new extraction pipeline")
+              setResumeData(structuredResumeToResumeData(data.structured_resume))
+            } else if (data.optimized_sections && Object.keys(data.optimized_sections).length > 0) {
+              // Fallback to optimized_sections (backward compat)
+              console.log("🔄 Using optimized_sections (backward compat)")
+              setResumeData(resumeSectionsToResumeData(data.optimized_sections, undefined, data.contact_info))
+            } else if (data.optimized_text) {
+              // Final fallback to raw text
+              console.log("⚠️ Using fallback parseRawTextToResumeData")
+              setResumeData(parseRawTextToResumeData(data.optimized_text))
             }
         } catch (e: any) {
             setError(e.response?.data?.detail || e.message)
