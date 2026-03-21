@@ -172,9 +172,9 @@ export function ResumeExampleDownloadSection({
         </div>
 
         {/* Preview + PDF Canvas */}
-        <div className="mt-12 glass p-8 rounded-2xl border border-white/10 overflow-x-auto">
+        <div className="mt-12 glass p-8 md:p-12 rounded-2xl border border-white/10 overflow-hidden">
           <h3 className="text-lg font-semibold text-white mb-6">Preview</h3>
-          <div id="resume-example-canvas" style={{ width: "8.5in" }} className="mx-auto">
+          <div id="resume-example-canvas" className="mx-auto" style={{ maxWidth: "900px", width: "100%" }}>
             <ResumeTemplates templateId={templateId} data={resumeData} theme={theme} />
           </div>
         </div>
