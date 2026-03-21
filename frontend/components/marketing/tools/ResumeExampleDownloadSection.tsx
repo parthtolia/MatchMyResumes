@@ -9,10 +9,12 @@ import type { ResumeExample } from "@/app/(marketing)/resume-examples/data"
 
 interface ResumeExampleDownloadSectionProps {
   example: ResumeExample
+  isSticky?: boolean
 }
 
 export function ResumeExampleDownloadSection({
   example,
+  isSticky = false,
 }: ResumeExampleDownloadSectionProps) {
   const [templateId, setTemplateId] = useState<ResumeTemplateId>("classic")
   const [accentColor, setAccentColor] = useState("#1a1a1a")
@@ -83,7 +85,7 @@ export function ResumeExampleDownloadSection({
   }
 
   return (
-    <section className="py-20 border-t border-white/5">
+    <section className={`${isSticky ? "py-0 pb-20" : "py-20"} border-t border-white/5`}>
       <div className="max-w-4xl mx-auto px-6">
         {/* Controls */}
         <div className="mb-12 space-y-6">

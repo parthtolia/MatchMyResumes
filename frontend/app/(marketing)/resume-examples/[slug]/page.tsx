@@ -143,7 +143,7 @@ export default async function ResumeExamplePage({
         </h1>
 
         {/* Two-column layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Left column - main content */}
           <div className="lg:col-span-1">
 
@@ -336,8 +336,8 @@ export default async function ResumeExamplePage({
 
           {/* Right sidebar - Sticky Download Section */}
           <div className="lg:col-span-1">
-            <div className="sticky top-0">
-              <ResumeExampleDownloadSection example={example} />
+            <div className="sticky top-0 h-fit">
+              <ResumeExampleDownloadSection example={example} isSticky />
             </div>
           </div>
         </div>
