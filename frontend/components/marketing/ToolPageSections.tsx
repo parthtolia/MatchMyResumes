@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
 import { LazyMotion, domAnimation, m } from "framer-motion"
-import { CheckCircle, ArrowRight, type LucideIcon, ScanSearch, GitCompareArrows, Sparkles, FileText, LogIn } from "lucide-react"
+import { CheckCircle, ArrowRight, type LucideIcon, ScanSearch, GitCompareArrows, Sparkles, FileText, LogIn, Wand2 } from "lucide-react"
 import Navbar from "@/components/landing/Navbar"
 import { getToolHref } from "@/lib/tool-routes"
 import { useUser as useClerkUser } from "@clerk/nextjs"
@@ -63,6 +63,7 @@ const tools = [
   { href: "/ats-score-checker", label: "ATS Score", icon: ScanSearch },
   { href: "/resume-job-description-match", label: "JD Match", icon: GitCompareArrows },
   { href: "/ai-resume-optimizer", label: "Optimizer", icon: Sparkles },
+  { href: "/resume-polish", label: "Polish", icon: Wand2 },
   { href: "/cover-letter-generator", label: "Cover Letter", icon: FileText },
 ]
 
@@ -536,6 +537,13 @@ const crossSellTools = [
     title: "AI Resume Optimizer",
     desc: "AI rewrites your resume to integrate missing keywords naturally.",
     cta: "Optimize Now",
+  },
+  {
+    href: "/resume-polish",
+    icon: Wand2,
+    title: "Resume Polish",
+    desc: "Enhance clarity, structure, and professionalism without a job description.",
+    cta: "Polish Now",
   },
   {
     href: "/cover-letter-generator",
