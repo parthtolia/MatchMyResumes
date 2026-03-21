@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next"
 import { blogPosts } from "./(marketing)/blog/posts"
 import { resumeExamples } from "./(marketing)/resume-examples/data"
 import { coverLetterExamples } from "./(marketing)/cover-letter-examples/data"
+import { competitors } from "./(marketing)/alternatives/data"
 
 export default function sitemap(): MetadataRoute.Sitemap {
     const baseUrl = "https://matchmyresumes.com"
@@ -25,6 +26,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
         lastModified: new Date(),
         changeFrequency: "monthly" as const,
         priority: 0.7,
+    }))
+
+    const alternativeEntries: MetadataRoute.Sitemap = competitors.map((c) => ({
+        url: `${baseUrl}/alternatives/${c.slug}`,
+        lastModified: new Date(),
+        changeFrequency: "monthly" as const,
+        priority: 0.8,
     }))
 
     return [
@@ -72,6 +80,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.8,
         },
         ...coverLetterEntries,
+        {
+            url: `${baseUrl}/alternatives`,
+            lastModified: new Date(),
+            changeFrequency: "weekly",
+            priority: 0.8,
+        },
+        ...alternativeEntries,
         {
             url: `${baseUrl}/blog`,
             lastModified: new Date(),

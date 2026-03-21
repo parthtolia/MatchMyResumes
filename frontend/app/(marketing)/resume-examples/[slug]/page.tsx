@@ -1,8 +1,17 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import dynamic from "next/dynamic"
 import Navbar from "@/components/landing/Navbar"
 import { resumeExamples, getExampleBySlug } from "../data"
 import type { Metadata } from "next"
+
+const ResumeExampleDownloadSection = dynamic(
+  () =>
+    import("@/components/marketing/tools/ResumeExampleDownloadSection").then(
+      (mod) => mod.ResumeExampleDownloadSection
+    ),
+  { ssr: false }
+)
 
 export function generateStaticParams() {
   return resumeExamples.map((e) => ({ slug: e.slug }))
@@ -230,6 +239,9 @@ export default async function ResumeExamplePage({
             ))}
           </div>
         </section>
+
+        {/* Download Resume */}
+        <ResumeExampleDownloadSection example={example} />
 
         {/* Resume Tips */}
         <section className="mb-12">
