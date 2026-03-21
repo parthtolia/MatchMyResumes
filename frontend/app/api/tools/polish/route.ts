@@ -80,9 +80,13 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
-      optimized_text: pipelineResult.optimized_text || "",
+      optimized_text: "",
       changes_summary: pipelineResult.changes_summary || [],
+      optimized_sections: {},
+      structured_json: {},
       structured_resume: pipelineResult.optimized,
+      missing_fields: pipelineResult.missing_fields,
+      confidence_score: pipelineResult.confidence_score,
       contact_info: {
         name: pipelineResult.optimized?.name,
         email: pipelineResult.optimized?.email,
