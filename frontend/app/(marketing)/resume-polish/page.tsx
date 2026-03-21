@@ -92,22 +92,14 @@ export default function ResumePolicePage() {
 
       <FaqSection faqs={faqs} />
 
-      <CrossSellSection
-        title="Also check out AI Optimizer"
-        description="Want to tailor your resume to a specific job? Use our AI Optimizer to match your resume to job descriptions and integrate relevant keywords."
-        ctaText="Try AI Optimizer"
-        ctaHref="/ai-resume-optimizer"
-      />
+      <CrossSellSection exclude="/resume-polish" />
 
-      <LoginPrompt
-        title="Save Your Work"
-        description="Create a free account to save all your polished resumes and access your history anytime."
-      />
+      <LoginPrompt />
 
       <CtaSection
-        title="Ready to strengthen your resume?"
-        description="Polish your resume in seconds with AI-powered improvements."
-        ctaText="Polish Now"
+        title="Ready to Strengthen"
+        titleAccent="Your Resume?"
+        subtitle="Polish your resume in seconds with AI-powered improvements. No job description needed."
       />
     </ToolPageShell>
   )
