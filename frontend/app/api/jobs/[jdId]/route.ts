@@ -4,6 +4,47 @@ import { jobDescriptions, resumeScores } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getAuthUserId, handleAuthError, AuthError } from "@/lib/auth";
 
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ jdId: string }> }
+) {
+  try {
+    const userId = await getAuthUserId();
+    const { jdId } = await params;
+
+    const [jd] = await db
+      .select()
+      .from(jobDescriptions)
+      .where(
+        and(eq(jobDescriptions.id, jdId), eq(jobDescriptions.userId, userId))
+      )
+      .limit(1);
+
+    if (!jd) {
+      return NextResponse.json(
+        { detail: "Job description not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      id: jd.id,
+      title: jd.title,
+      company: jd.company,
+      raw_text: jd.rawText,
+      parsed_json: jd.parsedJson,
+      created_at: jd.createdAt,
+    });
+  } catch (error) {
+    if (error instanceof AuthError) return handleAuthError(error);
+    console.error("Get JD error:", error);
+    return NextResponse.json(
+      { detail: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ jdId: string }> }

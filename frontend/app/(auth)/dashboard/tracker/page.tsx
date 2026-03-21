@@ -46,6 +46,7 @@ interface Application {
     status: Status
     notes?: string
     job_url?: string
+    jd_id?: string
     date_applied?: string
     created_at: string
 }
@@ -65,6 +66,9 @@ function ApplicationCard({
     const [editingNotes, setEditingNotes] = useState(false)
     const [notes, setNotes] = useState(app.notes || "")
     const [saving, setSaving] = useState(false)
+    const [showJdModal, setShowJdModal] = useState(false)
+    const [jdLoading, setJdLoading] = useState(false)
+    const [jdData, setJdData] = useState<{ title?: string; company?: string; raw_text?: string } | null>(null)
 
     const saveNotes = async () => {
         setSaving(true)
@@ -73,6 +77,16 @@ function ApplicationCard({
             onUpdateNotes(app.id, notes)
             setEditingNotes(false)
         } catch { } finally { setSaving(false) }
+    }
+
+    const fetchJdDetails = async () => {
+        if (!app.jd_id) return
+        setJdLoading(true)
+        try {
+            const res = await api.get(`/api/jobs/${app.jd_id}`)
+            setJdData(res.data)
+            setShowJdModal(true)
+        } catch { } finally { setJdLoading(false) }
     }
 
     return (
@@ -131,6 +145,19 @@ function ApplicationCard({
                         className="overflow-hidden"
                     >
                         <div className="mt-3 pt-3 border-t border-white/5 space-y-2">
+                            {/* View JD Button */}
+                            {app.jd_id && (
+                                <div>
+                                    <button
+                                        onClick={fetchJdDetails}
+                                        disabled={jdLoading}
+                                        className="text-[10px] text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors disabled:opacity-50"
+                                    >
+                                        {jdLoading ? <Loader2 size={9} className="animate-spin" /> : <ExternalLink size={9} />}
+                                        {jdLoading ? "Loading..." : "View Job Description"}
+                                    </button>
+                                </div>
+                            )}
                             {/* Notes */}
                             <div>
                                 <div className="flex items-center justify-between mb-1">
@@ -176,6 +203,47 @@ function ApplicationCard({
                                 </div>
                             </div>
                         </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* JD Modal */}
+            <AnimatePresence>
+                {showJdModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowJdModal(false)}
+                        className="fixed inset-0 bg-black/60 z-40 flex items-center justify-center p-4"
+                    >
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            onClick={e => e.stopPropagation()}
+                            className="bg-[#1a1a2e] border border-white/10 rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-2xl"
+                        >
+                            {/* Header */}
+                            <div className="p-6 border-b border-white/10 flex items-start justify-between">
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="font-semibold text-white truncate">{jdData?.title || app.job_title}</h3>
+                                    {jdData?.company && <p className="text-xs text-gray-400 mt-1">{jdData.company}</p>}
+                                </div>
+                                <button
+                                    onClick={() => setShowJdModal(false)}
+                                    className="ml-4 text-gray-500 hover:text-white transition-colors"
+                                >
+                                    <X size={18} />
+                                </button>
+                            </div>
+                            {/* Content */}
+                            <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+                                <pre className="text-xs text-gray-300 whitespace-pre-wrap word-break font-mono leading-relaxed">
+                                    {jdData?.raw_text || "Loading..."}
+                                </pre>
+                            </div>
+                        </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>

@@ -91,12 +91,21 @@ export const ResumeEditor: React.FC<ResumeEditorProps> = ({
                 <span className="text-xs uppercase tracking-widest opacity-60">Heading Color:</span>
             </div>
             <div className="flex gap-2">
-                {["#1a1a1a", "#2563eb", "#059669", "#7c3aed", "#db2777"].map(c => (
+                {[
+                    { color: "#1a1a1a", label: "Charcoal" },
+                    { color: "#1e3a5f", label: "Navy Blue" },
+                    { color: "#1d4e3f", label: "Forest Green" },
+                    { color: "#2d2d4e", label: "Deep Slate" },
+                    { color: "#3d2b1f", label: "Walnut Brown" },
+                    { color: "#1a3a2e", label: "Dark Teal" },
+                    { color: "#374151", label: "Steel Gray" },
+                ].map(({ color, label }) => (
                     <button
-                        key={c}
-                        onClick={() => onThemeChange({ headingColor: c, primaryColor: c })}
-                        className={`w-5 h-5 rounded-full border-2 ${theme.headingColor === c ? "border-white" : "border-transparent"} transition-transform hover:scale-110`}
-                        style={{ backgroundColor: c }}
+                        key={color}
+                        onClick={() => onThemeChange({ headingColor: color, primaryColor: color })}
+                        className={`w-5 h-5 rounded-full border-2 ${theme.headingColor === color ? "border-white" : "border-transparent"} transition-transform hover:scale-110`}
+                        style={{ backgroundColor: color }}
+                        title={label}
                     />
                 ))}
             </div>

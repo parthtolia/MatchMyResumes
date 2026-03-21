@@ -32,6 +32,7 @@ function OptimizeContent() {
     const { isLoaded, isSignedIn } = useUserSafe()
     const { resumes, jobs, loadingData, loadingPlan, refreshData } = useGlobalData()
     const [resumeId, setResumeId] = useState(params.get("resume_id") || "")
+    const [resumeInputType, setResumeInputType] = useState<"select" | "upload">("select")
     const [jdId, setJdId] = useState(params.get("jd_id") || "")
     const [jdInputType, setJdInputType] = useState<"saved" | "text">("saved")
     const [jdTitle, setJdTitle] = useState("")
@@ -49,9 +50,47 @@ function OptimizeContent() {
     })
 
     const [loading, setLoading] = useState(false)
+    const [uploading, setUploading] = useState(false)
     const [copied, setCopied] = useState(false)
     const [error, setError] = useState("")
+    const [uploadError, setUploadError] = useState("")
     const [alertMsg, setAlertMsg] = useState("")
+    const [uploadedResumeName, setUploadedResumeName] = useState("")
+
+    const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+        setUploading(true)
+        setUploadError("")
+        setUploadedResumeName("")
+        try {
+            const formData = new FormData()
+            formData.append("file", file)
+            const config = { headers: { "Content-Type": "multipart/form-data" } }
+            const uploadWithRetry = async () => {
+                try {
+                    const res = await api.post("/api/resumes", formData, config)
+                    return res
+                } catch (e: any) {
+                    if (e?.response?.status >= 500) {
+                        await new Promise(r => setTimeout(r, 1500))
+                        return await api.post("/api/resumes", formData, config)
+                    }
+                    throw e
+                }
+            }
+            const res = await uploadWithRetry()
+            setResumeId(res.data.id)
+            setUploadedResumeName(res.data.filename)
+            refreshData()
+            setResumeInputType("select")
+        } catch (e: any) {
+            setUploadError(e?.response?.data?.detail || e?.message || "Upload failed")
+        } finally {
+            setUploading(false)
+            ;(e.target as HTMLInputElement).value = ""
+        }
+    }
 
     useEffect(() => {
         if (resumeId && isLoaded && isSignedIn) {
@@ -161,11 +200,52 @@ function OptimizeContent() {
             <div className="glass p-6 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-xs font-medium text-gray-400 mb-1.5">Select Resume</label>
-                        <select className="input-styled py-1.5 text-sm" value={resumeId} onChange={e => setResumeId(e.target.value)}>
-                            <option value="">Choose resume...</option>
-                            {resumes.map((r: any) => <option key={r.id} value={r.id}>{r.filename}</option>)}
-                        </select>
+                        <label className="block text-xs font-medium text-gray-400 mb-1.5">Resume</label>
+                        <div className="border border-white/10 rounded-xl overflow-hidden bg-[rgba(255,255,255,0.02)]">
+                            {resumes.length > 0 && (
+                                <div className={`p-3 transition-colors border-b border-white/10 ${resumeInputType === "select" ? "bg-white/5" : "hover:bg-white/[0.04]"}`}>
+                                    <label className="flex items-center gap-3 cursor-pointer max-w-full">
+                                        <input type="radio" name="resume_type" checked={resumeInputType === "select"} onChange={() => setResumeInputType("select")} className="accent-violet-500 w-4 h-4 flex-shrink-0 cursor-pointer" />
+                                        <span className={`text-sm font-medium transition-colors ${resumeInputType === "select" ? "text-white" : "text-gray-400"}`}>Select Saved Resume</span>
+                                    </label>
+                                    {resumeInputType === "select" && (
+                                        <div className="pl-7 mt-2">
+                                            <select className="input-styled w-full py-1.5 text-sm" value={resumeId} onChange={e => setResumeId(e.target.value)}>
+                                                <option value="">Choose resume...</option>
+                                                {resumes.map((r: any) => <option key={r.id} value={r.id}>{r.filename}</option>)}
+                                            </select>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            <div className={`p-3 transition-colors ${resumeInputType === "upload" || resumes.length === 0 ? "bg-white/5" : "hover:bg-white/[0.04]"}`}>
+                                <label className="flex items-center gap-3 cursor-pointer max-w-full">
+                                    <input type="radio" name="resume_type" checked={resumeInputType === "upload" || resumes.length === 0} onChange={() => setResumeInputType("upload")} className="accent-violet-500 w-4 h-4 flex-shrink-0 cursor-pointer" />
+                                    <span className={`text-sm font-medium transition-colors ${resumeInputType === "upload" || resumes.length === 0 ? "text-white" : "text-gray-400"}`}>Upload Resume</span>
+                                </label>
+                                {(resumeInputType === "upload" || resumes.length === 0) && (
+                                    <div className="pl-7 mt-2 space-y-2">
+                                        <input
+                                            type="file"
+                                            accept=".pdf,.docx"
+                                            onChange={handleResumeUpload}
+                                            disabled={uploading}
+                                            className="input-styled text-sm py-1.5 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-violet-500/20 file:text-violet-300 hover:file:bg-violet-500/30 cursor-pointer disabled:opacity-50"
+                                        />
+                                        {uploadedResumeName && (
+                                            <p className="text-xs text-emerald-400">✓ Uploaded: {uploadedResumeName}</p>
+                                        )}
+                                        {uploadError && <p className="text-xs text-red-400">{uploadError}</p>}
+                                        {uploading && (
+                                            <div className="flex items-center gap-2 text-xs text-gray-400">
+                                                <Loader2 size={12} className="animate-spin" />
+                                                Uploading...
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label className="block text-xs font-medium text-gray-400 mb-1.5">Job Description Source</label>
