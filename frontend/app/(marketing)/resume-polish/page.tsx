@@ -58,16 +58,19 @@ const faqs = [
 
 const howItWorks = [
   {
+    num: "01",
     title: "Upload Your Resume",
-    description: "Share your PDF or DOCX resume — our AI analyzes the structure and content.",
+    desc: "Share your PDF or DOCX resume — our AI analyzes the structure and content.",
   },
   {
-    title: "AI Analysis",
-    description: "We identify areas for improvement: clarity, flow, professionalism, and impact.",
+    num: "02",
+    title: "AI Polishing",
+    desc: "We enhance clarity, improve structure, strengthen language, and maximize professionalism across all sections.",
   },
   {
+    num: "03",
     title: "Review & Download",
-    description: "See the improvements, download your polished resume, and save it to your account.",
+    desc: "See all improvements with a detailed summary. Download your polished resume and save it to your account.",
   },
 ]
 
@@ -75,23 +78,15 @@ export default function ResumePolicePage() {
   return (
     <ToolPageShell>
       <ToolHero
-        icon="Sparkles"
-        title="Resume Polish"
-        subtitle="Improve your resume's clarity, structure, and impact — no job description needed"
-        description="Our AI enhances every section of your resume to maximize professionalism and readability. Perfect for strengthening your base resume before tailoring it to specific positions."
-        cta="Polish Your Resume Free"
+        headline="Polish Your Resume"
+        headlineAccent="with AI in Seconds"
+        hook="Your resume deserves to shine. Let AI enhance clarity, structure, and professionalism without a job description."
+        trustItems={["No signup required", "Completely free", "Preserves your authentic experience"]}
       />
 
       <PolishToolSection />
 
-      <FeatureStrip
-        features={[
-          { emoji: "✨", label: "General Improvements" },
-          { emoji: "📝", label: "Enhanced Clarity" },
-          { emoji: "⚡", label: "Better Structure" },
-          { emoji: "🎯", label: "Professional Tone" },
-        ]}
-      />
+      <FeatureStrip active="/resume-polish" />
 
       <HowItWorksSection steps={howItWorks} />
 
