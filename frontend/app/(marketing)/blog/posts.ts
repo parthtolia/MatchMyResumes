@@ -1000,6 +1000,1208 @@ The resume that wins in 2026 is:
 The job market rewards candidates who adapt. Review your resume against these trends, identify where it falls short, and update accordingly. Tools like MatchMyResumes can help you verify that your updated resume is ATS-compatible and well-scored before you apply.
     `.trim(),
   },
+  {
+    slug: "resume-action-verbs",
+    title: "150+ Strong Resume Action Verbs (By Category)",
+    description: "Weak verbs kill strong resumes. Use these 150+ powerful action verbs — organized by skill category — to make every bullet point unforgettable.",
+    date: "2026-03-01",
+    readTime: "6 min read",
+    category: "Resume Tips",
+    content: `
+## Why Action Verbs Matter on a Resume
+
+The first word of every bullet point is your first impression. Weak openers like "Responsible for" or "Helped with" bury your contribution under vague language. Strong action verbs do the opposite: they put you at the center of the action, signal accomplishment, and make ATS systems take notice.
+
+Here is the definitive list of 150+ action verbs organized by the skill they signal.
+
+## Leadership & Management
+
+Use these verbs when describing roles where you directed people, projects, or strategy:
+
+**Directed, Led, Managed, Oversaw, Supervised, Spearheaded, Championed, Orchestrated, Headed, Steered, Guided, Mentored, Coached, Developed, Cultivated, Inspired, Mobilized, Unified, Delegated, Authorized**
+
+*Example:* "Led a cross-functional team of 12 to deliver a $2M platform migration 3 weeks ahead of schedule."
+
+## Technical & Engineering
+
+Use these to highlight builds, designs, and technical contributions:
+
+**Architected, Engineered, Developed, Built, Deployed, Implemented, Coded, Programmed, Configured, Integrated, Automated, Debugged, Optimized, Refactored, Migrated, Scaled, Designed, Prototyped, Launched, Shipped**
+
+*Example:* "Engineered a microservices API layer reducing response time from 800ms to 95ms."
+
+## Analysis & Problem-Solving
+
+Use these when you investigated, evaluated, or diagnosed:
+
+**Analyzed, Assessed, Diagnosed, Evaluated, Identified, Investigated, Examined, Researched, Audited, Benchmarked, Quantified, Mapped, Modeled, Forecasted, Projected, Interpreted, Synthesized, Validated, Tested, Reviewed**
+
+*Example:* "Analyzed 5M customer records to identify churn patterns, informing a retention strategy that saved $1.4M ARR."
+
+## Communication & Collaboration
+
+For roles requiring writing, presenting, or cross-team work:
+
+**Presented, Authored, Communicated, Wrote, Edited, Published, Facilitated, Mediated, Negotiated, Partnered, Collaborated, Liaised, Coordinated, Consulted, Influenced, Persuaded, Advocated, Pitched, Briefed, Trained**
+
+*Example:* "Presented quarterly business reviews to C-suite executives, distilling 40-page reports into 10-minute executive briefings."
+
+## Operations & Process Improvement
+
+For efficiency, workflow, and operational achievements:
+
+**Streamlined, Standardized, Optimized, Improved, Restructured, Redesigned, Consolidated, Eliminated, Reduced, Accelerated, Expedited, Centralized, Systematized, Operationalized, Launched, Executed, Processed, Administered, Maintained, Monitored**
+
+*Example:* "Streamlined the onboarding process from 18 days to 9 days by eliminating 4 redundant approval gates."
+
+## Finance & Business
+
+For financial, revenue, and commercial achievements:
+
+**Generated, Grew, Increased, Boosted, Maximized, Expanded, Secured, Closed, Negotiated, Saved, Reduced, Cut, Recovered, Allocated, Budgeted, Forecasted, Managed, Controlled, Tracked, Reconciled**
+
+*Example:* "Negotiated vendor contracts saving $2.8M annually while reducing single-source supplier risk."
+
+## Creative & Marketing
+
+For brand, content, and creative work:
+
+**Created, Designed, Conceptualized, Crafted, Produced, Developed, Launched, Branded, Curated, Directed, Illustrated, Composed, Wrote, Edited, Published, Positioned, Marketed, Promoted, Targeted, Personalized**
+
+*Example:* "Produced 24 long-form SEO articles ranking in top 3 positions for 85 target keywords."
+
+## Customer & Client Success
+
+For client-facing, service, and relationship roles:
+
+**Managed, Retained, Grew, Onboarded, Served, Supported, Resolved, Recovered, Converted, Upsold, Expanded, Nurtured, Advised, Guided, Partnered, Built, Maintained, Renewed, Exceeded, Delighted**
+
+*Example:* "Retained a $450K enterprise account at risk of churning by restructuring their implementation plan and delivering a custom QBR."
+
+## The 10 Weakest Resume Verbs to Avoid
+
+Replace these immediately:
+
+1. **Responsible for** → *Led, Managed, Owned*
+2. **Helped** → *Contributed, Supported, Accelerated*
+3. **Worked on** → *Built, Developed, Delivered*
+4. **Assisted** → *Partnered, Collaborated, Enabled*
+5. **Participated in** → *Contributed to, Drove, Shaped*
+6. **Was involved in** → *Played a key role in, Led, Implemented*
+7. **Handled** → *Managed, Resolved, Administered*
+8. **Did** → *Executed, Delivered, Achieved*
+9. **Made** → *Created, Produced, Built*
+10. **Tried to** → Delete this entirely — only claim what you achieved.
+
+## How to Use Action Verbs with Maximum Impact
+
+Strong action verbs are only the start. The full formula is:
+
+**[Strong Verb] + [What You Did] + [Quantified Result]**
+
+- ❌ "Responsible for improving customer satisfaction."
+- ✅ "Redesigned customer onboarding workflow, increasing 30-day satisfaction scores by 28 points."
+
+The verb opens the door. The metric closes the sale.
+
+Run your resume through MatchMyResumes to check how well your bullet points are scoring — weak language patterns reduce your ATS score and recruiter impact.
+    `.trim(),
+  },
+  {
+    slug: "how-to-explain-resume-gaps",
+    title: "How to Explain Resume Gaps Without Losing the Interview",
+    description: "Resume gaps are common — and manageable. Learn the honest, confident strategies that hiring managers respect, plus how to frame gaps on your resume and in interviews.",
+    date: "2026-02-15",
+    readTime: "7 min read",
+    category: "Resume Tips",
+    content: `
+## Resume Gaps Are More Common Than You Think
+
+According to LinkedIn research, over 60% of professionals have a gap in their employment history. Layoffs, caregiving responsibilities, health issues, education, travel, or simply taking time to find the right role — these are human experiences, not disqualifiers.
+
+The problem is not the gap. The problem is the gap you apologize for.
+
+## Why Hiring Managers Actually Ask About Gaps
+
+Recruiters and hiring managers ask about gaps for two reasons:
+
+1. **They want to confirm you didn't leave because of serious misconduct**
+2. **They want to see how you handle adversity and communicate honestly**
+
+A clear, confident answer that explains the gap and pivots to what you've done since addresses both concerns immediately.
+
+## How to Frame Common Types of Gaps
+
+### Layoff or Restructuring
+
+This is the most sympathetic and common gap cause — and increasingly understood after the 2022-2024 tech and finance layoff cycles.
+
+**What to say:** *"My role was eliminated in a company-wide restructuring. I used the time to complete [certification/course], worked on [project], and have been actively interviewing for roles where I can apply my [specific skills]. I'm excited about this opportunity because..."*
+
+**What not to say:** Don't volunteer specific details about the layoff or make the company sound dysfunctional. Keep it factual and brief.
+
+### Caregiving for Family
+
+**What to say:** *"I took time off to care for a family member. I maintained professional development during that period by [online courses, consulting work, freelance projects, professional reading]. Now that [situation resolved], I'm fully available and energized to return to full-time work."*
+
+**What not to say:** You don't owe detailed medical or personal information. Keep it general and redirect quickly to your readiness.
+
+### Health or Personal Leave
+
+**What to say:** *"I took medical leave to address a personal health situation that is now fully resolved. I am healthy, fully able to fulfill this role, and eager to refocus on my career. During that time, I [kept skills current through X / completed X project]."*
+
+**Legal note:** In the US, you are generally not legally required to disclose your specific health condition.
+
+### Education or Skill Development
+
+**What to say:** *"I took time off to complete [degree/certification/bootcamp]. I wanted to build depth in [area], and I have since [applied those skills in X project/role]. The learning was focused and intentional — I'm excited to apply it here."*
+
+This is the easiest gap to explain — frame it as an investment, not a pause.
+
+### Freelancing or Consulting
+
+**What to say:** *"After [previous role], I took on several consulting projects in [field] — working with [type of clients] on [types of projects]. It built my skills in [areas] and gave me valuable independent experience. I'm now seeking a full-time role because [genuine reason: team environment, scale, long-term investment in one product]."*
+
+### Travel or Personal Exploration
+
+**What to say:** *"I took an intentional break to travel and recharge after [years] of intense professional focus. I returned with [perspective, renewed energy, specific experiences relevant to this role]. I've been actively interviewing for the past [X months] and this role stands out because..."*
+
+## How to Handle Gaps on Your Resume
+
+### Use Years Only for Older Positions
+
+Instead of writing "June 2022 – August 2023," write "2022 – 2023." This format is standard and reduces the visual emphasis on gaps.
+
+### Fill Gaps with Legitimate Activities
+
+If you did anything during your gap that's professionally relevant, list it:
+- **Freelance/consulting:** List as a separate job entry
+- **Education/courses:** List in your Education section
+- **Volunteer work:** List in a Volunteer section
+- **Caregiving:** Not listed, but addressed briefly in cover letter if the gap is long
+
+### Don't Fabricate or Fudge Dates
+
+Background checks verify employment dates precisely. Dishonesty about dates is grounds for termination and will damage your professional reputation permanently. Gaps are manageable; fraud is not.
+
+## The Three-Part Gap Answer Formula
+
+For any interview question about a gap, use this structure:
+
+1. **Explain briefly** (1-2 sentences, factual and non-apologetic)
+2. **Pivot to what you did** (courses, projects, consulting, caregiving — show you were active)
+3. **Redirect to why you're excited** (bridge to the specific role and what you bring)
+
+**Example:** *"My position was eliminated in a restructuring [1]. During that time I completed the Google Data Analytics certification and built a personal analytics project using public data [2]. I've been searching for the right fit, and this role stood out because your data team's focus on customer behavior analysis matches exactly the work I'm most passionate about [3]."*
+
+## What About Gaps of 2+ Years?
+
+Longer gaps get more scrutiny but are still manageable with:
+- **More specific skills maintenance evidence** (certifications, courses, freelance work)
+- **Stronger pivots** — spend more time on what you've done since than on the gap
+- **Consider a functional or hybrid resume** that leads with skills and achievements before chronological history
+
+Ultimately, if you can confidently explain the gap and clearly show what value you bring today, most hiring managers will move past it quickly.
+
+Use MatchMyResumes to ensure the rest of your resume is strong enough that a gap is the last thing they focus on.
+    `.trim(),
+  },
+  {
+    slug: "career-change-resume-guide",
+    title: "Career Change Resume: How to Write One That Actually Works",
+    description: "Changing careers is harder when your resume screams the wrong industry. Learn how to reframe your experience, identify transferable skills, and pass ATS systems when making a career pivot.",
+    date: "2026-01-20",
+    readTime: "9 min read",
+    category: "Resume Tips",
+    content: `
+## The Career Change Resume Problem
+
+When you change careers, you face a paradox: you need to show experience in the new field to get hired in it, but you can't get experience without being hired. The career change resume is how you break that cycle.
+
+The goal is not to hide your previous experience. It's to reframe it — to show how what you've done maps to what your target role actually requires.
+
+## Step 1: Define Your Transferable Skills
+
+Transferable skills are competencies that apply across industries and roles. Most professionals dramatically underestimate how much they have.
+
+**Universal high-value transferable skills:**
+- Project management and deadline delivery
+- Data analysis and data-driven decision making
+- Stakeholder communication and presentation
+- Team leadership and cross-functional collaboration
+- Process improvement and operational efficiency
+- Customer or client relationship management
+- Budget ownership and financial accountability
+- Writing and documentation
+
+**Exercise:** Write down every significant responsibility from your last 3 roles. For each one, ask: "What skill is this actually demonstrating?" You will likely find 10-15 transferable skills you weren't planning to highlight.
+
+## Step 2: Identify the Skill Gap — Honestly
+
+Compare your transferable skills against the requirements in 5-10 job descriptions for your target role. Where are the gaps?
+
+Common gaps for career changers:
+- Missing technical skills (specific tools, programming languages, certifications)
+- Lack of industry-specific terminology and context
+- No demonstrated results in the new domain
+
+Gaps you can address quickly:
+- **Technical skills:** Free/low-cost courses on Coursera, LinkedIn Learning, Udemy
+- **Certifications:** Google, AWS, HubSpot, Salesforce, and many others offer recognized certifications in 1-6 months
+- **Domain knowledge:** Build a personal project in the new field
+
+Gaps you address in your resume by reframing:
+- Industry-specific terminology: You can learn and mirror it immediately
+- Demonstrated results: Freelance, volunteer, or personal projects fill this gap
+
+## Step 3: Choose the Right Resume Format
+
+For career changers, a **hybrid resume** (also called a combination resume) works better than a chronological resume.
+
+**Hybrid resume structure:**
+1. **Summary** — Lead with your career change story and the value you bring to the new role
+2. **Skills** — Prominent skills section with transferable and newly-acquired skills relevant to the target role
+3. **Selected Achievements** — 3-5 accomplishments from any role that demonstrate skills relevant to the new field
+4. **Professional Experience** — Standard chronological work history with bullets reframed for transferability
+5. **Education & Certifications** — Include new certifications prominently
+
+The skills section and selected achievements move the most relevant content above the fold, ensuring hiring managers and ATS see your most relevant material first.
+
+## Step 4: Reframe Your Experience
+
+This is the critical step. Every bullet point on your resume should be translated from "what you did in your old industry" to "what skill this demonstrates for your new industry."
+
+**Before (for a teacher applying to corporate training):**
+*"Taught AP Biology to 120 students across 4 sections."*
+
+**After:**
+*"Designed and delivered curriculum for 120 adult learners with diverse learning styles, achieving 94% pass rate on high-stakes standardized assessments."*
+
+**Before (for a sales rep applying to product management):**
+*"Exceeded quota by 127% in Q3 by identifying upsell opportunities in existing accounts."*
+
+**After:**
+*"Identified unmet customer needs in existing accounts, creating $340K in expansion revenue through targeted solutions — demonstrating the discovery and problem-framing skills central to product management."*
+
+The facts are the same. The framing makes them relevant.
+
+## Step 5: Write a Targeted Career Change Summary
+
+Your professional summary must do heavy lifting for career changers. It needs to:
+1. Acknowledge the career transition (briefly, not apologetically)
+2. Make the case for why your background is actually an asset
+3. State clearly what you're aiming for
+
+**Example — Teacher to Corporate Instructional Designer:**
+*"Instructional designer with a foundation in 8 years of classroom education and curriculum development for 400+ learners annually. Currently completing ATD Instructional Design certification and building Articulate Storyline portfolio. Brings a practitioner's understanding of how adults learn to the design of corporate training programs that stick."*
+
+**Example — Financial Analyst to Data Scientist:**
+*"Data scientist in transition from 5 years of financial modeling and quantitative analysis. Strong foundation in statistical analysis, Python, and Excel (advanced). Completed Google Data Analytics certificate and built a customer churn prediction model using scikit-learn and public bank data. Brings business acumen and financial domain expertise that pure computer science backgrounds often lack."*
+
+## Step 6: Fill the Experience Gap with Projects
+
+If you lack professional experience in the new field, projects are the answer:
+
+- **Personal projects:** Build something and put it on GitHub or in a portfolio
+- **Freelance work:** Even one paid project in your new field becomes professional experience
+- **Volunteer work:** Many nonprofits need skills that align with tech, marketing, data, and design roles
+- **Open source contributions:** For technical fields, GitHub contributions are directly portfolio-worthy
+- **Course capstone projects:** Many certificates include projects — list them like professional work
+
+List these under a "Projects" section with the same structure as job bullets: what you built, what skills you used, what the outcome or context was.
+
+## ATS Considerations for Career Change Resumes
+
+Career change resumes are often filtered by ATS systems that are tuned to look for industry-specific experience. To improve your ATS score:
+
+- **Mirror job description language exactly** — use the same terminology as the target role, even if your background used different words for the same concept
+- **Include a strong skills section** — this is where ATS keyword matching focuses first
+- **Use industry standard certifications by exact name** — "Google Data Analytics Professional Certificate" not "completed a Google analytics course"
+- **Tailor every application** — a career change resume requires more customization per application than a traditional resume
+
+Run each version through MatchMyResumes to check your keyword match score against specific job descriptions before applying.
+
+## The Cover Letter Is Mandatory for Career Changers
+
+A well-written cover letter is more important for career changers than any other job seeker. The hiring manager cannot understand your career change story from a resume alone — the cover letter is where you make the case.
+
+Address the transition directly. Explain why (genuine motivation, not "I just want a change"). Show the connection between your background and the new role. Lead with your enthusiasm for the specific company.
+
+The combination of a reframed resume and a compelling cover letter is your most powerful tool for breaking into a new field.
+    `.trim(),
+  },
+  {
+    slug: "entry-level-resume-guide",
+    title: "Entry-Level Resume Guide: Get Your First Job With No Experience",
+    description: "No experience? No problem. Learn how to build an entry-level resume that gets noticed — using coursework, projects, internships, and transferable skills from any background.",
+    date: "2026-01-05",
+    readTime: "8 min read",
+    category: "Resume Tips",
+    content: `
+## The Entry-Level Catch-22
+
+Every entry-level job posting says "0-2 years of experience required." But getting that first experience requires someone to take a chance on you first.
+
+This guide gives you the specific tools to write a resume that breaks the cycle — even if you have never held a full-time professional job.
+
+## What Employers Actually Want from Entry-Level Candidates
+
+When hiring managers post entry-level roles, they know candidates won't have 10 years of experience. What they're actually evaluating:
+
+1. **Learning ability** — Can this person pick things up quickly?
+2. **Initiative** — Did they seek out opportunities or wait to be taught?
+3. **Communication** — Can they present information clearly?
+4. **Relevant foundations** — Do they understand the basics of the role's domain?
+5. **Cultural fit** — Will they collaborate well with the team?
+
+Your resume needs to address all five — even without direct work experience.
+
+## Entry-Level Resume Structure
+
+For candidates with limited work experience, the order of sections matters:
+
+1. **Contact Info + Professional Summary** (3 sentences)
+2. **Skills** (technical and soft skills relevant to the role)
+3. **Projects** (personal, academic, or freelance work)
+4. **Education** (include relevant coursework for recent graduates)
+5. **Work Experience** (any work, including part-time, service industry, retail)
+6. **Certifications & Awards** (if applicable)
+
+Notice skills and projects come before work experience. This puts your most role-relevant content first, especially when your work experience is in unrelated fields.
+
+## How to Write a Powerful Entry-Level Summary
+
+Your summary needs to do two things: show who you are and make the case for why you're worth interviewing despite limited experience.
+
+**Template:**
+*[Degree/field] graduate with [X] years of [coursework/project/internship] experience in [specific skills]. Demonstrated ability to [key competency] through [specific evidence]. Eager to bring [specific value] to [type of company/role].*
+
+**Example — Computer Science graduate applying for a software engineering role:**
+*"Computer Science graduate with hands-on experience building full-stack web applications using React, Node.js, and PostgreSQL. Completed 3 personal projects deployed to production, including a task management app with 200+ active users. Eager to contribute engineering rigor and a strong self-learning foundation to a collaborative development team."*
+
+## Projects Are Your Experience
+
+Projects are the most powerful tool for entry-level candidates because they:
+- Demonstrate applied skills, not just theoretical knowledge
+- Show initiative (you built something without being asked)
+- Give interviewers something specific to discuss
+- Provide portfolio links that prove capability
+
+**What counts as a project:**
+- Academic capstone or class projects (especially if they have measurable outcomes)
+- Personal apps, websites, tools, or creative work
+- Freelance or volunteer work for anyone
+- Open-source contributions
+- Kaggle competitions, hackathons, or case competitions
+- Analyzing a public dataset and publishing findings
+
+**How to format projects on your resume:**
+
+**Project Name | Technology Stack | [Link]**
+*Brief description of what it does and the outcome*
+- Built [feature] using [technology] that [specific result]
+- Integrated [X] to enable [capability] for [users/audience]
+
+**Example:**
+
+**BudgetBuddy — Personal Finance App | React, Node.js, PostgreSQL | github.com/...**
+*Mobile-first budgeting app with 200+ active users, built during final semester*
+- Designed and built RESTful API using Node.js serving 1,200+ daily requests
+- Implemented OAuth authentication and PostgreSQL data persistence for secure account management
+
+## How to Present Unrelated Work Experience
+
+Most entry-level candidates have work experience — just not in the field they're applying for. Retail, food service, hospitality, and customer service jobs are full of transferable skills. The key is framing.
+
+**Instead of:**
+*"Worked as a barista at Starbucks."*
+
+**Write:**
+*"Provided high-volume customer service in fast-paced environment, processing 150+ transactions daily while maintaining 4.9/5 satisfaction rating."*
+
+Transferable skills from common entry-level jobs:
+- **Retail/service:** Customer service, cash handling, inventory management, conflict resolution
+- **Food service:** Time management, multitasking, team coordination, speed under pressure
+- **Tutoring/teaching:** Communication, patience, curriculum design, measurable outcomes
+- **Any job:** Reliability, punctuality, teamwork, learning new systems
+
+## Education Section for Recent Graduates
+
+As a recent graduate, your education section is more valuable than it will ever be again. Include:
+
+- **University name, degree, and graduation year**
+- **GPA** — if it's above 3.5, include it. Below 3.0, omit it.
+- **Relevant coursework** — list 4-6 courses that are directly relevant to the role (e.g., for a marketing job: "Digital Marketing, Consumer Behavior, Marketing Analytics, Brand Strategy")
+- **Honors and awards** — Dean's List, scholarships, honor societies
+- **Study abroad** — if it's relevant (e.g., international business role)
+- **Thesis or capstone project** — especially if it's relevant to the target role
+
+## Skills Section Strategy
+
+For entry-level candidates, the skills section is often the most important section for ATS matching. Build it in two parts:
+
+**Technical Skills:** List tools, software, programming languages, platforms, and certifications. Be honest about your proficiency level.
+
+**Core Competencies:** List 4-6 soft skills that are genuinely strong and can be evidenced. "Communication" without evidence is weak. "Cross-cultural communication" or "Technical writing" paired with evidence in your bullets is strong.
+
+## Entry-Level ATS Tips
+
+ATS systems don't give extra credit for having a degree from a top school or impressive extracurriculars — they look for keyword matches. For entry-level candidates:
+
+1. **Mirror the job description language exactly** — if they say "customer relationship management," use those exact words, not "client relations."
+2. **List tools by exact name** — "HubSpot" not "marketing software," "Excel" not "spreadsheets."
+3. **Include certifications by full name** — "Google Analytics 4 Certification" not "took a Google course."
+4. **Use a clean, single-column format** — two-column entry-level resumes often fail ATS parsing.
+
+Run your entry-level resume through MatchMyResumes to see your ATS score before applying. A 70%+ keyword match score is your target for competitive roles.
+
+## The Most Common Entry-Level Resume Mistakes
+
+1. **Objective statements** — Replace with a professional summary that gives value, not a statement about what you want.
+2. **High school experience** — Unless you're still in college, high school jobs, clubs, and GPA don't belong.
+3. **References available upon request** — This is implied and wastes valuable space.
+4. **Too long** — Entry-level resumes should be exactly 1 page. If yours is longer, cut it.
+5. **Unprofessional email** — Your email should be firstname.lastname@gmail.com, not "partyanimals2020@hotmail.com."
+
+The entry-level job search is a numbers game that rewards quality applications over mass applications. A tailored, ATS-optimized resume sent to 20 well-matched roles will outperform a generic resume sent to 200.
+    `.trim(),
+  },
+  {
+    slug: "cover-letter-tips-2026",
+    title: "Cover Letter Tips That Actually Get You Interviews in 2026",
+    description: "Most cover letters are ignored — or worse, they hurt your chances. Learn the modern cover letter framework that makes hiring managers stop and read.",
+    date: "2025-12-10",
+    readTime: "6 min read",
+    category: "Resume Tips",
+    content: `
+## Do Cover Letters Still Matter in 2026?
+
+Short answer: yes — but only when they're good.
+
+A mediocre cover letter is ignored. A bad cover letter hurts you. A great cover letter makes a hiring manager want to meet you before they've even finished reading your resume.
+
+The problem is most cover letters are bad. Generic, self-centered, and full of phrases that say nothing. This guide fixes that.
+
+## The One Rule of Modern Cover Letters
+
+Your cover letter is not about you. It is about what you can do for them.
+
+Every sentence should answer: "Why does this employer benefit from reading this?" If a sentence is only about your feelings, goals, or desires, rewrite it from the employer's perspective or delete it.
+
+**Generic (candidate-focused):** *"I am very interested in this position and believe it would be a great opportunity for my career growth."*
+
+**Strong (employer-focused):** *"Your Q3 revenue acceleration challenge — growing mid-market ARR while managing CAC — is precisely the problem I solved at my last company, where I grew this segment 40% in 18 months."*
+
+## The Four-Paragraph Formula
+
+### Paragraph 1: The Hook (Why You + Why Them)
+
+Skip "I am writing to apply for the [role] position." Everyone writes that. Instead, open with one of:
+
+- **A specific company insight** — something you noticed, read, or admire about their product, strategy, or culture
+- **Your most compelling credential directly relevant to the role**
+- **The business problem you know how to solve** — the one they're hiring this role to address
+
+**Example:** *"Your recent pivot from transactional to subscription revenue is the same transition I led at CloudPay in 2024 — a shift that required exactly the kind of customer success infrastructure I specialize in building."*
+
+### Paragraph 2: Your Strongest Evidence
+
+Pick your single best achievement that's directly relevant to this role. Tell the story: what was the situation, what did you do, what was the outcome?
+
+Keep it to 3-5 sentences. Include a specific metric. Make it undeniable.
+
+### Paragraph 3: Why This Specific Company
+
+This paragraph is where most candidates fail. They write generic praise or aspirational statements. Instead, show specific research:
+
+- Reference a specific product, feature, or business initiative
+- Mention something from their engineering blog, a talk their leadership gave, or a recent news item
+- Connect it genuinely to your interest — not as flattery, but as evidence you've done your homework
+
+**Example:** *"Your open-source observability platform was the tool I used at my previous company before switching to a paid solution, and I've been following your product roadmap since. The observability-as-infrastructure thesis is one I believe deeply in."*
+
+### Paragraph 4: The Close (Short and Direct)
+
+Don't grovel. Don't repeat everything you just said. Do:
+- Express genuine enthusiasm for the specific role
+- State your availability for a conversation
+- End with a confident, direct closing
+
+**Example:** *"I'd welcome the opportunity to discuss how my experience maps to your team's needs. I'm available for a conversation at your convenience."*
+
+## Cover Letter Length and Format
+
+- **Length:** 250-400 words maximum. 3-4 paragraphs. One page.
+- **Format:** Match your resume's header for personal branding consistency.
+- **Font:** Same font as your resume, 10-12pt.
+- **Salutation:** Use the hiring manager's name when possible. Research it — LinkedIn almost always has it. If you genuinely cannot find it: "Dear [Team] Hiring Manager" is acceptable.
+
+## 7 Phrases to Delete from Your Cover Letter
+
+These clichés appear in thousands of cover letters and are immediately forgettable. Cut them and replace with specific evidence.
+
+1. ❌ "I am a hard worker" → Show a result that proves it
+2. ❌ "I am passionate about this industry" → Say specifically what excites you and why
+3. ❌ "I am a team player" → Describe a specific collaboration outcome
+4. ❌ "I would be a great fit" → Show how your specific experience maps to their specific need
+5. ❌ "I have strong communication skills" → Let your writing demonstrate it
+6. ❌ "I am eager to learn" → Show something you've taught yourself recently
+7. ❌ "Please find attached my resume" → They know. Delete this entirely.
+
+## Should You Always Submit a Cover Letter?
+
+When the application says "optional" — submit one. Fewer candidates do, which means yours is read by a smaller, more motivated subset of the review pool.
+
+When the application says "required" — submit one and take it seriously. A form-letter cover letter for a "required" field will hurt you.
+
+When the company explicitly says not to — don't. Following instructions is itself a screening criterion.
+
+## ATS and Cover Letters
+
+Most ATS systems do not rank cover letters the same way they rank resumes — but many employers do read them manually after passing the ATS screen. Write for the human reader, not the algorithm.
+
+However, a cover letter that's submitted as your "resume" or uploaded in the wrong field will confuse the ATS. Follow submission instructions exactly.
+
+A great cover letter combined with a strong, ATS-optimized resume is the highest-impact combination in the modern job search. Check your resume score at MatchMyResumes and then write a cover letter worthy of the resume you've built.
+    `.trim(),
+  },
+  {
+    slug: "resume-keywords-by-industry",
+    title: "ATS Resume Keywords by Industry (2026 Master List)",
+    description: "Industry-specific ATS keywords for technology, healthcare, finance, marketing, and operations. Use this guide to optimize your resume for your specific sector.",
+    date: "2025-11-20",
+    readTime: "7 min read",
+    category: "ATS Tips",
+    content: `
+## Why Industry-Specific Keywords Matter
+
+Generic ATS optimization — clean formatting, standard headings, quantified bullets — gets you most of the way there. But the final 20% of your ATS score comes from industry-specific language that signals you know the domain.
+
+A resume for a healthcare role that uses generic language ("managed patient interactions") scores lower than one using precise clinical terminology ("conducted patient assessments using evidence-based clinical protocols").
+
+This guide gives you the power keywords by industry.
+
+## Technology & Software
+
+**Core role keywords:**
+Product Manager, Software Engineer, Data Scientist, DevOps Engineer, UX Designer, QA Engineer, Cloud Architect, Machine Learning Engineer
+
+**Technical tools (highest search frequency):**
+AWS, Azure, GCP, Python, JavaScript, TypeScript, React, Node.js, Kubernetes, Docker, Terraform, SQL, PostgreSQL, MongoDB, Redis, Git
+
+**Methodology & process keywords:**
+Agile, Scrum, CI/CD, DevOps, microservices, API design, test-driven development (TDD), distributed systems, system design, infrastructure as code (IaC)
+
+**Business impact keywords:**
+Uptime, latency reduction, deployment frequency, developer productivity, release velocity, platform reliability, cost optimization
+
+## Healthcare & Clinical
+
+**Core role keywords:**
+Registered Nurse, Nurse Practitioner, Medical Assistant, Healthcare Administrator, Physical Therapist, Pharmacist, Physician Assistant, Care Coordinator
+
+**Clinical terminology:**
+Electronic health records (EHR), Epic, Cerner, HIPAA compliance, medication administration, patient assessment, evidence-based practice, clinical documentation, triage, multidisciplinary team
+
+**Quality & compliance keywords:**
+HCAHPS scores, Joint Commission, NCQA standards, patient safety, quality improvement, root cause analysis, infection control, medication reconciliation, readmission rate
+
+**Business & operations keywords:**
+Revenue cycle management, length of stay (LOS), patient throughput, capacity planning, CMS compliance, Magnet designation, value-based care
+
+## Finance & Accounting
+
+**Core role keywords:**
+Financial Analyst, FP&A Manager, Controller, Accountant, Investment Analyst, Risk Manager, CFO, Treasury Manager
+
+**Technical skills keywords:**
+Financial modeling, DCF analysis, Bloomberg Terminal, SAP, Oracle, Excel (advanced), VBA, Power BI, SQL, GAAP, IFRS
+
+**Process & compliance keywords:**
+Month-end close, year-end close, SOX compliance, internal controls, revenue recognition, variance analysis, budget vs. actual, audit preparation, PCAOB standards
+
+**Business impact keywords:**
+EBITDA improvement, cost reduction, working capital optimization, IRR, NPV, operating leverage, earnings per share (EPS), free cash flow
+
+## Marketing & Growth
+
+**Core role keywords:**
+Marketing Manager, Growth Marketer, Content Strategist, Demand Generation Manager, SEO Specialist, Paid Media Manager, Brand Manager
+
+**Platform & tools keywords:**
+HubSpot, Marketo, Salesforce, Google Analytics 4, Google Ads, Meta Ads, LinkedIn Ads, SEMrush, Ahrefs, Hootsuite, Klaviyo, Pardot
+
+**Channel keywords:**
+SEO, SEM, email marketing, content marketing, social media marketing, influencer marketing, affiliate marketing, account-based marketing (ABM), demand generation
+
+**Metrics keywords:**
+CAC (customer acquisition cost), LTV (lifetime value), ROAS (return on ad spend), MQL, SQL, CPL (cost per lead), conversion rate, organic traffic, email open rate, click-through rate
+
+## Operations & Supply Chain
+
+**Core role keywords:**
+Operations Manager, Supply Chain Manager, Logistics Manager, Procurement Manager, Plant Manager, Director of Operations, VP of Operations
+
+**Methodology keywords:**
+Lean manufacturing, Six Sigma, DMAIC, Kaizen, 5S, Toyota Production System, PDCA, process mapping, root cause analysis, value stream mapping
+
+**Systems & tools keywords:**
+SAP, Oracle SCM, JDA, Manhattan Associates, ERP implementation, warehouse management system (WMS), transportation management system (TMS), demand planning
+
+**Performance keywords:**
+On-time delivery (OTD), fill rate, inventory turnover, days of inventory on hand (DOH), order accuracy, throughput, capacity utilization, OTIF (on-time in-full)
+
+## Human Resources
+
+**Core role keywords:**
+HR Manager, HR Business Partner (HRBP), Talent Acquisition Manager, People Operations Manager, Compensation & Benefits Manager, Employee Relations
+
+**Platforms & tools keywords:**
+Workday, ADP, BambooHR, Greenhouse, Lever, Rippling, Paycom, SAP SuccessFactors, Lattice, Culture Amp
+
+**Compliance & policy keywords:**
+EEOC compliance, FMLA, ADA, FLSA, Title VII, SOX (HR controls), HIPAA (health data), workers' compensation, employment law
+
+**People metrics keywords:**
+Employee engagement score, voluntary turnover rate, time-to-fill, cost-per-hire, offer acceptance rate, first-year attrition, eNPS (employee Net Promoter Score)
+
+## How to Use This Keyword Guide
+
+1. **Identify your target industry and role**
+2. **Pull 5 job descriptions** for roles you're applying to
+3. **Cross-reference** the keywords that appear in both this guide and your target job descriptions
+4. **Integrate organically** — don't keyword stuff. Use terms in context within achievement bullet points
+5. **Validate** — run your resume through MatchMyResumes to measure your keyword match score
+
+The goal is not to include every keyword from this list. It's to include the keywords from your specific job descriptions, placed naturally in your experience bullets and skills section where ATS systems are most likely to find and weight them.
+    `.trim(),
+  },
+  {
+    slug: "linkedin-profile-optimization",
+    title: "LinkedIn Profile Optimization Guide for Job Seekers in 2026",
+    description: "Your LinkedIn profile is your 24/7 recruiter. Learn how to optimize every section — headline, summary, experience — to attract inbound opportunities and pass LinkedIn's algorithm.",
+    date: "2025-11-01",
+    readTime: "8 min read",
+    category: "Resume Tips",
+    content: `
+## Why Your LinkedIn Profile Matters More Than Your Resume
+
+Your resume is a document you send when you apply. Your LinkedIn profile is the profile recruiters find when they search. In 2026, 87% of recruiters use LinkedIn as their primary sourcing tool, and 72% of hiring managers Google candidates before interviews — and LinkedIn usually appears first.
+
+An optimized LinkedIn profile creates inbound opportunities. A weak one means you're invisible to the 70% of jobs that are never publicly posted.
+
+## Section-by-Section Optimization
+
+### 1. Profile Photo
+
+Your profile photo is seen first — before your headline, before your name. Research consistently shows profiles with professional photos get 21x more views and 36x more messages.
+
+**What makes a great LinkedIn photo:**
+- Professional background (solid wall, subtle office, outdoor)
+- Well-lit, clear, high-resolution (400x400px minimum)
+- Business casual or professional attire appropriate to your industry
+- Genuine smile and direct eye contact with camera
+- Just you — no group photos cropped down
+
+### 2. Background Banner
+
+The background banner is prime real estate that 80% of profiles leave blank or generic. Use it to communicate your professional brand.
+
+**Banner ideas:**
+- A clean branded image with your name and specialty
+- A landmark or visual associated with your industry
+- A quote or value statement that represents your work
+- Your company's branding (with permission) if you want to emphasize the company
+
+### 3. Headline — The Most Important Field
+
+Your headline appears everywhere: search results, connection requests, comments, message previews. It's the first thing people read.
+
+**Default (weak):** "Senior Product Manager at TechCorp"
+
+**Optimized:** "Senior Product Manager | B2B SaaS | 0 to 1 Products | Scaling ARR from $2M to $25M"
+
+**Headline formula:**
+*[Your Role] | [Key Specialty/Niche] | [Biggest Result or Differentiator]*
+
+Include keywords recruiters search for: your exact job title, industry, and 2-3 core skills. LinkedIn's algorithm treats your headline as a search ranking signal.
+
+### 4. About Section (Summary)
+
+Your About section is your elevator pitch. Unlike a resume summary (3-4 lines), LinkedIn allows up to 2,600 characters — use 1,000-1,500 of them.
+
+**Effective About section structure:**
+
+1. **Hook (2-3 sentences)** — Who you are, what problem you solve, and for whom
+2. **What you do (3-5 sentences)** — Your core expertise, industries, and skills
+3. **Key achievements (3-5 bullets)** — Your most impressive, specific, and quantified wins
+4. **What you're looking for or excited about** — Be specific about your next chapter or what energizes you
+5. **Call to action** — How to reach you (email address, note to connect)
+
+Write in first person ("I" not "She/He"). Use natural, conversational language — LinkedIn is a professional social network, not a resume. Add line breaks every 2-3 sentences for readability on mobile.
+
+### 5. Featured Section
+
+The Featured section pins content directly under your About — prime visual real estate. Use it for:
+
+- **Portfolio or work samples** — Published articles, case studies, presentations
+- **Top LinkedIn posts** — Your best performing content signals social proof
+- **External links** — Portfolio website, GitHub, published research, personal website
+- **Media appearances** — Podcast interviews, conference talks, press mentions
+
+Curate this section carefully — 2-3 strong items beat 10 mediocre ones.
+
+### 6. Experience Section
+
+Your LinkedIn experience should NOT be a copy-paste of your resume. LinkedIn is more conversational and gives you more space. Use it.
+
+**For each role:**
+- **First 2-3 lines** — Appear in search previews. Lead with your biggest impact or the scope of your role.
+- **3-5 bullets** — Focus on outcomes with metrics. More detailed than your resume.
+- **Media** — Add project links, articles, or presentations directly to each role.
+
+**Example strong experience bullet:**
+*"Led the redesign of our core analytics dashboard, increasing daily active usage by 40% and becoming the product's most-cited feature in customer reviews. Collaborated with 6 engineers, 2 designers, and 4 business stakeholders across a 5-month delivery cycle."*
+
+### 7. Skills Section
+
+Add up to 50 skills. Skills are searchable by recruiters. Focus on:
+
+- Your most important technical and tool-based skills first (these get the most recruiter searches)
+- Get endorsements from colleagues for your top 5-10 skills — 10+ endorsements signals credibility
+- Remove skills you don't want to be contacted about (irrelevant old skills create wrong-fit outreach)
+
+### 8. Recommendations
+
+Written recommendations are powerful social proof that resumes can't replicate. Aim for 3-5 recommendations that:
+
+- Come from credible people (managers, senior colleagues, clients — not just peers)
+- Are specific about what you did and the impact it had
+- Cover different aspects of your work (leadership, technical skills, communication)
+
+The easiest way to get recommendations: give one first. Reciprocity works.
+
+### 9. Creator Mode & Content
+
+If you want inbound opportunities, turning on Creator Mode and posting regularly is the highest-leverage LinkedIn optimization. The algorithm distributes content to non-connections — creating reach that profile views alone never achieve.
+
+**Content ideas:**
+- Lessons from recent projects (without violating NDA)
+- Industry observations or contrarian takes
+- Practical tips for people in your field
+- Behind-the-scenes of your professional process
+- Career advice for people entering your field
+
+Even 1 post per week consistently will put your profile in the top 5% of activity.
+
+## The LinkedIn All-Star Profile Checklist
+
+LinkedIn's own algorithm ranks "All-Star" profiles higher in recruiter searches. To reach All-Star status:
+
+- [ ] Profile photo uploaded
+- [ ] Industry and location listed
+- [ ] Current position listed with a description
+- [ ] At least 2 past positions listed
+- [ ] Education section filled out
+- [ ] At least 5 skills listed
+- [ ] At least 50 connections
+
+## Keywords — The LinkedIn SEO System
+
+LinkedIn works like a search engine. Recruiters search for candidates using keywords, and the algorithm ranks profiles by keyword relevance.
+
+**Where to put keywords:**
+1. Headline (highest weight)
+2. About section (first 200 characters especially)
+3. Job titles in Experience
+4. Skills section
+5. Project and education descriptions
+
+Use the same keywords that appear in job descriptions for your target role. Include both the full term and the acronym: "Search Engine Optimization (SEO)."
+
+An optimized LinkedIn profile, combined with a strong ATS-optimized resume, creates a professional presence that attracts both inbound recruiter outreach and advances your applications through ATS filters. Use MatchMyResumes to ensure your resume matches your target jobs, and treat LinkedIn as the 24/7 partner to your resume strategy.
+    `.trim(),
+  },
+  {
+    slug: "recruiter-resume-secrets",
+    title: "What Recruiters Really Look for in Your Resume (Insider Guide)",
+    description: "A recruiter spends 6-7 seconds on your resume. Here's exactly what they're looking at — and what makes them stop scrolling and call you.",
+    date: "2025-10-15",
+    readTime: "6 min read",
+    category: "Resume Tips",
+    content: `
+## The 6-Second Resume Review
+
+Eye-tracking studies of recruiter behavior show an average of 6-7 seconds on initial resume review. In that time, they look at:
+
+1. **Job title** (top 3 roles)
+2. **Company names** (are they recognizable or credible?)
+3. **Education** (degree and school, if scanning for it)
+4. **Timeline** (are there obvious gaps?)
+5. **Layout** (is it clean and easy to read?)
+
+If those five things pass, they read further. Everything else depends on that initial scan.
+
+Here is what recruiters told us they look for — not what the career advice industry says, but what actual talent professionals report.
+
+## 1. Current or Recent Role Title Alignment
+
+If you're applying for a Senior Data Analyst role and your most recent title is "Business Analyst," recruiters immediately assess fit. They're not just reading your title — they're mentally mapping it to what they're hiring for.
+
+**What to do:** If your actual title doesn't match the role's language, add a clarifying parenthetical:
+*"Business Intelligence Analyst (Data Analyst equivalent)"*
+
+Or use a functional role descriptor in your summary that bridges the gap: *"Experienced data analyst currently titled Business Intelligence Analyst at Acme Corp."*
+
+## 2. Recognizable Company Names
+
+Recruiters scan company names and instantly assign credibility. Brand-name companies signal competitive hiring filters, structured environments, and validated competency.
+
+**If your companies aren't well-known:**
+- Add a brief company descriptor: *"TechStartup Inc. (Series B SaaS, 200 employees)"*
+- Include notable clients or metrics: *"Served Fortune 500 clients in supply chain optimization"*
+- Mention any recognition: *"3x Inc. 5000 company"*
+
+This context takes 5 words and changes how the recruiter perceives the experience.
+
+## 3. Metrics and Quantified Achievements
+
+This is the single most consistent piece of recruiter feedback: they want numbers.
+
+Recruiters report that quantified bullets are processed faster, remembered longer, and perceived as more credible than descriptive bullets.
+
+**What to quantify:**
+- Scale: team size, revenue, users, data volume, customer base
+- Impact: percentage improvement, dollar amounts saved or generated, time saved
+- Scope: budget managed, number of projects, geographic reach
+
+**No numbers? Estimate.** "Approximately $500K in annual revenue impact" is far stronger than "significant revenue impact." Approximations are acceptable; absence of metrics is a weakness.
+
+## 4. Employment Continuity
+
+Recruiters notice gaps immediately. A gap doesn't disqualify you — but an unexplained gap raises questions that an explanation would close.
+
+For gaps under 3 months: generally ignored.
+For gaps of 3-12 months: often explained naturally in an interview. Consider a brief note in your cover letter.
+For gaps over 12 months: address proactively in your resume's professional summary or cover letter. "Took dedicated time for caregiving" or "Pursued professional development" are both acceptable framings.
+
+## 5. Formatting — Not Design, but Readability
+
+Recruiters do not want designed resumes — they want readable ones. The difference:
+
+**Readability:** Clean headers, consistent spacing, bullet point uniformity, 10-12pt font, appropriate white space.
+
+**Design:** Multiple colors, icons, graphs, infographics, two-column layouts, tables.
+
+The irony: heavily designed resumes that look impressive to the candidate often fail ATS parsing and confuse recruiters who are reading 50+ resumes in a day.
+
+**Format rules recruiters love:**
+- Single-column layout
+- Section headers in bold or slightly larger font (not all-caps for every line)
+- Bullet points starting with action verbs
+- Consistent date format throughout
+- 1-inch margins
+- 1 page (under 10 years) or 2 pages maximum
+
+## 6. Relevance to the Specific Role
+
+Recruiters know the difference between a generic resume and a tailored one — and they prefer tailored ones.
+
+The clearest signals that a resume is tailored:
+- Job title language matches the posting
+- Skill keywords match the description's requirements
+- The most prominent experience bullets address the role's core responsibilities
+
+The clearest signals that it's generic:
+- Summary says "passionate professional seeking a challenging opportunity in a dynamic environment"
+- Skills section is a comprehensive list of every tool ever used
+- Bullet points describe responsibilities, not achievements
+
+## 7. ATS Score — Before the Recruiter Sees Your Resume
+
+Most large companies and recruiting agencies use ATS software to filter resumes before a recruiter ever opens them. This is the step that eliminates 75% of applicants.
+
+Passing the ATS screen requires:
+- Keyword alignment with the job description
+- Standard resume formatting (not tables, text boxes, or graphics)
+- Proper section labeling (Work Experience, Education, Skills)
+
+What doesn't affect ATS scoring: GPA from 10 years ago, a beautifully designed template, or a personal mission statement.
+
+## The 30-Second Deep Read
+
+If your resume passes the 6-second scan, recruiters move to a 30-second deep read. This is where they evaluate:
+
+- Your most recent role's full bullet points
+- Whether your experience progression makes sense
+- Your education and certifications
+- Your skills section for specific requirements
+
+This is where keyword density matters, metrics create memory, and your summary either earns more attention or gets skipped.
+
+## What Makes a Recruiter Stop and Call
+
+After reviewing thousands of resumes, recruiters consistently mention these as call-makers:
+
+1. **An exact title match** at a credible company in the past 2-3 years
+2. **A metric that's extraordinarily specific** — "Reduced customer acquisition cost from $680 to $392" makes a recruiter stop
+3. **A career trajectory that tells a clear story** — consistent growth in scope and seniority
+4. **A summary that directly addresses the job's core problem** — showing you understand what they need
+5. **A certification or credential that was specifically listed as preferred** — it signals you meet the bar
+
+The best resume strategy is not to impress the recruiter with creativity. It's to make the recruiter's job easier — to see immediately that you have what they need and that you've presented it clearly.
+
+Use MatchMyResumes to measure how well your resume matches the specific job descriptions you're targeting. The ATS score is a reliable proxy for how clearly you're communicating your fit to both the algorithm and the human who reads next.
+    `.trim(),
+  },
+  {
+    slug: "ats-resume-format-guide",
+    title: "Best ATS Resume Format: What Recruiters Actually Scan in 2026",
+    description: "Most resume templates fail ATS systems. Learn exactly which formats pass parsing, which sections ATS reads first, and the formatting rules that keep your resume out of the black hole.",
+    date: "2025-09-25",
+    readTime: "7 min read",
+    category: "ATS Tips",
+    content: `
+## The ATS Formatting Black Hole
+
+An Applicant Tracking System (ATS) is software that reads, parses, and ranks resumes before any human sees them. Over 98% of Fortune 500 companies and 75%+ of all employers use one.
+
+The problem: ATS systems are not sophisticated readers. They are pattern-matching engines tuned to extract information from well-structured text. If your resume uses a format the ATS cannot parse, your content becomes invisible — even if your experience is a perfect match.
+
+This guide tells you exactly what format passes ATS parsing in 2026.
+
+## The Single Most Important ATS Format Rule
+
+**Use a single-column layout with no tables, text boxes, or graphics.**
+
+Everything else in this guide builds on this foundation. ATS systems parse documents left to right, top to bottom. Two-column layouts, sidebars, and decorative elements break this parsing and cause the ATS to skip content entirely.
+
+Popular resume templates on Canva, many Word templates, and most "design-forward" resume builders produce ATS-incompatible layouts. They look great in PDF preview. They get your resume rejected by the ATS before a human ever sees it.
+
+## The ATS-Compliant Resume Structure
+
+This is the order and format that maximizes ATS parsing accuracy:
+
+### 1. Header
+- Full name (no symbols or special characters)
+- Phone number
+- Professional email address
+- LinkedIn URL (optional but recommended)
+- City and State (not full street address — safety and parsability)
+- Portfolio or GitHub URL if relevant
+
+**Do NOT use:** columns in your header, tables, headers/footers (many ATS extract text from body only, not headers/footers)
+
+### 2. Professional Summary
+A 2-4 sentence paragraph immediately below your contact info. Label it exactly "Summary," "Professional Summary," or "Profile" — ATS systems are tuned to these exact headings.
+
+### 3. Skills
+Label this section exactly "Skills" or "Core Skills" or "Technical Skills." Use a simple, comma-separated list or single-column bullet format.
+
+Avoid: putting skills in a graphical rating bar, visual proficiency scale, or two-column table. These fail ATS parsing.
+
+### 4. Work Experience
+Label exactly "Work Experience," "Professional Experience," or "Experience."
+
+**Standard bullet format:**
+- Start with an action verb
+- Include quantified achievement
+- Keep to one or two lines per bullet
+
+**ATS-safe date format:** Spell out or abbreviate months: "January 2022 – March 2025" or "Jan 2022 – Mar 2025." Numeric-only formats (01/2022) can confuse some ATS systems.
+
+### 5. Education
+Label exactly "Education." Include:
+- School name
+- Degree type and major
+- Graduation year (or expected graduation year)
+- GPA if above 3.5 (optional)
+
+### 6. Certifications
+Label "Certifications" or "Licenses & Certifications." List each on its own line with the full certification name, issuing body, and year.
+
+## File Format: PDF vs. Word vs. Other
+
+**PDF:** Safe for most modern ATS systems (Workday, Greenhouse, Lever, iCIMS). Save as text-layer PDF, not a scanned image PDF (which is completely unreadable by ATS).
+
+**Word (.docx):** Universally ATS-compatible. Some older systems parse Word files more reliably than PDF. If a job posting specifically requests Word format, comply.
+
+**Google Docs exported to PDF:** Usually fine.
+
+**Canva PDF, Photoshop, JPEG, PNG:** Never use for ATS submission. Image-based formats are completely unreadable.
+
+**Figma, InDesign, or publisher formats:** Same — not ATS-compatible.
+
+## Fonts, Sizes, and Spacing
+
+**Safe fonts:** Arial, Calibri, Garamond, Georgia, Helvetica, Times New Roman. These parse reliably.
+
+**Risky fonts:** Decorative, script, or uncommon fonts can cause character encoding errors in ATS text extraction.
+
+**Font size:** 10-12pt for body text. 14-16pt for your name. Consistency matters more than the exact size.
+
+**Margins:** 0.5-1 inch on all sides. Margins under 0.5 inches can cause text clipping in some ATS.
+
+**Line spacing:** Single or 1.15x. Dense text is harder to read; excessive spacing wastes the page.
+
+## The Formatting Elements That Kill ATS Scores
+
+Avoid all of these:
+
+| Element | Why It Fails ATS |
+|---|---|
+| Tables | ATS reads table cells out of order or skips them |
+| Text boxes | Invisible to most ATS parsers |
+| Headers/footers | Many ATS only extract body text |
+| Images, icons, logos | Binary data — no readable text |
+| Two-column layout | Left column content often dropped or misread |
+| Horizontal lines as graphics | Some parse as garbled characters |
+| Progress bars for skills | No text — ATS sees nothing |
+| Colored text | Sometimes parsed as blank depending on ATS |
+
+**The test:** Copy all the text from your PDF resume and paste it into Notepad or a plain text editor. If the content reads in logical order with all information intact — your resume will parse correctly in most ATS systems. If it's jumbled, skipping, or missing content — you have an ATS formatting problem.
+
+## Section Headings: Use Standard Labels
+
+ATS systems are tuned to specific section headings. Clever alternatives often fail:
+
+| ✅ ATS-Safe | ❌ May Fail |
+|---|---|
+| Work Experience | Career Journey |
+| Skills | My Toolkit |
+| Education | Academic Background |
+| Certifications | Credentials |
+| Summary | About Me |
+
+Standard headings are boring because they work. Save creativity for your bullet points.
+
+## How to Check Your Resume's ATS Compatibility
+
+1. **The text paste test:** Paste into plain text and check for logical order and completeness
+2. **The Jobscan or MatchMyResumes test:** Upload your resume and a job description to see your keyword match score — poor formatting often drops keyword extraction accuracy
+3. **Email it to yourself and open on mobile:** If it's hard to read, redesign for clarity
+4. **Ask someone unfamiliar with your background to read it in 30 seconds:** If they can't identify your top 3 qualifications, your format is obscuring your content
+
+An ATS-optimized resume is the foundation of a successful job search. After formatting correctly, the next step is keyword optimization — matching your resume's language to the specific job descriptions you're applying to. MatchMyResumes helps you measure and improve both.
+    `.trim(),
+  },
+  {
+    slug: "how-to-tailor-resume-for-job-description",
+    title: "How to Tailor Your Resume to Any Job Description (Step-by-Step)",
+    description: "A tailored resume is 5x more likely to land an interview than a generic one. Here is the exact process for customizing your resume to any job posting in under 30 minutes.",
+    date: "2025-09-01",
+    readTime: "6 min read",
+    category: "ATS Tips",
+    content: `
+## Why You Must Tailor Your Resume
+
+Research shows tailored resumes are significantly more likely to advance past ATS screening than generic ones — because ATS systems rank resumes by keyword match score against the specific job description.
+
+The problem: most job seekers send the same resume everywhere. They lose the ATS game before a human ever sees their application.
+
+The good news: with the right process, tailoring a resume takes 20-30 minutes per application — not hours.
+
+## The 5-Step Resume Tailoring Process
+
+### Step 1: Analyze the Job Description (5 minutes)
+
+Read the job description and highlight:
+
+- **Required qualifications** (non-negotiable keywords)
+- **Preferred qualifications** (bonus keywords)
+- **Job responsibilities** (the work you'll be doing)
+- **Company language and terminology** (mirror their vocabulary exactly)
+
+Pay attention to:
+- Words that appear multiple times (higher ATS weight)
+- Specific tools, technologies, or certifications named
+- Outcome language: "driven," "measurable," "accountable," "cross-functional"
+
+### Step 2: Run a Keyword Gap Analysis (5 minutes)
+
+Compare your current resume to the job description:
+
+**Create two lists:**
+- Keywords in the job description you already have on your resume
+- Keywords in the job description you're missing
+
+Tools like MatchMyResumes do this automatically — upload your resume and the job description to get a gap analysis instantly.
+
+Focus on the missing keywords. For each one, ask:
+- Do I actually have this skill or experience?
+- If yes, why isn't it on my resume?
+- If no, do I have something adjacent I can honestly describe?
+
+### Step 3: Update Your Professional Summary (5 minutes)
+
+Your summary should be a 3-sentence match against the job description. Include:
+- Your most relevant role title and years of experience
+- 2-3 keywords from the job description
+- Your most relevant accomplishment for this specific role
+
+**Generic summary (don't do this):**
+*"Experienced marketing professional seeking a challenging opportunity to apply my skills in a dynamic environment."*
+
+**Tailored summary (do this):**
+*"Demand generation manager with 6 years of B2B SaaS experience and a track record of generating $4M in annual pipeline from digital channels. Expert in HubSpot, Google Ads, and account-based marketing — the three core programs described in this role. Most recently reduced CPL from $520 to $310 while growing MQL volume by 40%."*
+
+### Step 4: Rewrite 3-5 Bullet Points to Match Key Requirements (10 minutes)
+
+You don't need to rewrite your entire resume. Focus on:
+
+1. **Your most recent role's top 3-4 bullets** — these receive the most ATS and recruiter attention
+2. **Any bullet where you can naturally incorporate a missing keyword**
+3. **Your skills section** — add any missing required skills you genuinely have
+
+**Original bullet:**
+*"Managed social media and email campaigns."*
+
+**Tailored to a HubSpot-focused demand generation role:**
+*"Managed HubSpot email workflows and LinkedIn Ads campaigns, achieving 34% open rate and generating 280 MQLs per quarter."*
+
+The facts are the same. The language is tuned to what the ATS is searching for.
+
+### Step 5: Align Your Skills Section (5 minutes)
+
+Add any required or preferred skills from the job description that you legitimately have but haven't listed. Remove or deprioritize skills that are irrelevant to this specific role.
+
+If the job description lists 5 specific tools, those 5 tools should appear in your skills section in the same language (exact product names, not categories).
+
+## What NOT to Do When Tailoring
+
+- **Don't lie or fabricate experience** — background checks and interview questions will reveal it
+- **Don't keyword stuff** — "Python Python Python Python" looks bad to humans and increasingly to AI-based ATS systems
+- **Don't rewrite every bullet** — you'll lose hours and the gains don't justify the time
+- **Don't change the formatting** — tailoring is about content, not design
+
+## The 30-Minute Tailoring Checklist
+
+Use this before every application submission:
+
+- [ ] Read the full job description and highlighted key requirements
+- [ ] Run keyword gap analysis (MatchMyResumes or manual comparison)
+- [ ] Updated professional summary to mirror job description language
+- [ ] Rewrote 3-4 most relevant bullet points with missing keywords
+- [ ] Added missing required skills to skills section
+- [ ] Used exact tool/platform names from job description
+- [ ] Verified resume ATS score is above 70% match
+- [ ] Saved as new file (never overwrite your master resume)
+
+## Should You Have Multiple Resume Versions?
+
+Yes — but more focused than most job seekers think:
+
+- **1 master resume** — Complete record of all experience, skills, and achievements. Never send this directly.
+- **2-4 role family versions** — Tailored for different role types you're pursuing (e.g., "Technical PM" vs. "Growth PM" vs. "Platform PM")
+- **Per-application tweaks** — 5-10 minutes of final keyword matching before each submission
+
+The role family versions do 80% of the tailoring work. The per-application tweaks close the gap.
+
+A resume you tailored in 30 minutes will consistently outperform a "perfect" generic resume in ATS scoring. The math is simple: keyword match percentage directly predicts whether the ATS serves your resume to a recruiter or doesn't.
+
+MatchMyResumes automates the keyword gap analysis step — upload your resume and a job description to see your match score and the exact keywords you're missing before you apply.
+    `.trim(),
+  },
 ]
 
 export function getPostBySlug(slug: string): BlogPost | undefined {

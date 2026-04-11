@@ -3,6 +3,8 @@ import { blogPosts } from "./(marketing)/blog/posts"
 import { resumeExamples } from "./(marketing)/resume-examples/data"
 import { coverLetterExamples } from "./(marketing)/cover-letter-examples/data"
 import { competitors } from "./(marketing)/alternatives/data"
+import { interviewData } from "./(marketing)/interview-questions/data"
+import { atsKeywordsData } from "./(marketing)/ats-keywords/data"
 
 export default function sitemap(): MetadataRoute.Sitemap {
     const baseUrl = "https://matchmyresumes.com"
@@ -30,6 +32,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     const alternativeEntries: MetadataRoute.Sitemap = competitors.map((c) => ({
         url: `${baseUrl}/alternatives/${c.slug}`,
+        lastModified: new Date(),
+        changeFrequency: "monthly" as const,
+        priority: 0.8,
+    }))
+
+    const interviewEntries: MetadataRoute.Sitemap = interviewData.map((d) => ({
+        url: `${baseUrl}/interview-questions/${d.slug}`,
+        lastModified: new Date(),
+        changeFrequency: "monthly" as const,
+        priority: 0.7,
+    }))
+
+    const atsKeywordEntries: MetadataRoute.Sitemap = atsKeywordsData.map((d) => ({
+        url: `${baseUrl}/ats-keywords/${d.slug}`,
         lastModified: new Date(),
         changeFrequency: "monthly" as const,
         priority: 0.8,
@@ -100,6 +116,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.8,
         },
         ...blogEntries,
+        {
+            url: `${baseUrl}/interview-questions`,
+            lastModified: new Date(),
+            changeFrequency: "weekly",
+            priority: 0.8,
+        },
+        ...interviewEntries,
+        {
+            url: `${baseUrl}/ats-keywords`,
+            lastModified: new Date(),
+            changeFrequency: "weekly",
+            priority: 0.8,
+        },
+        ...atsKeywordEntries,
         {
             url: `${baseUrl}/privacy`,
             lastModified: new Date(),
