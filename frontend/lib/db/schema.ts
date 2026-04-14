@@ -244,6 +244,29 @@ export const usageLogs = pgTable(
   ]
 );
 
+export const affiliateEvents = pgTable(
+  "affiliate_events",
+  {
+    id: text("id").primaryKey(),
+    eventType: varchar("event_type", { length: 20 }).notNull(), // 'impression' | 'click'
+    productId: varchar("product_id", { length: 100 }).notNull(),
+    page: varchar("page", { length: 50 }).notNull(),
+    position: varchar("position", { length: 20 }).notNull(), // 'primary' | 'secondary' | 'sticky'
+    intentLevel: varchar("intent_level", { length: 20 }), // 'CRITICAL' | 'NEEDS_WORK' | 'STRONG' | 'READY'
+    userScore: integer("user_score"), // 0–100
+    abVariant: varchar("ab_variant", { length: 5 }), // 'A' | 'B'
+    sessionId: text("session_id").notNull(),
+    userId: text("user_id"), // nullable — marketing pages have no user
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    index("affiliate_events_type_idx").on(table.eventType),
+    index("affiliate_events_product_idx").on(table.productId),
+    index("affiliate_events_created_idx").on(table.createdAt),
+    index("affiliate_events_session_idx").on(table.sessionId),
+  ]
+);
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -260,4 +283,6 @@ export type NewApplication = typeof applications.$inferInsert;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type NewSubscription = typeof subscriptions.$inferInsert;
 export type UsageLog = typeof usageLogs.$inferSelect;
+export type AffiliateEvent = typeof affiliateEvents.$inferSelect;
+export type NewAffiliateEvent = typeof affiliateEvents.$inferInsert;
 export type NewUsageLog = typeof usageLogs.$inferInsert;

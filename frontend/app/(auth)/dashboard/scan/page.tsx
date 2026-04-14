@@ -9,6 +9,7 @@ import ScoreCircle from "@/components/ScoreCircle"
 import KeywordHeatmap from "@/components/KeywordHeatmap"
 import { useGlobalData } from "@/components/dashboard/GlobalDataProvider"
 import { Lightbulb, Info } from "lucide-react"
+import { AffiliateRecommendations } from "@/components/affiliates/AffiliateRecommendations"
 
 interface ATSResult {
     id: string
@@ -485,6 +486,23 @@ function ScanPageContent() {
                                 )}
                             </div>
                         </div>
+
+                        {/* Affiliate Recommendations */}
+                        {result && (
+                            <AffiliateRecommendations
+                                totalScore={result.total_score}
+                                missingKeywords={result.missing_keywords}
+                                skillsDetected={result.matched_keywords}
+                                cvScores={{
+                                    keyword_score: result.breakdown.keyword_score,
+                                    semantic_score: result.breakdown.semantic_score,
+                                    formatting_score: result.breakdown.formatting_score,
+                                    section_score: result.breakdown.section_score,
+                                    quantification_score: result.breakdown.quantification_score,
+                                }}
+                                pageContext="scan"
+                            />
+                        )}
 
                         <div className="flex flex-wrap gap-3">
                             <a

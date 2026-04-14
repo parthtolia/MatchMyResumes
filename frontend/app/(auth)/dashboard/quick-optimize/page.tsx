@@ -5,7 +5,7 @@ import { Sparkles, Loader2, Copy, Check, ArrowRight, Download } from "lucide-rea
 import AlertModal from "@/components/ui/AlertModal"
 import api from "@/lib/api"
 import { useGlobalData } from "@/components/dashboard/GlobalDataProvider"
-import { downloadElementAsPdf, downloadTextAsDocx } from "@/lib/download"
+import { downloadElementAsPdf, downloadTextAsDocx, downloadPlainTextAsDocx } from "@/lib/download"
 import { ResumeEditor } from "@/components/editor/ResumeEditor"
 import { ResumeData, ResumeTemplateId, ResumeTheme } from "@/lib/types/resume"
 import type { StructuredResume } from "@/lib/types/structured-resume"
@@ -151,13 +151,16 @@ function QuickOptimizeContent() {
     }
 
     const downloadPolishedDocx = async () => {
-        const textToExport = resumeData ? resumeDataToRawText(resumeData) : (result?.optimized_text || "")
-        if (!textToExport) return
-
         const selectedResume = resumes.find(r => r.id === resumeId)
         const name = selectedResume?.filename?.replace(/\.[^.]+$/, "") || "resume"
         try {
-            await downloadTextAsDocx(textToExport, `${name}_polished.docx`, theme.headingColor)
+            if (resumeData) {
+                await downloadTextAsDocx(resumeData, `${name}_polished.docx`, templateId, theme.primaryColor)
+            } else {
+                const textToExport = result?.optimized_text || ""
+                if (!textToExport) return
+                await downloadPlainTextAsDocx(textToExport, `${name}_polished.docx`)
+            }
         } catch {
             setAlertMsg("Failed to generate DOCX. Please try again.")
         }

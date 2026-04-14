@@ -8,6 +8,9 @@ import {
 import api from "@/lib/api"
 import ScoreCircle from "@/components/ScoreCircle"
 import { useGlobalData } from "@/components/dashboard/GlobalDataProvider"
+import { AffiliateRecommendations } from "@/components/affiliates/AffiliateRecommendations"
+import { StickyAffiliateCta } from "@/components/affiliates/StickyAffiliateCta"
+import { getRecommendations, classifyIntent } from "@/lib/affiliates/recommendation-engine"
 
 interface CVResult {
     resume_id: string
@@ -287,6 +290,22 @@ export default function CVAnalysisPage() {
                                     )}
                                 </div>
                             </div>
+                        )}
+
+                        {/* Affiliate Recommendations */}
+                        {result && (
+                            <AffiliateRecommendations
+                                totalScore={result.total_score}
+                                skillsDetected={result.skills_detected}
+                                cvScores={{
+                                    section_score: result.section_score,
+                                    formatting_score: result.formatting_score,
+                                    quantification_score: result.quantification_score,
+                                    contact_score: result.contact_score,
+                                    content_density_score: result.content_density_score,
+                                }}
+                                pageContext="cv-analysis"
+                            />
                         )}
 
                         {/* CTA to JD matching */}
